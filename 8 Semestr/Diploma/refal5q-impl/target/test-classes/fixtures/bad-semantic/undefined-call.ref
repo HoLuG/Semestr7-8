@@ -1,0 +1,6 @@
+$ENTRY Main;
+
+* Calls a function that is neither defined here nor declared $EXTERN.
+Main {
+  = <NoSuchFunc 1 2 3>;
+}

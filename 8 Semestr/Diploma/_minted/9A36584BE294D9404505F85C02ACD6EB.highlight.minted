@@ -1,0 +1,11 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{n}{Set}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{used}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{HashSet}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{p}\PYG{p}{.}\PYG{n+na}{funcs}\PYG{p}{().}\PYG{n+na}{keySet}\PYG{p}{());}
+\PYG{+w}{    }\PYG{n}{Map}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{String}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{rename}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{HashMap}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{fname}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{p}\PYG{p}{.}\PYG{n+na}{funcs}\PYG{p}{().}\PYG{n+na}{keySet}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{entries}\PYG{p}{.}\PYG{n+na}{contains}\PYG{p}{(}\PYG{n}{fname}\PYG{p}{))}\PYG{+w}{ }\PYG{k}{continue}\PYG{p}{;}\PYG{+w}{   }\PYG{c+c1}{// (2)}
+\PYG{+w}{        }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{cand}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{prefix}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{fname}\PYG{p}{;}\PYG{+w}{            }\PYG{c+c1}{// (3)}
+\PYG{+w}{        }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{used}\PYG{p}{.}\PYG{n+na}{contains}\PYG{p}{(}\PYG{n}{cand}\PYG{p}{))}\PYG{+w}{ }\PYG{n}{cand}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{cand}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}\PYGZus{}\PYGZdq{}}\PYG{p}{;}\PYG{+w}{ }\PYG{c+c1}{// (4)}
+\PYG{+w}{        }\PYG{n}{rename}\PYG{p}{.}\PYG{n+na}{put}\PYG{p}{(}\PYG{n}{fname}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{cand}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{used}\PYG{p}{.}\PYG{n+na}{add}\PYG{p}{(}\PYG{n}{cand}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

@@ -1,0 +1,89 @@
+$ENTRY Go {
+   = <Eq Valid <Check <Eq 1 <Step>> <Lenw <ListOfBuiltin>> <Eq 6 <Step>>>>;
+}
+
+Check {
+  s.Count e.Entries-B t.InvalidEntry e.Entries-E
+    = <Check_check
+        s.Count (e.Entries-B) t.InvalidEntry (e.Entries-E)
+        <Valid t.InvalidEntry>
+      >;
+
+  e.Other = <Check_cont e.Other>;
+}
+
+Check_check {
+  s.Count (e.Entries-B) t.InvalidEntry (e.Entries-E) False
+    = Invalid t.InvalidEntry;
+
+  s.Count (e.Entries-B) t.InvalidEntry (e.Entries-E) e.Other
+    = <Check_forward s.Count (e.Entries-B) t.InvalidEntry e.Entries-E>;
+}
+
+Check_forward {
+  s.Count (e.Entries-B_fix) t.Entries-B_next e.Entries-B_rest
+    = <Check_next s.Count (e.Entries-B_fix t.Entries-B_next) e.Entries-B_rest>;
+
+  s.Count (e.Entries-B_fix) = <Check_cont s.Count e.Entries-B_fix>;
+}
+
+Check_next {
+  s.Count (e.Entries-B_fix) e.Entries-B_var t.InvalidEntry e.Entries-E
+    = <Check_check
+        s.Count (e.Entries-B_fix e.Entries-B_var) t.InvalidEntry (e.Entries-E)
+        <Valid t.InvalidEntry>
+      >;
+
+  s.Count (e.Entries-B_fix) e.Entries-B_rest
+    = <Check_cont s.Count e.Entries-B_fix e.Entries-B_rest>;
+}
+
+Check_cont {
+  s.Count e.Entries = Valid <Putout 7 s.Count 'builtin functions is known'>;
+}
+
+Valid {
+  (s.Number s.Name s.Type)
+    = <Valid_check s.Number s.Name s.Type <Type s.Number>>;
+
+  e.Other = <Valid_cont e.Other>;
+}
+
+Valid_check {
+  s.Number s.Name s.Type 'N' e.0
+    = <Valid_check0 s.Number s.Name s.Type (e.0) <Type s.Name>>;
+
+  e.Other = <Valid_cont0 e.Other>;
+}
+
+Valid_cont {
+  t.Invalid = False;
+}
+
+Valid_check0 {
+  s.Number s.Name s.Type (e.0) 'W' e.1
+    = <Valid_check1 s.Number s.Name s.Type (e.0) (e.1) regular special>;
+
+  e.Other = <Valid_cont1 e.Other>;
+}
+
+Valid_cont0 {
+  s.Number s.Name s.Type e.Other = <Valid_cont (s.Number s.Name s.Type)>;
+}
+
+Valid_check1 {
+  s.Number s.Name s.Type (e.0) (e.1) e.2 s.Type e.3 = True;
+
+  s.Number s.Name s.Type (e.0) (e.1) e.Other
+    = <Valid_cont1 s.Number s.Name s.Type (e.0) 'W' e.1>;
+}
+
+Valid_cont1 {
+  s.Number s.Name s.Type (e.0) e.Other
+    = <Valid_cont0 s.Number s.Name s.Type 'N' e.0>;
+}
+
+Eq {
+  s.X s.X = <Prout s.X>;
+}
+

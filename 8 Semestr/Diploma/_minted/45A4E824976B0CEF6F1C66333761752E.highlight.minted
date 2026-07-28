@@ -1,0 +1,10 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@Test}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{singleSVariableBindsAtom}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{pattern}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{List}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{SVar}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}X\PYGZdq{}}\PYG{p}{));}\PYG{+w}{     }\PYG{c+c1}{// [s.X]}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{expr}\PYG{+w}{    }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{singleton}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Sym}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Hello\PYGZdq{}}\PYG{p}{));}\PYG{+w}{   }\PYG{c+c1}{// [Hello]}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{result}\PYG{+w}{  }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Matcher}\PYG{p}{.}\PYG{n+na}{match}\PYG{p}{(}\PYG{n}{pattern}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{);}
+\PYG{+w}{    }\PYG{n}{assertThat}\PYG{p}{(}\PYG{n}{result}\PYG{p}{).}\PYG{n+na}{isPresent}\PYG{p}{();}\PYG{+w}{           }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{n}{assertThat}\PYG{p}{(}\PYG{n}{result}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{().}\PYG{n+na}{get}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}s.X\PYGZdq{}}\PYG{p}{).}\PYG{n+na}{toList}\PYG{p}{())}
+\PYG{+w}{        }\PYG{p}{.}\PYG{n+na}{containsExactly}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Sym}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Hello\PYGZdq{}}\PYG{p}{));}\PYG{+w}{   }\PYG{c+c1}{// (2)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

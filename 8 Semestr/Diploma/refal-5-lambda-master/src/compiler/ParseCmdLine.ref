@@ -1,0 +1,454 @@
+*$FROM GetOpt
+$EXTERN GetOpt;
+
+$INCLUDE "LibraryEx";
+
+*$FROM Config
+$EXTERN Config-Create, Config-SetCppCompiler, Config-SetCompilerFlags,
+  Config-SetOptFlags, Config-SetErrorFile, Config-SetMarkupContext,
+  Config-SetDebugInfo, Config-SetGrammarCheck, Config-SetTargetFileName,
+  Config-SetTargetSuffix, Config-SetSearchFolder, Config-SetPrefix,
+  Config-AddReference, Config-SetTargetMode, Config-AddIncorporated,
+  Config-SetChmodXCommand, Config-SetPrelude, Config-SetR5Mode,
+  Config-SetLogFile, Config-SetTreeOptCycles, Config-SetIncorporated,
+  Config-SetKeepRasls, Config-SetTempDir, Config-SetOverwriteExistRasls,
+  Config-SetCppCompilerSuf, Config-SetNoSources, Config-SetWarning,
+  Config-IncVerbose, Config-SetVerbose;
+
+*$FROM Version
+$EXTERN PrintVersion;
+
+
+/**
+  <ParseCommandLine e.Arguments>
+    == Success t.Config (s.ArgNum e.File)*
+    == Fails (s.ArgNum e.ErrorMessage)
+*/
+$ENTRY ParseCommandLine {
+  e.Arguments =
+    <Fetch
+      <GetOpt
+        (
+          (CppCompiler-Exe Required 'c' ('cpp-command') ('cpp-command-exe'))
+          (CppCompiler-Lib Required ('cpp-command-lib'))
+          (CppFlag Required 'f' ('cppflag'))
+          (CppFlags Required 'F' ('cppflags'))
+          (DebugInfo None 'g' ('debug-info'))
+          (ErrorFile Required 'e' ('error-file'))
+          (GrammarCheck None ('grammar-check'))
+          (Incorporated Required ('incorporated'))
+          (MarkupContext None ('markup-context'))
+          (Opt Required 'O')
+          (Warning Required 'W')
+          (Prefix Required 'p' ('prefix'))
+          (Reference Required 'r' ('reference'))
+          (RuntimeFolder Required 'D' ('runtime-dir') ('runtime-directory'))
+          (SearchFolder Required 'd' ('dir') ('directory'))
+          (TargetFileName Required 'o' ('target-file'))
+          (TargetMode-Exe None 'x' ('makeexe'))
+          (TargetMode-Lib None 'l' ('makelib'))
+          (TargetMode-R None 'R')
+          (TargetMode-C None 'C' ('compile-only'))
+          (TargetSuffix-Exe
+            Required
+            ('targsuffix') ('targetsuffix') ('targsuf')
+            ('exesuffix') ('exesuf')
+          )
+          (TargetSuffix-Lib Required ('libsuffix') ('libsuf'))
+          (ChmodXCommand Required ('chmod-x') ('chmod-x-command'))
+          (Prelude Required ('prelude'))
+          (ClassicMode None ('classic'))
+          (ExtendedMode None ('extended'))
+          (Log Required ('log'))
+          (TreeOptCycles Required ('opt-tree-cycles'))
+          (Help None 'h?' ('help'))
+          (Version None ('version'))
+          (KeepRasls None ('keep-rasl') ('keep-rasls'))
+          (DontKeepRasls None ('dont-keep-rasl') ('dont-keep-rasls'))
+          (TempDir Required ('tmp-dir') ('temp-dir'))
+          (REF5RSL-Env None ('ref5rsl'))
+          (OverwriteExistRasls None
+            ('overwrite-exist-rasls') ('overwrite-exist-rasl')
+          )
+          (DontOverwriteExistRasls None
+            ('dont-overwrite-exist-rasls') ('dont-overwrite-exist-rasl')
+          )
+          (CppCompilerSuf-Exe Required ('cpp-command-exe-suf'))
+          (CppCompilerSuf-Lib Required ('cpp-command-lib-suf'))
+          (NoSources None ('no-sources'))
+          (VerboseInc None 'v')
+          (VerboseSet Required ('verbose'))
+        )
+        e.Arguments
+      >
+      <Pipe
+        {
+          (e.Errors) e.Options
+            = (<Config-Create> e.Errors) e.Options;
+        }
+        (&MapAccum
+          {
+            (t.Config e.Errors) (CppCompiler-Exe s.Num e.CppCompiler)
+              = <Update
+                  t.Config (e.Errors)
+                  &Config-SetCppCompiler s.Num EXE e.CppCompiler
+                >;
+
+            (t.Config e.Errors) (CppCompiler-Lib s.Num e.CppCompiler)
+              = <Update
+                  t.Config (e.Errors)
+                  &Config-SetCppCompiler s.Num LIB e.CppCompiler
+                >;
+
+            (t.Config e.Errors) (CppFlag s.Num e.Flag)
+              = <Update
+                  t.Config (e.Errors)
+                  &Config-SetCompilerFlags s.Num ' "' e.Flag '"'
+                >;
+
+            (t.Config e.Errors) (CppFlags s.Num e.Flags)
+              = <Update
+                  t.Config (e.Errors) &Config-SetCompilerFlags s.Num ' ' e.Flags
+                >;
+
+            (t.Config e.Errors) (DebugInfo s.Num)
+              = <Update t.Config (e.Errors) &Config-SetDebugInfo s.Num>;
+
+            (t.Config e.Errors) (ErrorFile s.Num e.FileName)
+              = <Update
+                  t.Config (e.Errors) &Config-SetErrorFile s.Num e.FileName
+                >;
+
+            (t.Config e.Errors) (GrammarCheck s.Num)
+              = <Update t.Config (e.Errors) &Config-SetGrammarCheck s.Num>;
+
+            (t.Config e.Errors) (Incorporated s.Num e.LibName)
+              = <Update
+                  t.Config (e.Errors) &Config-AddIncorporated s.Num e.LibName
+                >;
+
+            (t.Config e.Errors) (MarkupContext s.Num)
+              = <Update t.Config (e.Errors) &Config-SetMarkupContext s.Num>;
+
+            (t.Config e.Errors) (Opt s.Num e.Flags)
+              = <Update t.Config (e.Errors) &Config-SetOptFlags s.Num e.Flags>;
+
+            (t.Config e.Errors) (Warning s.Num e.WarningName)
+              = <Update
+                  t.Config (e.Errors) &Config-SetWarning s.Num e.WarningName
+                >;
+
+            (t.Config e.Errors) (Prefix s.Num e.Prefix)
+              = <Update t.Config (e.Errors) &Config-SetPrefix s.Num e.Prefix>;
+
+            (t.Config e.Errors) (Reference s.Num e.Reference)
+              = <Update
+                  t.Config (e.Errors) &Config-AddReference s.Num e.Reference
+                >;
+
+            (t.Config e.Errors) (RuntimeFolder s.Num e.Path)
+              = <Update
+                  t.Config (e.Errors)
+                  &Config-SetCompilerFlags s.Num ' -I"' e.Path '"'
+                >
+                (SearchFolder s.Num e.Path);
+
+            (t.Config e.Errors) (TargetFileName s.Num e.FileName)
+              = <Update
+                  t.Config (e.Errors) &Config-SetTargetFileName s.Num e.FileName
+                >;
+
+            (t.Config e.Errors) (TargetMode-Exe s.Num)
+              = <Update t.Config (e.Errors) &Config-SetTargetMode s.Num EXE>;
+
+            (t.Config e.Errors) (TargetMode-Lib s.Num)
+              = <Update t.Config (e.Errors) &Config-SetTargetMode s.Num LIB>;
+
+            (t.Config e.Errors) (TargetMode-R s.Num)
+              = <Update t.Config (e.Errors) &Config-SetTargetMode s.Num R>;
+
+            (t.Config e.Errors) (TargetMode-C s.Num)
+              = <Update
+                  t.Config (e.Errors) &Config-SetTargetMode s.Num CompileOnly
+                >
+              : (t.Config^ e.Errors^)
+              = <Update t.Config (e.Errors) &Config-SetKeepRasls s.Num True>;
+
+            (t.Config e.Errors) (TargetSuffix-Exe s.Num e.Suffix)
+              = <Update
+                  t.Config (e.Errors) &Config-SetTargetSuffix s.Num EXE e.Suffix
+                >;
+
+            (t.Config e.Errors) (TargetSuffix-Lib s.Num e.Suffix)
+              = <Update
+                  t.Config (e.Errors) &Config-SetTargetSuffix s.Num LIB e.Suffix
+                >;
+
+            (t.Config e.Errors) (ChmodXCommand s.Num e.Command)
+              = <Update
+                  t.Config (e.Errors) &Config-SetChmodXCommand s.Num e.Command
+                >;
+
+            (t.Config e.Errors) (Prelude s.Num e.Prelude)
+              = <Update t.Config (e.Errors) &Config-SetPrelude s.Num e.Prelude>;
+
+            (t.Config e.Errors) (ClassicMode s.Num)
+              = <Update t.Config (e.Errors) &Config-SetR5Mode s.Num Classic>;
+
+            (t.Config e.Errors) (ExtendedMode s.Num)
+              = <Update t.Config (e.Errors) &Config-SetR5Mode s.Num Extended>;
+
+            (t.Config e.Errors) (Log s.Num e.LogFile)
+              = <Update t.Config (e.Errors) &Config-SetLogFile s.Num e.LogFile>;
+
+            (t.Config e.Errors) (TreeOptCycles s.Num e.Cycles)
+              = <Update
+                  t.Config (e.Errors) &Config-SetTreeOptCycles s.Num e.Cycles
+                >;
+
+            (t.Config e.Errors) (Help s.Num) = <PrintHelp> (t.Config e.Errors);
+
+            (t.Config e.Errors) (Version s.Num)
+              = <PrintVersion 'rlc'> (t.Config e.Errors);
+
+            (t.Config e.Errors) (KeepRasls s.Num)
+              = <Update t.Config (e.Errors) &Config-SetKeepRasls s.Num True>;
+
+            (t.Config e.Errors) (DontKeepRasls s.Num)
+              = <Update t.Config (e.Errors) &Config-SetKeepRasls s.Num False>;
+
+            (t.Config e.Errors) (TempDir s.Num e.Name)
+              = <Update t.Config (e.Errors) &Config-SetTempDir s.Num e.Name>;
+
+            (t.Config e.Errors) (REF5RSL-Env s.Num)
+              = (t.Config e.Errors) (REF5RSL-Env s.Num);
+
+            (t.Config e.Errors) (OverwriteExistRasls s.Num)
+              = <Update
+                  t.Config (e.Errors) &Config-SetOverwriteExistRasls s.Num True
+                >;
+
+            (t.Config e.Errors) (DontOverwriteExistRasls s.Num)
+              = <Update
+                  t.Config (e.Errors) &Config-SetOverwriteExistRasls s.Num False
+                >;
+
+            (t.Config e.Errors) (CppCompilerSuf-Exe s.Num e.CppCompilerSuf)
+              = <Update
+                  t.Config (e.Errors)
+                  &Config-SetCppCompilerSuf s.Num EXE e.CppCompilerSuf
+                >;
+
+            (t.Config e.Errors) (CppCompilerSuf-Lib s.Num e.CppCompilerSuf)
+              = <Update
+                  t.Config (e.Errors)
+                  &Config-SetCppCompilerSuf s.Num LIB e.CppCompilerSuf
+                >;
+
+            (t.Config e.Errors) (NoSources s.Num)
+              = <Update t.Config (e.Errors) &Config-SetNoSources s.Num True>;
+
+            (t.Config e.Errors) (VerboseInc s.Num)
+              = <Update t.Config (e.Errors) &Config-IncVerbose s.Num>;
+
+            (t.Config e.Errors) (VerboseSet s.Num e.Value)
+              = <Update t.Config (e.Errors) &Config-SetVerbose s.Num e.Value>;
+
+            (t.Config e.Errors) t.Option
+              = (t.Config e.Errors) t.Option;
+          }
+        )
+        (&MapAccum
+          {
+            (t.Config e.Errors) (SearchFolder s.Num e.Folder)
+              = (<Config-SetSearchFolder t.Config e.Folder> e.Errors);
+
+            (t.Config e.Errors) (REF5RSL-Env s.Num)
+              = (<Config-SetSearchFolder t.Config REF5RSL> e.Errors);
+
+            (t.Config e.Errors) (FILE s.Num e.FileName)
+              = (t.Config e.Errors) (s.Num e.FileName);
+          }
+        )
+        {
+          (t.Config /* нет ошибок */) e.FileNames =
+            Success t.Config e.FileNames;
+
+          (t.Config e.Errors) e.FileNames =
+            Fails
+            <Map
+              {
+                (s.Pos NoRequiredParam e.Param) =
+                  (s.Pos 'option ' e.Param ' expects parameter');
+
+                (s.Pos UnknownShortOption s.Option) =
+                  (s.Pos 'unknown option -' s.Option);
+
+                (s.Pos UnknownLongOption e.Option) =
+                  (s.Pos 'unknown option --' e.Option);
+
+                /* У нас все опции с параметрами, не должно возникать */
+                /* (s.Pos UnexpectedLongOptionParam (e.Option) e.Param) = */
+
+                (s.Pos BadValue-Opt e.BadValue) =
+                  (
+                    s.Pos
+                    'option -O expects \'d\', \'C\', \'D\', \'I\', \'P\', '
+                    '\'R\', \'S\', \'T\' or it\'s combination, '
+                    'but got \'' e.BadValue '\''
+                  );
+
+                (s.Pos BadValue-Warning e.BadValue) =
+                   (
+                     s.Pos
+                     'option -W expects \'all\', \'[no-]error[=...]\', '
+                     '\'[no-]screening\',\'[no-]multiscreening\', '
+                     '\'[no-]multiscreening5\',\'[no-]pseudofunctions\' '
+                     '\'[no-]repeated\', \'[no-]deprecated\', '
+                     '\'[no-]nul-in-compound\', but got \'' e.BadValue '\''
+                   );
+
+                (s.Pos EmptyErrorFileName)
+                  = (s.Pos 'option --error-file expects a non-empty argument');
+
+                (s.Pos TargetModeAlreadySet)
+                  = (s.Pos
+                      'options --makeexe (-x), --makelib (-l) and -R '
+                      'should appear once'
+                    );
+
+                (s.Pos BadValue-MustBeNumber e.Cycles)
+                  = (s.Pos 'option --opt-tree-cycles expects a number parameter');
+              }
+              e.Errors
+            >;
+        }
+      >
+    >;
+}
+
+Update {
+  t.Config (e.Errors) s.Updater s.LineNum e.Option
+    = <s.Updater t.Config e.Option>
+    : {
+        Success t.Config^ = (t.Config e.Errors);
+
+        Fails e.ErrorMessage = (t.Config e.Errors (s.LineNum e.ErrorMessage));
+      }
+}
+
+PrintHelp {
+  = <Prout
+'rlc-core flags... filenames...\n'
+'rlc-core @flag-list-file.txt\n'
+'\n'
+'-c, --cpp-command, --cpp-command-exe command-line\n'
+'        C++ command line prefix for building executable module\n'
+'--cpp-command-lib command-line\n'
+'        C++ command line prefix for building library module\n'
+'-f, --cpp-flag flag\n'
+'        Additional flag for C++ compiler, quoted in command line\n'
+'-F, --cpp-flags flags\n'
+'        Additional flags for C++ compiler, don\'t quoted in command line\n'
+'-g, --debug-info\n'
+'        Information of variable table for step-by-step debugger\n'
+'-e, --error-file filename\n'
+'        Compiler creates empty file with this name if compilation failed\n'
+'--grammar-check\n'
+'        Dont compile sources, only syntax (w/o semantic) check for sources\n'
+'--incorporated filename\n'
+'        Marks that a module with the name is statically linked to this module\n'
+'--markup-context\n'
+'        Save catched variable names in closure content\n'
+'-O keys[change]\n'
+'        Optimization keys:\n'
+'          -OP - conjoint pattern optimization\n'
+'          -OR - building result optimization\n'
+'          -Od - use direct code generation instead interpretation code,\n'
+'                compile functions to C++ instead RASL\n'
+'          -OT - tree optimization (expands direct calls for closures)\n'
+'          -OD - drive functions with $DRIVE, inline functions with $INLINE\n'
+'          -OI - inline functions with $DRIVE and $INLINE\n'
+'          -OS - specialize functions with $SPEC\n'
+'          -OA - automatically markup optimizable functions\n'
+'          -Oi - optimize intrinsic functions\n'
+'          -OG - global optimization\n'
+'          -Ox, -Oy, -Oz - experimental keys, do nothing in release\n'
+'        Flags D, I, S, A, i implicitly contain T\n'
+'        Change key mode (optional):\n'
+'          -O...+ - set the flags with previous setted\n'
+'          -O...- - reject the flags from previous setted\n'
+'          -O...= - assign the flags, previous setted will be skipped\n'
+'-W keywords\n'
+'        Warning keywords:\n'
+'          -Wall - show all warnings\n'
+'          -Wscreening, -Wmultiscreening(5), -Wno-... - check/don\'t\n'
+'                                 screening sentences (disabled by default)\n'
+'          -Wnul-in-compound, -Wno-... - check/don\'t nuls in compounds\n'
+'                                        (enabled by default)\n'
+'          -Wpseudofunctions, -Wno-... - check/don\'t pseudofunction\n'
+'                                        correctness (enabled by default)\n'
+'          -Wrepeated, -Wno-... - check/don\'t suspicious repeated variables\n'
+'                                 (enabled by default)\n'
+'          -Wdeprecated, -Wno-... - warn/don\'t about deprecated syntax\n'
+'                                   (enabled by default)\n'
+'          -Werror[=...], -Wno-error[=...] - treat/don\'t all or only provided\n'
+'                                            warning(s) as error(s)\n'
+'-p, --prefix prefix-name\n'
+'        set prefix file name\n'
+'-r, --reference reference-name\n'
+'        Compiled module depends from the reference\n'
+'-D, --runtime-dir, --runtime-directory dir\n'
+'        Add the directory to search list and include list for C++ compiler\n'
+'-d, --dir, --directory dir\n'
+'        Add the directory to search list\n'
+'-o, --target-file target-file-name\n'
+'        Name of target file\n'
+'-x, --makeexe\n'
+'        Compile to executable file\n'
+'-l, --makelib\n'
+'        Compile to library file (with or w/o native code)\n'
+'-R      Compile to library RASL module (w/o native code)\n'
+'-C, --compile-only\n'
+'        Compile sources w/o linking\n'
+'--targsuffix, --targetsuffix, --targsuf, --exesuffix, --exesuf suffix\n'
+'        Suffix for executable file (for example, .exe)\n'
+'--libsuffix, --libsuf suffix\n'
+'        Suffix for library file (for example, .dll or .so)\n'
+'--chmod-x, --chmod-x-command command\n'
+'        Must be empty on Windws, "chmod +x" on POSIX\n'
+'--prelude filename.refi\n'
+'        Prelude file with builtin functions declarations\n'
+'--classic, --extended\n'
+'        Switch Refal-5-lambda syntax analyzer to full compatibility\n'
+'        with classic Refal-5 or not. Default is --extended\n'
+'--log logfile.log\n'
+'        Logs compilation process. Compiler writes to log syntax tree\n'
+'        after desugaring, after tree optimization, high-leve RASL\n'
+'--opt-tree-cycles number\n'
+'        Max number of tree optimization passes\n'
+'--help  Print this help\n'
+'--version\n'
+'        Print version\n'
+'--keep-rasl, --keep-rasls, --dont-keep-rasl, --dont-keep-rasls\n'
+'        Save or don\'t save temporary .rasl after compilation\n'
+'--tmp-dir, --temp-dir directory\n'
+'        Directory for intermediate .rasl files, current is default\n'
+'--ref5rsl\n'
+'        Use environment variable REF5RSL as search path\n'
+'--overwrite-exist-rasls, --dont-overwrite-exist-rasls,\n'
+'--overwrite-exist-rasl, --dont-overwrite-exist-rasl\n'
+'        If tmp-dir already contain file with name that being produced\n'
+'        new file use new name\n'
+'--no-sources\n'
+'        Don\'t show error when there are no sources in command line\n'
+'-v      Increment log level\n'
+'--verbose=N\n'
+'        Set log level to N.\n'
+'\n'
+'Long keys with params may be used with equation:\n'
+'--tmp-dir dirname or --tmp-dir=dirname\n'
+'\n'
+'Each line of arg-list-file.txt is interpreted as independed key\n'
+    >;
+}

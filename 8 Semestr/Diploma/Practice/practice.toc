@@ -1,0 +1,39 @@
+
+\babel@toc {russian}{}\relax 
+\contentsline {section}{\numberline {}ВВЕДЕНИЕ}{4}{section*.1}%
+\contentsline {section}{\numberline {1}Технологическая часть}{5}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Инструкция пользователя}{5}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}Требования к среде}{5}{subsubsection.1.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.2}Сборка}{5}{subsubsection.1.1.2}%
+\contentsline {subsubsection}{\numberline {1.1.3}Запуск интерпретатора}{6}{subsubsection.1.1.3}%
+\contentsline {subsubsection}{\numberline {1.1.4}Запуск тестов}{6}{subsubsection.1.1.4}%
+\contentsline {subsection}{\numberline {1.2}Структура данных: раскрученная двусторонняя очередь}{7}{subsection.1.2}%
+\contentsline {subsubsection}{\numberline {1.2.1}Sealed interface Expr<T>}{7}{subsubsection.1.2.1}%
+\contentsline {subsubsection}{\numberline {1.2.2}Параметры буферов}{8}{subsubsection.1.2.2}%
+\contentsline {subsubsection}{\numberline {1.2.3}ShallowDeque<T>: мелкий буфер}{8}{subsubsection.1.2.3}%
+\contentsline {subsubsection}{\numberline {1.2.4}DeepDeque<T>: глубокий уровень}{9}{subsubsection.1.2.4}%
+\contentsline {subsubsection}{\numberline {1.2.5}Конкатенация: четыре случая}{10}{subsubsection.1.2.5}%
+\contentsline {subsection}{\numberline {1.3}Цикл нормализации}{11}{subsection.1.3}%
+\contentsline {subsubsection}{\numberline {1.3.1}Поле зрения и иерархия ViewTerm}{11}{subsubsection.1.3.1}%
+\contentsline {subsubsection}{\numberline {1.3.2}Двустековая реализация нормализатора}{12}{subsubsection.1.3.2}%
+\contentsline {subsubsection}{\numberline {1.3.3}Оптимизация BulkPassive}{13}{subsubsection.1.3.3}%
+\contentsline {section}{\numberline {2}Аналитическая часть}{15}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Стратегия тестирования}{15}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Состав тестов}{15}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Юнит-тесты раскрученной очереди}{15}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Юнит-тесты лексера, парсера и семантики}{16}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Юнит-тесты исполнения}{17}{subsubsection.2.2.3}%
+\contentsline {subsubsection}{\numberline {2.2.4}Интеграционные тесты}{17}{subsubsection.2.2.4}%
+\contentsline {subsubsection}{\numberline {2.2.5}Совместимостные тесты (AutotestsRunnerTest)}{17}{subsubsection.2.2.5}%
+\contentsline {subsection}{\numberline {2.3}Покрытие кода}{18}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Сравнительные прогоны}{18}{subsection.2.4}%
+\contentsline {subsubsection}{\numberline {2.4.1}Условия измерений}{18}{subsubsection.2.4.1}%
+\contentsline {subsubsection}{\numberline {2.4.2}Тестовая программа Loop/Select}{19}{subsubsection.2.4.2}%
+\contentsline {subsubsection}{\numberline {2.4.3}Методика измерений}{19}{subsubsection.2.4.3}%
+\contentsline {subsubsection}{\numberline {2.4.4}Результаты}{20}{subsubsection.2.4.4}%
+\contentsline {subsubsection}{\numberline {2.4.5}Обсуждение результатов}{21}{subsubsection.2.4.5}%
+\contentsline {section}{\numberline {}ЗАКЛЮЧЕНИЕ}{23}{section*.24}%
+\contentsline {section}{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}{24}{section*.24}%
+\contentsline {section}{\numberline {\CYRA }Исходный код бенчмарка Loop/Select}{25}{appendix.A}%
+\contentsline {section}{\numberline {\CYRB }Инструкция по воспроизведению измерений}{26}{appendix.B}%
+\contentsline {section}{\numberline {\CYRV }Реализация функций конкатенации}{28}{appendix.C}%

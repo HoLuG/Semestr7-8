@@ -1,0 +1,415 @@
+$INCLUDE "LibraryEx";
+
+*$FROM DisplayName
+$EXTERN DisplayName;
+
+
+/**
+  <Log-TextFromAST t.Units*> == (e.TextLine)*
+*/
+$ENTRY Log-TextFromAST {
+  e.Units = <UndoubleEmtpyLines <TrimLines <Map &Element e.Units>>>;
+}
+
+TrimLines {
+  (e.Line) e.Lines = (<Trim-R e.Line>) <TrimLines e.Lines>;
+
+  /* пусто */ = /* пусто */;
+}
+
+UndoubleEmtpyLines {
+  e.Lines-B () () e.Lines-E = e.Lines-B <UndoubleEmtpyLines () e.Lines-E>;
+
+  e.Lines = e.Lines;
+}
+
+Element {
+  (Function s.Scope (e.Name) e.Body) = <Function (e.Name) s.Scope e.Body>;
+  (ColdFunction s.ColdBy s.Scope (e.Name) e.Body)
+    = <ColdFunction s.ColdBy (e.Name) s.Scope e.Body>;
+
+  (Swap GN-Entry e.Name) = ('$ESWAP ' <DisplayName e.Name> ';');
+  (Swap GN-Local e.Name) = ('$SWAP ' <DisplayName e.Name> ';');
+
+  (Declaration GN-Entry e.Name) = ('$EXTERN ' <DisplayName e.Name> ';');
+  (Declaration GN-Local e.Name) = ('$FORWARD ' <DisplayName e.Name> ';');
+
+  (Inline e.Name) = ('$INLINE ' <DisplayName e.Name> ';');
+
+  (Drive e.Name) = ('$DRIVE ' <DisplayName e.Name> ';');
+
+  (Intrinsic e.Name) = ('$INTRINSIC ' <DisplayName e.Name> ';');
+
+  (Ident e.Name) = ('$LABEL ' <DisplayName e.Name> ';');
+
+  (NativeBlock t.SrcPos e.Code) = ('%% native block %%');
+
+  (Spec (e.Name) e.Pattern)
+    = ('$SPEC ' <DisplayName e.Name> ' ' <InlineExpr e.Pattern> ';');
+
+  (DriveInfo e.DriveInfo) = ('(DriveInfo ...)');
+  (SpecInfo e.SpecInfo) = ('(SpecInfo ...)');
+}
+
+
+MAX-LINE { = 77 }
+
+LongLine {
+  e.Line
+    = <Lenw e.Line> : s.Len e.Line^
+    = <Compare s.Len <MAX-LINE>>
+    : {
+        '+' = True;
+        s._ = False;
+      };
+}
+
+
+Function {
+  (e.Name) s.Scope e.Body
+    = <Function-Aux (<DisplayName e.Name>) s.Scope e.Body>;
+}
+
+ColdFunction {
+  s.ColdBy (e.Name) s.Scope e.Body
+    = <Function (e.Name) s.Scope e.Body>
+    : {
+        () e.FunctionLines
+          = ()
+            ('/* Cold by ' <Explode s.ColdBy> ' */')
+            e.FunctionLines;
+
+        (e.FunctionLine)
+          = (e.FunctionLine '  /* Cold by ' <Explode s.ColdBy> ' */');
+      }
+}
+
+Function-Aux {
+  (e.Name) s.Scope Sentences /* пусто */
+    = (<Entry s.Scope> e.Name ' { /* empty */ }');
+
+  (e.Name) s.Scope Sentences e.Sentences
+    = ()
+      (<Entry s.Scope> e.Name ' {')
+      <Sentences ('  ') e.Sentences>
+      ('}')
+      ();
+
+  (e.Name) s.Scope NativeBody t.SrcPos e.NativeBody
+    = (<Entry s.Scope> e.Name ' { %% native %% }');
+
+  (e.Name) s.Scope Metatable e.Metatable
+    = ()
+      (<Entry s.Scope> e.Name ' {')
+      ('* metatable function')
+      <Map
+        {
+          (t.Ident t.Name)
+            = ('  ' <InlineTerm t.Ident> ' :: ' <InlineTerm t.Name>);
+        }
+        e.Metatable
+      >
+      ('}')
+      ();
+};
+
+Entry {
+  GN-Entry = '$ENTRY ';
+  GN-Local = /* пусто */;
+}
+
+Sentences {
+  (e.Indent) (e.Sentence) = <Sentence (e.Indent) e.Sentence>;
+
+  (e.Indent) (e.Sentence) e.Sentences
+    = <Sentence (e.Indent) e.Sentence>
+      ()
+      <Sentences (e.Indent) e.Sentences>;
+
+  (e.Indent) /* пусто */ = /* пусто */;
+}
+
+Sentence {
+  (s.Space e.Indent) Comment e.Text
+    = <PutComment (e.Indent) e.Text>;
+
+  (e.Indent) (e.Pattern) (e.Result)
+    , e.Indent <InlineExpr e.Pattern> ' = ' <InlineExpr e.Result> ';'
+    : e.OneLineSentence
+    , <LongLine e.OneLineSentence> : False
+    = (e.OneLineSentence);
+
+  (e.Indent) (e.Pattern) e.Tail
+    = <Expression (e.Indent) (e.Indent) e.Pattern ()>
+      <Tail (e.Indent '  ') e.Tail>;
+}
+
+$ENTRY Log-InlineExpr {
+  e.Expr = <InlineSubexpr e.Expr>;
+}
+
+InlineExpr {
+  /* empty */ = '/* empty */';
+  e.Expr = <InlineSubexpr e.Expr>;
+}
+
+PutComment {
+  (e.Indent) e.Comment '\n' e.Tail
+    = ('*' e.Indent e.Comment) <PutComment (e.Indent) e.Tail>;
+
+  (e.Indent) e.Comment = ('*' e.Indent e.Comment);
+}
+
+Tail {
+  (e.Indent) (Condition (e.Name) (e.Result) (e.Pattern)) e.Tail
+    = e.Indent ', ' <InlineExpr e.Result> ' : ' <InlineExpr e.Pattern>
+    : e.OneLineCondition
+    = <LongLine e.OneLineCondition>
+    : {
+        True
+          = (e.Indent '  /* ' <DisplayName e.Name> ' */')
+            <Expression (e.Indent ', ') (e.Indent '  ') e.Result ()>
+            <Expression (e.Indent ': ') (e.Indent '  ') e.Pattern ()>
+            <Tail (e.Indent) e.Tail>;
+
+        False
+          = (e.Indent '  /* ' <DisplayName e.Name> ' */')
+            (e.OneLineCondition)
+            <Tail (e.Indent) e.Tail>;
+      };
+
+  (e.Indent) (e.Result)
+    = <Expression (e.Indent '= ') (e.Indent '  ') e.Result (';')>;
+}
+
+$SPEC Expression (e.prefix) (e.indent) e.expression (e.suffix);
+
+Expression {
+  (e.Prefix) (e.Indent) /* пусто */ (e.Suffix)
+    = (e.Prefix '/* empty */' e.Suffix);
+
+  (e.Prefix) (e.Indent) e.Expression (e.Suffix)
+    = <DoExpression FIRST (e.Indent) (e.Prefix) e.Expression (e.Suffix)>;
+}
+
+$SPEC DoExpression s.POS (e.indent) (e.out-line) e.expression;
+
+DoExpression {
+  s.Pos (e.Indent) (e.OutLine) /* пусто */ (e.Suffix) = (e.OutLine e.Suffix);
+
+  s.Pos (e.Indent) (e.OutLine) t.NextTerm e.Expr (e.Suffix)
+    = <InlineTerm t.NextTerm> : e.TextualTerm
+    = <AppendTerm e.OutLine (e.TextualTerm)> : e.NewOutLine
+    = <LongLine e.NewOutLine>
+    : {
+        True
+          = e.Indent e.TextualTerm : e.OutLineTerm
+          = <LongLine e.OutLineTerm>
+          : {
+              True, e.Expr : /* пусто */
+                = <MultilineTerm s.Pos (e.OutLine) e.Indent t.NextTerm (e.Suffix)>;
+
+              True
+                = <MultilineTerm s.Pos (e.OutLine) e.Indent t.NextTerm ()>
+                  <DoExpression FIRST (e.Indent) (e.Indent) e.Expr (e.Suffix)>;
+
+              False
+                = (e.OutLine)
+                  <DoExpression NEXT (e.Indent) (e.OutLineTerm) e.Expr (e.Suffix)>;
+            };
+
+        False
+          = <DoExpression NEXT (e.Indent) (e.NewOutLine) e.Expr (e.Suffix)>;
+      };
+}
+
+AppendTerm {
+  e.String '\'' ('\'' e.Term) = e.String e.Term;
+  e.String ' ' (e.Term) = e.String ' ' e.Term;
+  e.String (e.Term) = e.String ' ' e.Term;
+}
+
+InlineTerm {
+  (Symbol e.Value) = <Symbol e.Value>;
+  (Var e.Value) = <Var e.Value>;
+  (Brackets e.Value) = <Brackets e.Value>;
+  (ADT-Brackets e.Value) = <ADT-Brackets e.Value>;
+  (CallBrackets e.Value) = <CallBrackets e.Value>;
+  (ColdCallBrackets e.Value) = <ColdCallBrackets e.Value>;
+  (ClosureBrackets e.Value) = <ClosureBrackets e.Value>;
+}
+
+$SPEC MultilineTerm s.pos (e.prefix) e.indent t.term (e.suffix);
+
+MultilineTerm {
+  FIRST (e.Prefix) e.Indent t.Term (e.Suffix)
+    = <MultilineTerm-Prefix (e.Prefix) e.Indent t.Term (e.Suffix)>;
+
+  NEXT (e.Prefix) e.Indent t.Term (e.Suffix)
+    = (e.Prefix)
+      <MultilineTerm-Prefix (e.Indent) e.Indent t.Term (e.Suffix)>;
+}
+
+MultilineTerm-Prefix {
+  (e.Prefix) e.Indent t.Term (e.Suffix)
+    = t.Term
+    : {
+        (Brackets e.Expr)
+          = (e.Prefix '(')
+            <Expression (e.Indent '  ') (e.Indent '  ') e.Expr ()>
+            (e.Indent ')' e.Suffix);
+
+        (ADT-Brackets (e.Name) e.Expr)
+          = (e.Prefix '[' <DisplayName e.Name>)
+            <Expression (e.Indent '  ') (e.Indent '  ') e.Expr ()>
+            (e.Indent ']' e.Suffix);
+
+        (CallBrackets (Symbol Name e.Function) e.Expr)
+          = (e.Prefix '<' <DisplayName e.Function>)
+            <Expression (e.Indent '  ') (e.Indent '  ') e.Expr ()>
+            (e.Indent '>' e.Suffix);
+
+        (CallBrackets (Var e.Indirect) e.Expr)
+          = (e.Prefix '<' <Var e.Indirect>)
+            <Expression (e.Indent '  ') (e.Indent '  ') e.Expr ()>
+            (e.Indent '>' e.Suffix);
+
+        (CallBrackets (ClosureBrackets (Symbol Name e.Function) e.Context) e.Expr)
+          = (e.Prefix '< {{' <DisplayName e.Function>)
+            <Expression (e.Indent '    ') (e.Indent '    ') e.Context ()>
+            (e.Indent '  }}')
+            <Expression (e.Indent '  ') (e.Indent '  ') e.Expr ()>
+            (e.Indent '>' e.Suffix);
+
+        (CallBrackets e.Expr)
+          = (e.Prefix '<')
+            <Expression (e.Indent '  ') (e.Indent '  ') e.Expr ()>
+            (e.Indent '>' e.Suffix);
+
+        (ColdCallBrackets e.Expr)
+          = (e.Prefix '<*')
+            <Expression (e.Indent '  ') (e.Indent '  ') e.Expr ()>
+            (e.Indent '*>' e.Suffix);
+
+        (ClosureBrackets (Symbol Name e.Function) e.Expr)
+          = (e.Prefix '{{' <DisplayName e.Function>)
+            <Expression (e.Indent '  ') (e.Indent '  ') e.Expr ()>
+            (e.Indent '}}' e.Suffix);
+
+        (s.Type e.Value)
+          = (e.Prefix <InlineTerm (s.Type e.Value)> e.Suffix);
+      };
+}
+
+Symbol {
+  Char s.Char = '\'' <CharRep s.Char> '\'';
+  Number Cookie1 = '$COOKIE1';
+  Number Cookie2 = '$COOKIE2';
+  Number s.Number = <Symb s.Number>;
+  Name e.Ident = '&' <DisplayName e.Ident>;
+  Identifier e.Ident = <Compound <DisplayName e.Ident>>;
+}
+
+Compound {
+  e.Chars, <IsIdent e.Chars> : True e.Textual = e.Textual;
+
+  e.Chars = '\"' <DoCompound e.Chars> '\"'
+}
+
+DoCompound {
+  s.Char e.Chars = <CharRep s.Char> <DoCompound e.Chars>;
+  /* пусто */ = /* Пусто */;
+}
+
+IsIdent {
+  s.Initial e.Tail
+    , <Type s.Initial> : 'L' s.SubType s.Initial
+    = <DoIsIdent (s.Initial) e.Tail>;
+
+  e.Other = False;
+}
+
+DoIsIdent {
+  (e.Valid) '-' e.Tail = <DoIsIdent (e.Valid '-') e.Tail>;
+  (e.Valid) '_' e.Tail = <DoIsIdent (e.Valid '_') e.Tail>;
+
+  (e.Valid) s.Next e.Tail
+    , <Type s.Next> : 'L' s.Subtype s.Next
+    = <DoIsIdent (e.Valid s.Next) e.Tail>;
+
+  (e.Valid) s.Next e.Tail
+    , <Type s.Next> : 'D0' s.Next
+    = <DoIsIdent (e.Valid s.Next) e.Tail>;
+
+  (e.Valid) /* пусто */ = True e.Valid;
+
+  (e.Valid) s.Other e.Tail = False;
+}
+
+CharRep {
+  '\'' = '\\\'';
+  '\"' = '\\\"';
+  '\\' = '\\\\';
+  '\n' = '\\n';
+  '\r' = '\\r';
+  '\t' = '\\t';
+
+  s.Char
+    , <Ord s.Char> : s.Ord
+    , <Compare s.Ord 32> : '-'
+    = '\\x' <HexDigit </ s.Ord 16>> <HexDigit <% s.Ord 16>>;
+
+  s.Char = s.Char;
+}
+
+HexDigit {
+  s.Number
+    , <First s.Number '0123456789abcdef'> : (e.1) s.Digit e.2
+    = s.Digit
+}
+
+Var {
+  s.Type e.Index = s.Type '.' e.Index;
+}
+
+Brackets {
+  e.Expr = '(' <InlineSubexpr e.Expr> ')'
+}
+
+ADT-Brackets {
+  (e.Name) e.Expr = '[' <DisplayName e.Name> ' ' <InlineSubexpr e.Expr> ']';
+}
+
+CallBrackets {
+  (Symbol Name e.Function) /* пусто */ = '<' <DisplayName e.Function> '>';
+
+  (Symbol Name e.Function) e.Expr
+    = '<' <DisplayName e.Function> ' ' <InlineSubexpr e.Expr> '>';
+
+  (Var e.Indirect) e.Expr = '<' <Var e.Indirect> ' ' <InlineSubexpr e.Expr> '>';
+
+  e.Expr = '< ' <InlineSubexpr e.Expr> '>';
+}
+
+ColdCallBrackets {
+  e.Expr = '<* ' <InlineSubexpr e.Expr> '*>';
+}
+
+ClosureBrackets {
+  e.Expr = '{{' <InlineSubexpr e.Expr> '}}';
+}
+
+InlineSubexpr {
+  t.Term e.Expr = <DoInlineExpr (<gen_e__ <InlineTerm t.Term>>) e.Expr>;
+
+  /* пусто */ = /* пусто */;
+}
+
+gen_e__ { e.Arg = e.Arg }
+
+DoInlineExpr {
+  (e.Text) t.NextTerm e.Expr
+    = <DoInlineExpr (<AppendTerm e.Text (<InlineTerm t.NextTerm>)>) e.Expr>;
+
+  (e.Text) = e.Text;
+}

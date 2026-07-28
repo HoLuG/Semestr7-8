@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Func.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.ast</a> &gt; <span class="el_source">Func.java</span></div><h1>Func.java</h1><pre class="source lang-java linenums">package refal.ast;
+
+import java.util.List;
+import java.util.Objects;
+
+// Определение функции: имя и непустой список правил.
+public record Func(String name, List&lt;Rule&gt; rules) {
+<span class="fc" id="L8">    public Func {</span>
+<span class="fc" id="L9">        Objects.requireNonNull(name, &quot;Func.name&quot;);</span>
+<span class="pc bpc" id="L10" title="1 of 2 branches missed.">        if (name.isEmpty()) {</span>
+<span class="nc" id="L11">            throw new IllegalArgumentException(&quot;Func.name must not be empty&quot;);</span>
+        }
+<span class="fc" id="L13">        Objects.requireNonNull(rules, &quot;Func.rules&quot;);</span>
+<span class="fc bfc" id="L14" title="All 2 branches covered.">        if (rules.isEmpty()) {</span>
+<span class="fc" id="L15">            throw new IllegalArgumentException(</span>
+                    &quot;Func '&quot; + name + &quot;' must contain at least one rule&quot;);
+        }
+<span class="fc" id="L18">        rules = List.copyOf(rules);</span>
+<span class="fc" id="L19">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

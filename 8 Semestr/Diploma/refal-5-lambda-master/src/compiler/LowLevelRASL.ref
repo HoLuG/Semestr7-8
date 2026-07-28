@@ -1,0 +1,347 @@
+$INCLUDE "LibraryEx";
+
+*$FROM Hash
+$EXTERN HashLittle2-Chars;
+
+*$FROM LowLevelRASL-RASL
+$EXTERN LowLevelRASL-RASL;
+
+*$FROM LowLevelRASL-Native
+$EXTERN LowLevelRASL-Native;
+
+*$FROM DisplayName
+$EXTERN DisplayName;
+
+
+/**
+  <LowLevelRASL s.GenMode s.DebugInfo (e.SrcName) e.RASLAST>
+    == t.RASLModule
+    == t.RASLModule t.NativeModule
+
+  s.GenMode ::= OnlyDirect | OnlyInterpret
+  s.DebugInfo ::= DebugInfo | NoDebugInfo
+*/
+$ENTRY LowLevelRASL {
+  s.GenMode s.DebugInfo (e.SrcName) e.ProgramElements
+
+    = <MapAccum
+        &CalcDigest
+        /* Числа выбраны случайно: hexdump /dev/urandom */
+        (4001567069 291363191)
+        (UnitName <Canonize e.SrcName>)
+        e.ProgramElements
+      >
+    : (s.Hash1 s.Hash2) e.Items
+
+    = <Map (&SetScopeIDs s.Hash1 s.Hash2) e.Items> : e.Items^
+
+    = <SelectConstantsOutliner e.Items> : s.OutlineConstants e.Items^
+
+    = <MapAccum
+        s.OutlineConstants
+        ((0 /* functions */) (0 /* idents */))
+        e.Items
+      >
+    : t.Tables e.Items^
+
+    = <Map (&MarkFunctionGenMode s.GenMode) e.Items> : e.Items^
+
+    = <MapAccum &SeparateItems (/* native items */) e.Items>
+    : (e.NativeItems) e.RASLItems
+
+    = <LowLevelRASL-RASL s.DebugInfo s.Hash1 s.Hash2 t.Tables e.RASLItems>
+      <LowLevelRASL-Native s.Hash1 s.Hash2 t.Tables e.NativeItems>;
+}
+
+Canonize {
+  e.Canonized '\\' e.NotCanonized = e.Canonized '/' <Canonize e.NotCanonized>;
+  e.Canonized = e.Canonized;
+}
+
+CalcDigest {
+  (s.Hash1 s.Hash2) (UnitName e.SrcName) =
+    (<HashLittle2-Chars s.Hash1 s.Hash2 e.SrcName>)
+    (UnitName e.SrcName);
+
+  (s.Hash1 s.Hash2) (Function s.ScopeClass (e.Name) e.Commands) =
+    (<HashFuncName s.Hash1 s.Hash2 s.ScopeClass e.Name 'R'>)
+    (Function s.ScopeClass (e.Name) e.Commands);
+
+  (s.Hash1 s.Hash2)
+  (CmdNativeFunction s.ScopeClass (e.Name) t.SrcPos e.Code) =
+    (<HashFuncName s.Hash1 s.Hash2 s.ScopeClass e.Name 'N'>)
+    (CmdNativeFunction s.ScopeClass (e.Name) t.SrcPos e.Code);
+
+  (s.Hash1 s.Hash2)
+  (CmdMetatable s.ScopeClass (e.Name) e.Metatable) =
+    (<HashFuncName s.Hash1 s.Hash2 s.ScopeClass e.Name 'T'>)
+    (CmdMetatable s.ScopeClass (e.Name) e.Metatable);
+
+  (s.Hash1 s.Hash2) (CmdEnum s.ScopeClass e.Name) =
+    (<HashFuncName s.Hash1 s.Hash2 s.ScopeClass e.Name 'E'>)
+    (CmdEnum s.ScopeClass e.Name);
+
+  (s.Hash1 s.Hash2) (CmdSwap s.ScopeClass e.Name) =
+    (<HashFuncName s.Hash1 s.Hash2 s.ScopeClass e.Name 'S'>)
+    (CmdSwap s.ScopeClass e.Name);
+
+  (s.Hash1 s.Hash2) (CmdConditionFunc s.ScopeClass e.Name) =
+    (<HashFuncName s.Hash1 s.Hash2 s.ScopeClass e.Name 'C'>)
+    (CmdConditionFunc s.ScopeClass e.Name);
+
+  (s.Hash1 s.Hash2) (CmdDeclaration s.ScopeClass e.Name) =
+    (<HashFuncName s.Hash1 s.Hash2 s.ScopeClass e.Name 'D'>)
+    (CmdDeclaration s.ScopeClass e.Name);
+
+  (s.Hash1 s.Hash2) (CmdDefineIdent e.Name) =
+    (s.Hash1 s.Hash2) (CmdDefineIdent e.Name);
+
+  (s.Hash1 s.Hash2) (CmdEmitNativeCode t.SrcPos e.Code) =
+    (s.Hash1 s.Hash2) (CmdEmitNativeCode t.SrcPos e.Code);
+}
+
+HashFuncName {
+  s.Hash1 s.Hash2 s.ScopeClass e.Name s.Sign =
+    <HashLittle2-Chars
+      s.Hash1 s.Hash2
+      <CharFromScopeClass s.ScopeClass> <DisplayName e.Name> s.Sign
+    >;
+}
+
+CharFromScopeClass {
+  GN-Entry = 'E';
+  GN-Local = 'L';
+}
+
+SetScopeIDs {
+  s.Hash1 s.Hash2 (Function s.ScopeClass (e.Name) e.Commands)
+    = (Function
+        s.ScopeClass (e.Name)
+        <SetScopeIDs-Commands s.Hash1 s.Hash2 e.Commands>
+      );
+
+  s.Hash1 s.Hash2 t.OtherItem = t.OtherItem;
+}
+
+SetScopeIDs-Commands {
+  s.Hash1 s.Hash2 e.Commands
+    = <Map (&SetScopeIDs-Command s.Hash1 s.Hash2) e.Commands>;
+}
+
+SetScopeIDs-Command {
+  s.Hash1 s.Hash2
+  (CmdNumber s.Direction s.BracketNum s.Number)
+    = (CmdNumber
+        s.Direction s.BracketNum
+        <SetScopeIDs-Patch s.Hash1 s.Hash2 s.Number>
+      );
+
+  s.Hash1 s.Hash2
+  (CmdNumberSave s.Direction s.BracketNum s.SaveOffset s.Number)
+    = (CmdNumberSave
+        s.Direction s.BracketNum s.SaveOffset
+        <SetScopeIDs-Patch s.Hash1 s.Hash2 s.Number>
+      );
+
+  s.Hash1 s.Hash2
+  (CmdCreateElem s.CreateMode s.ElemNo ElNumber s.Number)
+    = (CmdCreateElem
+        s.CreateMode s.ElemNo
+        ElNumber <SetScopeIDs-Patch s.Hash1 s.Hash2 s.Number>
+      );
+
+  s.Hash1 s.Hash2 (CmdSentence e.SubCommands)
+    = (CmdSentence <SetScopeIDs-Commands s.Hash1 s.Hash2 e.SubCommands>);
+
+  s.Hash1 s.Hash2
+  (CmdOpenELoop AlgLeft s.BracketNum s.VarNumber e.SubCommands)
+    = (CmdOpenELoop
+        AlgLeft s.BracketNum s.VarNumber
+        <SetScopeIDs-Commands s.Hash1 s.Hash2 e.SubCommands>
+      );
+
+  s.Hash1 s.Hash2 t.OtherCommand = t.OtherCommand;
+}
+
+SetScopeIDs-Patch {
+  s.Hash1 s.Hash2 Cookie1 = s.Hash1;
+  s.Hash1 s.Hash2 Cookie2 = s.Hash2;
+  s.Hash1 s.Hash2 s.Number = s.Number;
+}
+
+SelectConstantsOutliner {
+  e.Items-B (NativeBlock t.SrcPos e.Code) e.Items-E
+    = &OutlineConstants-WithNative
+      e.Items-B (NativeBlock t.SrcPos e.Code) e.Items-E;
+
+  e.Items-B (CmdNativeFunction s.ScopeClass (e.Name) t.SrcPos e.Code) e.Items-E
+    = &OutlineConstants-WithNative
+      e.Items-B
+      (CmdNativeFunction s.ScopeClass (e.Name) t.SrcPos e.Code)
+      e.Items-E;
+
+  e.Items = &OutlineConstants-RASLOnly e.Items;
+}
+
+OutlineConstants-WithNative {
+  t.Tables (UnitName e.SrcName) = t.Tables (UnitName e.SrcName);
+
+  t.Tables (Function s.ScopeClass (e.Name) e.Commands)
+    = <UpdateFuncTable t.Tables e.Name> : t.Tables^ s.Id
+    = <OutlineConstants-Commands t.Tables e.Commands> : t.Tables^ e.Commands^
+    = t.Tables (Function s.ScopeClass (e.Name) e.Commands);
+
+  t.Tables (CmdNativeFunction s.ScopeClass (e.Name) t.SrcPos e.Code)
+    = <UpdateFuncTable t.Tables e.Name> : t.Tables^ s.Id
+    = t.Tables (CmdNativeFunction s.ScopeClass (e.Name) t.SrcPos e.Code);
+
+  t.Tables (CmdMetatable s.ScopeClass (e.Name) e.Metatable)
+    = <OutlineConstants-Metatable t.Tables e.Metatable> : t.Tables^ e.Metatable^
+    = t.Tables
+      (CmdMetatable s.ScopeClass (e.Name) e.Metatable);
+
+  t.Tables (s.Definition s.ScopeClass e.Name)
+    , <OneOf s.Definition CmdEnum CmdSwap CmdConditionFunc CmdDeclaration> : True
+    = <UpdateFuncTable t.Tables e.Name> : t.Tables^ s.Id
+    = t.Tables (s.Definition s.ScopeClass e.Name);
+
+  t.Tables (CmdDefineIdent e.Name)
+    = <UpdateIdentTable t.Tables e.Name> : t.Tables^ s.Id
+    = t.Tables;
+
+  t.Tables (CmdEmitNativeCode t.SrcPos e.Code)
+    = t.Tables (CmdEmitNativeCode t.SrcPos e.Code);
+}
+
+OutlineConstants-RASLOnly {
+  t.Tables (Function s.ScopeClass (e.Name) e.Commands)
+    = <OutlineConstants-Commands t.Tables e.Commands> : t.Tables^ e.Commands^
+    = t.Tables (Function s.ScopeClass (e.Name) e.Commands);
+
+  t.Tables (CmdDefineIdent e.Name) = t.Tables /* пропускаем */;
+
+  t.Tables (CmdMetatable s.ScopeClass (e.Name) e.Metatable)
+    = <OutlineConstants-Metatable t.Tables e.Metatable> : t.Tables^ e.Metatable^
+    = t.Tables
+      (CmdMetatable s.ScopeClass (e.Name) e.Metatable);
+
+  t.Tables t.OtherItem = t.Tables t.OtherItem;
+}
+
+OutlineConstants-Metatable {
+  t.Tables e.Metatable
+    = <MapAccum
+        {
+          t.Tables^ ((Symbol Identifier e.Ident) (Symbol Name e.Function))
+            = <UpdateIdentTable t.Tables e.Ident> : t.Tables^ s.IdentId
+            = <UpdateFuncTable t.Tables e.Function> : t.Tables^ s.FuncId
+            = t.Tables (s.IdentId s.FuncId);
+        }
+        t.Tables e.Metatable
+      >
+}
+
+OutlineConstants-Commands {
+  t.Tables e.Commands
+    = <MapAccum &OutlineConstants-OneCommand t.Tables e.Commands>;
+}
+
+OutlineConstants-OneCommand {
+  t.Tables (CmdName s.Direction s.BracketNum e.Func)
+    = <UpdateFuncTable t.Tables e.Func> : t.Tables^ s.Id
+    = t.Tables (CmdName s.Direction s.BracketNum s.Id e.Func);
+
+  t.Tables (CmdNameSave s.Direction s.BracketNum s.SaveOffset e.Func)
+    = <UpdateFuncTable t.Tables e.Func> : t.Tables^ s.Id
+    = t.Tables (CmdNameSave s.Direction s.BracketNum s.SaveOffset s.Id e.Func);
+
+  t.Tables (CmdCreateElem s.CreateMode s.ElemNo ElName e.Func)
+    = <UpdateFuncTable t.Tables e.Func> : t.Tables^ s.Id
+    = t.Tables (CmdCreateElem s.CreateMode s.ElemNo ElName s.Id e.Func);
+
+  t.Tables (CmdADT s.Direction s.BracketNum s.InnerBrackets e.Func)
+    = <UpdateFuncTable t.Tables e.Func> : t.Tables^ s.Id
+    = t.Tables (CmdADT s.Direction s.BracketNum s.InnerBrackets s.Id e.Func);
+
+  t.Tables (CmdADTSave s.Direction s.BracketNum s.InnerBrackets e.Func)
+    = <UpdateFuncTable t.Tables e.Func> : t.Tables^ s.Id
+    = t.Tables (CmdADTSave s.Direction s.BracketNum s.InnerBrackets s.Id e.Func);
+
+  t.Tables (CmdIdent s.Direction s.BracketNum e.Ident)
+    = <UpdateIdentTable t.Tables e.Ident> : t.Tables^ s.Id
+    = t.Tables (CmdIdent s.Direction s.BracketNum s.Id e.Ident);
+
+  t.Tables (CmdIdentSave s.Direction s.BracketNum s.SaveOffset e.Ident)
+    = <UpdateIdentTable t.Tables e.Ident> : t.Tables^ s.Id
+    = t.Tables (CmdIdentSave s.Direction s.BracketNum s.SaveOffset s.Id e.Ident);
+
+  t.Tables (CmdCreateElem s.CreateMode s.ElemNo ElIdent e.Ident)
+    = <UpdateIdentTable t.Tables e.Ident> : t.Tables^ s.Id
+    = t.Tables (CmdCreateElem s.CreateMode s.ElemNo ElIdent s.Id e.Ident);
+
+  t.Tables (CmdSentence e.Commands)
+    = <OutlineConstants-Commands t.Tables e.Commands> : t.Tables^ e.Commands^
+    = t.Tables (CmdSentence e.Commands);
+
+  t.Tables (CmdOpenELoop AlgLeft s.BracketNum s.VarNumber e.Commands)
+    = <OutlineConstants-Commands t.Tables e.Commands> : t.Tables^ e.Commands^
+    = t.Tables (CmdOpenELoop AlgLeft s.BracketNum s.VarNumber e.Commands);
+
+  t.Tables t.OtherCommand = t.Tables t.OtherCommand;
+}
+
+UpdateFuncTable {
+  (t.FuncTable t.IdentTable) e.Name
+    = <UpdateTable t.FuncTable e.Name> : t.FuncTable^ s.Id
+    = (t.FuncTable t.IdentTable) s.Id;
+}
+
+UpdateIdentTable {
+  (t.FuncTable t.IdentTable) e.Name
+    = <UpdateTable t.IdentTable e.Name> : t.IdentTable^ s.Id
+    = (t.FuncTable t.IdentTable) s.Id;
+}
+
+UpdateTable {
+  (s.NextId e.Names-B (s.Id e.Name) e.Names-E) e.Name
+    = (s.NextId e.Names-B (s.Id e.Name) e.Names-E) s.Id;
+
+  (s.NextId e.Names) e.Name
+    = (<Inc s.NextId> e.Names (s.NextId e.Name)) s.NextId;
+}
+
+MarkFunctionGenMode {
+  OnlyInterpret (Function s.ScopeClass (e.Name) e.Commands) =
+    (Function-ToRASL s.ScopeClass (e.Name) e.Commands);
+
+  OnlyDirect (Function s.ScopeClass (e.Name) e.Commands) =
+    (Function-ToNative s.ScopeClass (e.Name) e.Commands);
+
+  OnlyInterpret (CmdConditionFunc s.ScopeClass e.Name)=
+   (CmdConditionFunc-ToRASL s.ScopeClass e.Name);
+
+  OnlyDirect (CmdConditionFunc s.ScopeClass e.Name) =
+    (CmdConditionFunc-ToNative s.ScopeClass e.Name);
+
+  s.GenMode (s.Type e.Info) = (s.Type e.Info);
+}
+
+SeparateItems {
+  (e.NativeItems) (s.ItemType e.ItemValue)
+    , UnitName Function-ToRASL CmdMetatable CmdEnum CmdSwap
+      CmdConditionFunc-ToRASL CmdConditionFunc-ToNative
+      CmdConditionFuncDecsrRasl CmdDeclaration
+    : e._ s.ItemType e._
+    = (e.NativeItems) (s.ItemType e.ItemValue);
+
+  (e.NativeItems) (Function-ToNative s.ScopeClass (e.Name) e.Commands)
+    = (e.NativeItems (Function-ToNative s.ScopeClass (e.Name) e.Commands))
+      (Function-ToNative s.ScopeClass (e.Name) /* не копируем */);
+
+  (e.NativeItems) (CmdNativeFunction s.ScopeClass (e.Name) t.SrcPos e.Code)
+    = (e.NativeItems (CmdNativeFunction s.ScopeClass (e.Name) t.SrcPos e.Code))
+      (CmdNativeFunction s.ScopeClass (e.Name) t.SrcPos e.Code);
+
+  (e.NativeItems) (CmdEmitNativeCode t.SrcPos e.Code)
+    = (e.NativeItems (CmdEmitNativeCode t.SrcPos e.Code));
+}

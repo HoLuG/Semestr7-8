@@ -1,0 +1,56 @@
+$ENTRY Go {
+    = <True True> <False False> <True <Equal-e ('ABC') ('ABC')>>
+      <True <Equal-e ('ABC') ('ABC')>> <True <Equal-e () ()>>
+      <True <Equal-e ((('ABC'))) ((('ABC')))>> <False <Equal-e ('AB') ('ABC')>>
+      <False <Equal-e ('ABCD') ('ABC')>> <True <Equal-t ('ABC') ('ABC')>>
+      <True <Equal-t ('ABC') ('ABC')>> <True <Equal-t () ()>>
+      <True <Equal-t ((('ABC'))) ((('ABC')))>> <False <Equal-t ('AB') ('ABC')>>
+      <False <Equal-t ('ABCD') ('ABC')>>
+      <True <Equal-e (<Cut-2-3 'ABCDEFGH'>) ('CDE')>>
+      <Eq (<CutPrefix ('ABC') 'ABCDEF'>) ('DEF')>
+      <Eq (<CutPrefix () 'ABCDEF'>) ('ABCDEF')>
+      <Eq (<CutSuffix 'ABCDEF' ('DEF')>) ('ABC')>
+      <Eq (<CutSuffix 'ABCDEF' ()>) ('ABCDEF')>
+      <Eq (<SplitBy 'CD' ('ABCDEF')>) (('AB') ('EF'))>;
+}
+
+True {
+  True = ;
+}
+
+False {
+  False = ;
+}
+
+Equal-e {
+  (e.X) (e.X) = True;
+
+  (e.X) (e.Y) = False;
+}
+
+Equal-t {
+  t.X t.X = True;
+
+  t.X t.Y = False;
+}
+
+Cut-2-3 {
+  s.L1 s.L2 e.Mid s.R3 s.R2 s.R1 = e.Mid;
+}
+
+Eq {
+  (e.X) (e.X) = ;
+}
+
+CutPrefix {
+  (e.Prefix) e.Prefix e.Rest = e.Rest;
+}
+
+CutSuffix {
+  e.Rest e.Suffix (e.Suffix) = e.Rest;
+}
+
+SplitBy {
+  e.X (e.Before e.X e.After) = (e.Before) (e.After);
+}
+

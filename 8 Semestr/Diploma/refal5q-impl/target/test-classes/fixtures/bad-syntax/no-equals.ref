@@ -1,0 +1,6 @@
+$ENTRY Main;
+
+* Missing '=' before result expression.
+Main {
+  s.X s.Y ;
+}

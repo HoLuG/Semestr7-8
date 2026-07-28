@@ -1,0 +1,16 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{record} \PYG{n+nc}{Rule}\PYG{p}{(}\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{pattern}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{result}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+
+\PYG{k+kd}{record} \PYG{n+nc}{Func}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{name}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Rule}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{rules}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// rules list must not be empty \PYGZhy{}\PYGZhy{} enforced by Parser}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+c1}{// Program is built via Builder:}
+\PYG{n}{Program}\PYG{p}{.}\PYG{n+na}{Builder}\PYG{+w}{ }\PYG{n}{b}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Program}\PYG{p}{.}\PYG{n+na}{builder}\PYG{p}{();}
+\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{addFunc}\PYG{p}{(}\PYG{n}{func}\PYG{p}{);}
+\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{entry}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Go\PYGZdq{}}\PYG{p}{);}\PYG{+w}{         }\PYG{c+c1}{// \PYGZdl{}ENTRY}
+\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{addExterns}\PYG{p}{(}\PYG{n}{names}\PYG{p}{);}\PYG{+w}{   }\PYG{c+c1}{// \PYGZdl{}EXTERN}
+\PYG{n}{Program}\PYG{+w}{ }\PYG{n}{p}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{build}\PYG{p}{();}
+\PYG{c+c1}{// Stores: LinkedHashMap\PYGZlt{}String,Func\PYGZgt{} funcs, Optional\PYGZlt{}String\PYGZgt{} entry,}
+\PYG{c+c1}{//         Set\PYGZlt{}String\PYGZgt{} externs, Set\PYGZlt{}String\PYGZgt{} duplicateFuncNames}
+\end{MintedVerbatim}

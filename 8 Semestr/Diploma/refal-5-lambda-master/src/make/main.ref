@@ -1,0 +1,208 @@
+*$FROM LibraryEx
+$EXTERN ArgList, Map;
+
+*$FROM ParseCmdLine
+$EXTERN PrintHelp, ParseCommandLine;
+
+*$FROM FileScanner
+$EXTERN CreateFileList;
+
+*$FROM Config
+$EXTERN
+  Config-GetFolders,
+  Config-GetSourceFile,
+  Config-GetRuntimeFiles,
+  Config-GetRLCompiler,
+  Config-GetCppCompilerExe,
+  Config-GetCppCompilerLib,
+  Config-GetPrefix,
+  Config-GetReferences,
+  Config-GetPrelude,
+  Config-GetTargetMode,
+  Config-GetTargetFileName,
+  Config-GetIncorporateds,
+  Config-GetKeepRasls,
+  Config-GetTempDir,
+  Config-GetOverwriteExistRasls,
+  Config-GetCppCompilerExeSuf,
+  Config-GetCppCompilerLibSuf;
+
+
+$ENTRY Go { = <Main <ArgList>>; }
+
+Main {
+  (e.Program) = <PrintHelp>;
+
+  (e.Program) e.Arguments
+    = <MakeProject
+        <ParseCommandLine e.Arguments>
+      >;
+}
+
+MakeProject {
+  Success t.Config
+    = <Config-GetSourceFile t.Config> : e.SourceFile
+    = <Config-GetRuntimeFiles t.Config> : e.RuntimeFiles
+    = <CreateFileList t.Config (e.SourceFile) e.RuntimeFiles>
+    : t.Config^ e.Units
+    = <RunRLCompiler t.Config e.Units>;
+
+  Fails e.Errors
+    = <Map
+        {
+          (s.Pos e.Message) =
+            <Prout 'Command line argument ' <Symb s.Pos> ': ' e.Message>;
+        }
+        e.Errors
+      >
+      <Exit 1>;
+}
+
+PrintSrcPos {
+  CMD-LINE = 'command line';
+  (s.LineNum e.FileName) = e.FileName ':' <Symb s.LineNum>;
+}
+
+RunRLCompiler {
+  t.Config e.Units-B (Error t.SrcPos e.Message) e.Units-E
+    = <Map
+        {
+          (Error t.SrcPos^ e.Message^) =
+            <Prout <PrintSrcPos t.SrcPos> ': ' e.Message>;
+
+          (Output e.Output) = ;
+          (OutputWithNative (e.Output) e.Native) = ;
+          (Source (s.Dialect e.Source) e.Output) = ;
+          (Include e.Include) = ;
+        }
+        (Error t.SrcPos e.Message) e.Units-E
+      >
+      <Exit 1>;
+
+  t.Config e.Units
+    = <Config-GetRLCompiler t.Config> : e.RLCompiler
+    = <MakeOptionalFlag &Config-GetCppCompilerExe t.Config 'cpp-command-exe'>
+    : e.CppCompilerExe
+    = <MakeOptionalFlag &Config-GetCppCompilerLib t.Config 'cpp-command-lib'>
+    : e.CppCompilerLib
+    = <MakeTargetModeFlag t.Config> : e.TargetModeFlag
+    = <MakeTargetFileFlag t.Config> : e.TargetFileFlag
+    = <MakeSearchFolderFlags t.Config> : e.SearchFolderFlags
+    = <GetPrefix t.Config> : e.Prefix
+    = <Config-GetReferences t.Config> : e.References
+    = <Config-GetIncorporateds t.Config> : e.IncorporatedLibs
+    = <Config-GetPrelude t.Config> : e.Prelude
+    = <MakeBoolFlag <Config-GetKeepRasls t.Config> 'keep-rasls'> : e.KeepRasls
+    = <Config-GetTempDir t.Config> : e.TempDir
+    = <MakeBoolFlag
+        <Config-GetOverwriteExistRasls t.Config> 'overwrite-exist-rasls'
+      >
+    : e.OverwriteExistRasls
+    = <MakeOptionalFlag
+        &Config-GetCppCompilerExeSuf t.Config 'cpp-command-exe-suf'
+      >
+    : e.CppCompilerExeSuf
+    = <MakeOptionalFlag
+        &Config-GetCppCompilerLibSuf t.Config 'cpp-command-lib-suf'
+      >
+    : e.CppCompilerLibSuf
+    = <System
+        e.RLCompiler
+        e.TargetModeFlag
+        e.CppCompilerExe
+        e.CppCompilerLib
+        e.TargetFileFlag
+        e.SearchFolderFlags
+        ' --prefix="' e.Prefix '"'
+        ' --prelude="' e.Prelude '"'
+        <Map
+          {
+            (e.Reference) = ' --reference="' e.Reference '"';
+          }
+          e.References
+        >
+        <Map
+          {
+            (e.LibName) = ' --incorporated="' e.LibName '"';
+          }
+          e.IncorporatedLibs
+        >
+        e.KeepRasls
+        ' --temp-dir="' e.TempDir '"'
+        e.OverwriteExistRasls
+        e.CppCompilerExeSuf
+        e.CppCompilerLibSuf
+        <Map
+          {
+            (Output e.Output) = ' "' e.Output '"';
+            (OutputWithNative (e.Output) e.Native) = ' "' e.Output '"';
+            (Source (s.Dialect e.Source) e.Output) = ' "' e.Source '"';
+            (Include e.Include) = /* пусто */;
+          }
+          e.Units
+        >
+      >
+    : {
+        0 = /* пусто */;
+
+        e.RetCode
+          = <Prout 'ERROR: rlc-core returned code ' <Symb e.RetCode>>
+            <Exit 1>;
+      };
+}
+
+MakeOptionalFlag {
+  s.Getter t.Config e.LongOptionName
+    = <s.Getter t.Config>
+    : {
+        /* empty */ = /* empty */;
+        e.Value = ' --' e.LongOptionName '="' e.Value '"';
+      };
+}
+
+MakeTargetModeFlag {
+  t.Config
+    = <Config-GetTargetMode t.Config>
+    : {
+        DefaultEXE = /* пусто */;
+        EXE = ' --makeexe';
+        LIB = ' --makelib';
+        R = ' -R';
+        CompileOnly = ' --compile-only';
+      };
+}
+
+MakeTargetFileFlag {
+  t.Config
+    = <Config-GetTargetFileName t.Config>
+    : {
+        DefaultTarget = /* пусто */;
+        e.TargetFile = ' --target-file="' e.TargetFile '"';
+      };
+}
+
+MakeSearchFolderFlags {
+  t.Config
+    = <Map
+        {
+          (Search e.Folder) = ' --directory="' e.Folder '"';
+          (Runtime e.Folder) = ' --runtime-directory="' e.Folder '"';
+          REF5RSL = ' --ref5rsl';
+        }
+        <Config-GetFolders t.Config>
+      >;
+}
+
+MakeBoolFlag {
+  True e.FlagName = ' --' e.FlagName;
+  False e.FlagName = ' --dont-' e.FlagName;
+}
+
+GetPrefix {
+  t.Config
+    = <Config-GetPrefix t.Config>
+    : {
+        NotSet = /* пусто */;
+        e.Prefix = e.Prefix;
+      };
+}

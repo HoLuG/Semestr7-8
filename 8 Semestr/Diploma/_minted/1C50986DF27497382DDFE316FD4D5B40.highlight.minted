@@ -1,0 +1,4 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+mvn\PYG{+w}{ }\PYG{n+nb}{test}
+\PYG{c+c1}{\PYGZsh{} Ожидается: Tests run: 224, Failures: 0, Errors: 0, Skipped: 7}
+\end{MintedVerbatim}

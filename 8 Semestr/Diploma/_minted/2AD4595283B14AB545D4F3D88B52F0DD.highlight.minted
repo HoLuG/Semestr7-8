@@ -1,0 +1,13 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{n}{EVar}\PYG{+w}{ }\PYG{n}{leftV}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{EVar}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{pat}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{pi}\PYG{p}{);}
+\PYG{+w}{    }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{key}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{leftV}\PYG{p}{.}\PYG{n+na}{key}\PYG{p}{();}
+
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{pi}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{n}{pe}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                              }\PYG{c+c1}{// (12)}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{env}\PYG{p}{.}\PYG{n+na}{contains}\PYG{p}{(}\PYG{n}{key}\PYG{p}{))}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{Bindings}\PYG{p}{.}\PYG{n+na}{equalExprs}\PYG{p}{(}\PYG{n}{env}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{key}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{))}
+\PYG{+w}{                }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// (13)}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{.}\PYG{n+na}{apply}\PYG{p}{(}\PYG{n}{env}\PYG{p}{);}\PYG{+w}{                  }\PYG{c+c1}{// (14)}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{.}\PYG{n+na}{apply}\PYG{p}{(}\PYG{n}{env}\PYG{p}{.}\PYG{n+na}{with}\PYG{p}{(}\PYG{n}{key}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{));}\PYG{+w}{      }\PYG{c+c1}{// (15)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

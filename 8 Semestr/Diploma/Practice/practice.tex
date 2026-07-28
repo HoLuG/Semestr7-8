@@ -1,0 +1,524 @@
+% !TEX program = pdflatex
+% !TEX options = -shell-escape
+\documentclass[14pt, russian]{scrartcl}
+\let\counterwithout\relax
+\let\counterwithin\relax
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{extsizes}
+\usepackage{subfig}
+\usepackage[export]{adjustbox}
+\usepackage{tocvsec2}
+\usepackage[subfigure]{tocloft}
+
+\AtBeginEnvironment{figure}{\vspace{0.5cm}}
+\AtBeginEnvironment{table}{\vspace{0.5cm}}
+\AtBeginEnvironment{listing}{\vspace{0.5cm}}
+\AtBeginEnvironment{algorithm}{\vspace{0.5cm}}
+\usepackage{ulem,bm,mathrsfs,ifsym}
+\normalem
+\renewcommand{\emph}[1]{#1}
+\usepackage{sectsty}
+
+%%% Поля и разметка страницы %%%
+\usepackage{pdflscape}
+\usepackage{geometry}
+\geometry{a4paper,tmargin=2cm,bmargin=2cm,lmargin=3cm,rmargin=1cm}
+
+%%% Математические пакеты %%%
+\usepackage{amsthm,amsfonts,amsmath,amssymb,amscd}
+\usepackage{mathtools}
+\usepackage[perpage]{footmisc}
+
+\KOMAoptions{fontsize=14pt}
+
+\makeatletter
+\def\showfontsize{\f@size{} point}
+\makeatother
+
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
+
+\usepackage{tempora}
+\usepackage{cmap}
+\usepackage[T2A,T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, main=russian]{babel}
+\usepackage{textcomp}
+\usepackage{indentfirst}
+
+%%% Таблицы %%%
+\usepackage{longtable}
+\usepackage{multirow,makecell,array}
+\usepackage{booktabs}
+
+%%% Общее форматирование
+\usepackage{soulutf8}
+\usepackage{icomma}
+
+%%% Изображения %%%
+\usepackage{graphicx}
+\usepackage{wrapfig}
+
+%%% Списки %%%
+\usepackage{enumitem}
+
+%%% Подписи %%%
+\usepackage{caption}
+
+\addto\captionsrussian{%
+  \renewcommand{\lstlistingname}{Листинг}%
+}
+%%% Счётчики %%%
+\usepackage[figure,table,section]{totalcount}
+\DeclareTotalCounter{lstlisting}
+\usepackage{totcount}
+\usepackage{totpages}
+
+\linespread{1.3}
+
+%%% Гиперссылки %%%
+\usepackage{hyperref}
+
+%%% Выравнивание и переносы %%%
+\sloppy
+\clubpenalty=10000
+\widowpenalty=10000
+
+\makeatletter
+\let\@@scshape=\scshape
+\renewcommand{\scshape}{%
+  \ifnum\strcmp{\f@series}{bx}=\z@
+    \usefont{T1}{cmr}{bx}{sc}%
+  \else
+    \ifnum\strcmp{\f@shape}{it}=\z@
+      \fontshape{scsl}\selectfont
+    \else
+      \@@scshape
+    \fi
+  \fi}
+\makeatother
+
+\usepackage{ifthen}
+\newcounter{intvl}
+\newcounter{otstup}
+\newcounter{contnumeq}
+\newcounter{contnumfig}
+\newcounter{contnumtab}
+\newcounter{pgnum}
+\newcounter{bibliosel}
+\newcounter{chapstyle}
+\newcounter{headingdelim}
+\newcounter{headingalign}
+\newcounter{headingsize}
+\newcounter{tabcap}
+\newcounter{tablaba}
+\newcounter{tabtita}
+
+\setcounter{intvl}{3}
+\setcounter{otstup}{0}
+\setcounter{contnumeq}{1}
+\setcounter{contnumfig}{1}
+\setcounter{contnumtab}{1}
+\setcounter{pgnum}{0}
+\setcounter{bibliosel}{1}
+\setcounter{chapstyle}{1}
+\setcounter{headingdelim}{1}
+\setcounter{headingalign}{0}
+\setcounter{headingsize}{0}
+\setcounter{tabcap}{0}
+\setcounter{tablaba}{2}
+\setcounter{tabtita}{1}
+
+\DeclareCaptionLabelSeparator*{emdash}{~--- }
+\captionsetup[listing]{position=top,labelsep=colon,justification=centering,singlelinecheck=false}
+\captionsetup[lstlisting]{position=top,labelsep=colon,justification=centering,singlelinecheck=false}
+\captionsetup[figure]{labelsep=emdash,font=onehalfspacing,position=bottom}
+
+\ifthenelse{\equal{\thetabcap}{0}}{%
+    \newcommand{\tabcapalign}{\raggedright}
+}
+
+\DeclareCaptionFormat{tablecaption}{\tabcapalign #1#2#3}
+\captionsetup[table]{labelsep=emdash}
+\captionsetup[table]{format=tablecaption,singlelinecheck=off,font=onehalfspacing,position=top,skip=-5pt}
+\DeclareCaptionLabelFormat{continued}{Продолжение таблицы~#2}
+\setlength{\belowcaptionskip}{.2cm}
+\setlength{\intextsep}{0ex}
+
+\renewcommand{\thesubfigure}{\asbuk{subfigure}}
+\captionsetup[subfigure]{font={normalsize},
+    labelformat=brace,
+    justification=centering,
+}
+
+\definecolor{linkcolor}{rgb}{0.0,0,0}
+\definecolor{citecolor}{rgb}{0,0.0,0}
+\definecolor{urlcolor}{rgb}{0,0,0}
+
+\hypersetup{
+    linktocpage=true,
+    plainpages=true,
+    unicode=true,
+    colorlinks,
+    linkcolor={linkcolor},
+    citecolor={citecolor},
+    urlcolor={urlcolor},
+    pdflang={ru},
+}
+\urlstyle{same}
+
+\setlength{\parindent}{2.5em}
+
+\renewcommand{\labelitemi}{---}
+\setlist{nosep,
+    labelindent=\parindent,leftmargin=*
+}
+
+\usepackage{ragged2e}
+\usepackage{needspace}
+\usepackage[explicit]{titlesec}
+\usepackage{placeins}
+\usepackage{xparse}
+\usepackage{csquotes}
+
+\usepackage[highlightmode=immediate]{minted}
+\usepackage{listings}
+\providecommand{\listingname}{Листинг}
+\addto\captionsrussian{%
+  \renewcommand{\listingname}{Листинг}%
+}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=t,
+  inputencoding=utf8,
+  frame=single,
+  keepspaces=true,
+  keywordstyle=\bf,
+  numbers=left,
+  numbersep=5pt,
+  xleftmargin=25pt,
+  xrightmargin=25pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  stepnumber=1,
+  tabsize=2,
+  title=\lstname
+}
+\setminted{
+  frame=single,
+  fontsize=\footnotesize,
+  linenos,
+  xleftmargin=1.5em,
+  breaklines=true,
+}
+\newenvironment{longlisting}{\captionsetup{type=listing}}{}
+\usepackage{url}
+\usepackage{algorithm, algorithmicx}
+\usepackage[noend]{algpseudocode}
+\usepackage{blkarray}
+\usepackage{chngcntr}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+
+% --- Библиография ---
+\usepackage[backend=biber,
+    bibstyle=gost-numeric,
+    citestyle=nature]{biblatex}
+\addbibresource{biblio.bib}
+% Как в РПЗ: [Электронный ресурс] у @online (поле media = {eresource} в .bib)
+\DefineBibliographyStrings{russian}{%
+  mediaeresource = {{Электронный ресурс}},%
+}
+
+\titleformat{name=\section,numberless}[block]{\normalfont\Large\centering}{}{0em}{#1}
+\titleformat{\section}[block]{\normalfont\Large\bfseries\raggedright}{}{0em}{\thesection\hspace{0.25em}#1}
+\titleformat{\subsection}[block]{\normalfont\Large\bfseries\raggedright}{}{0em}{\thesubsection\hspace{0.25em}#1}
+\titleformat{\subsubsection}[block]{\normalfont\large\bfseries\raggedright}{}{0em}{\thesubsubsection\hspace{0.25em}#1}
+
+\let\Algorithm\algorithm
+\renewcommand\algorithm[1][]{\Algorithm[#1]\setstretch{1.5}}
+
+\usepackage{pifont}
+\usepackage{calc}
+\usepackage{suffix}
+\DeclareQuoteStyle{russian}
+    {\guillemotleft}{\guillemotright}[0.025em]
+    {\quotedblbase}{\textquotedblleft}
+\ExecuteQuoteOptions{style=russian}
+\newcommand{\enq}[1]{\enquote{#1}}
+\newcommand{\eng}[1]{\begin{english}#1\end{english}}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\renewcommand{\listalgorithmname}{Список алгоритмов}
+\floatname{algorithm}{Листинг}
+\renewcommand{\lstlistingname}{Листинг}
+\renewcommand{\thealgorithm}{\arabic{algorithm}}
+
+\newcommand{\refAlgo}[1]{(листинг \ref{#1})}
+\newcommand{\refImage}[1]{(рисунок \ref{#1})}
+
+\renewcommand{\theenumi}{\arabic{enumi}.}
+\renewcommand{\labelenumi}{\arabic{enumi}.}
+\renewcommand{\theenumii}{\arabic{enumii}}
+\renewcommand{\labelenumii}{(\arabic{enumii})}
+\renewcommand{\theenumiii}{\roman{enumiii}}
+\renewcommand{\labelenumiii}{(\roman{enumiii})}
+\renewcommand{\labelitemi}{---}
+\renewcommand{\labelitemii}{---}
+
+\lstdefinelanguage{Refal}{
+  sensitive=true,
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{mygreen},
+  morestring=[b]',
+  stringstyle=\color{mymauve}
+}
+
+\makeatletter
+\def\p@subsection{}
+\def\p@subsubsection{\thesection\,\thesubsection\,}
+\makeatother
+\newcommand{\prog}[1]{{\ttfamily\small#1}}
+
+\newcommand{\anonsection}[1]{\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{section}{\protect\numberline{}#1}
+\section*{#1}\vspace*{2.5ex}}
+\newcommand{\sectionbreak}{\clearpage}
+\renewcommand{\sectionfont}{\normalsize}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+
+\renewcommand{\cftsecfont}{\normalfont\large}
+\renewcommand{\cftsubsecfont}{\normalfont\large}
+
+\setlength{\cftsecindent}{0pt}
+\setlength{\cftsubsecindent}{0pt}
+\setlength{\cftsubsubsecindent}{0pt}
+
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+    \DeclarePairedDelimiter\abs{\lvert}{\rvert}
+    \DeclarePairedDelimiter\norm{\lVert}{\rVert}
+\DeclareTextCommandDefault{\textvisiblespace}{%
+  \mbox{\kern.06em\vrule \@height.3ex}%
+  \vbox{\hrule \@width.3em}%
+  \hbox{\vrule \@height.3ex}}
+\newsavebox{\spacebox}
+\begin{lrbox}{\spacebox}
+\verb*! !
+\end{lrbox}
+\newcommand{\aspace}{\usebox{\spacebox}}
+\DeclareTotalCounter{listing}
+
+\makeatletter
+\renewcommand*{\p@subsubsection}{}
+\makeatother
+
+\begin{document}
+\sloppy
+
+\def\figurename{Рисунок}
+
+\begin{titlepage}
+\thispagestyle{empty}
+\newpage
+
+\vspace*{-30pt}
+\hspace{-45pt}
+\begin{minipage}{0.17\textwidth}
+\hspace*{-20pt}\centering
+\includegraphics[width=1.3\textwidth]{../nir/Emblem.png}
+\end{minipage}
+\begin{minipage}{0.82\textwidth}\small \textbf{
+\vspace*{-0.7ex}
+\hspace*{-10pt}\centerline{Министерство науки и высшего образования Российской Федерации}
+\vspace*{-0.7ex}
+\centerline{Федеральное государственное автономное образовательное учреждение }
+\vspace*{-0.7ex}
+\centerline{высшего образования}
+\vspace*{-0.7ex}
+\centerline{<<Московский государственный технический университет}
+\vspace*{-0.7ex}
+\centerline{имени Н.Э. Баумана}
+\vspace*{-0.7ex}
+\centerline{(национальный исследовательский университет)>>}
+\vspace*{-0.7ex}
+\centerline{(МГТУ им. Н.Э. Баумана)}}
+\end{minipage}
+
+\vspace{-2pt}
+\hspace{-34.5pt}\rule{\textwidth}{2.5pt}
+
+\vspace*{-20.3pt}
+\hspace{-34.5pt}\rule{\textwidth}{0.4pt}
+
+\vspace{0.5ex}
+\noindent \small ФАКУЛЬТЕТ\hspace{80pt} <<Информатика и системы управления>>
+
+\vspace*{-16pt}
+\hspace{35pt}\rule{0.855\textwidth}{0.4pt}
+
+\vspace{0.5ex}
+\noindent \small КАФЕДРА\hspace{50pt} <<Теоретическая информатика и компьютерные технологии>>
+
+\vspace*{-16pt}
+\hspace{25pt}\rule{0.875\textwidth}{0.4pt}
+
+\vspace{3em}
+
+\begin{center}
+\Large \bf{РАСЧЕТНО-ПОЯСНИТЕЛЬНАЯ ЗАПИСКА\\\textbf{\textit{К ПРЕДДИПЛОМНОЙ ПРАКТИКЕ\\НА ТЕМУ:}} \\}
+\end{center}
+
+\vspace*{-6ex}
+\begin{center}
+\Large
+\textit{\textbf{«\,Компилятор базисного подмножества}}\par
+\vspace*{-3ex}
+\rule{0.9\textwidth}{1.2pt}
+
+\vspace*{0.55ex}
+\textit{\textbf{Рефала-5 с представлением данных,}}\par
+\vspace*{-3ex}
+\rule{0.9\textwidth}{1.2pt}
+
+\vspace*{0.55ex}
+\textit{\textbf{использующим раскрученные очереди\,»}}\par
+\vspace*{-3ex}
+\rule{0.9\textwidth}{1.2pt}
+
+\vspace*{-0.2ex}
+\rule{0.9\textwidth}{1.2pt}
+
+\vspace*{-0.2ex}
+\rule{0.9\textwidth}{1.2pt}
+\end{center}
+
+\vspace{\fill}
+
+\newlength{\ML}
+\settowidth{\ML}{«\underline{\hspace{0.7cm}}» \underline{\hspace{2cm}}}
+
+\noindent Студент \underline{\hspace{1.5cm}} \hfill \underline{\hspace{4cm}}\quad
+\underline{\hspace{4cm}}
+
+\vspace{-2.1ex}
+\noindent\hspace{9ex}\scriptsize{(Группа)}\normalsize\hspace{170pt}\hspace{2ex}\scriptsize{(Подпись, дата)}\normalsize\hspace{30pt}\hspace{6ex}\scriptsize{(И.О. Фамилия)}\normalsize
+
+\bigskip
+
+\noindent Руководитель  \hfill \underline{\hspace{4cm}}\quad
+\underline{\hspace{4cm}}
+
+\vspace{-2ex}
+\noindent\hspace{13.5ex}\normalsize\hspace{170pt}\hspace{2ex}\scriptsize{(Подпись, дата)}\normalsize\hspace{30pt}\hspace{6ex}\scriptsize{(И.О. Фамилия)}\normalsize
+\vfill
+
+\begin{center}
+\textsl{\the\year{} г.}
+\end{center}
+\end{titlepage}
+
+\setlength{\tabcolsep}{3pt}
+\newpage
+\setcounter{page}{2}
+
+\renewcommand\contentsname{\hfill{\normalfont{СОДЕРЖАНИЕ}}\hfill}
+\tableofcontents
+\newpage
+
+\anonsection{ВВЕДЕНИЕ}
+
+Рефал-5~--- язык программирования, в основе которого лежит переписывание
+объектных выражений по набору правил. Программа на Рефале задаётся как
+функции, состоящие из предложений вида «образец $\to$ результат»;
+интерпретатор сопоставляет аргументы вызова с образцами и собирает
+правую часть подошедшего предложения. Скорость такой машины определяется
+не только тем, сколько шагов нормализации она делает, но и тем, как
+устроены сами операции над объектными выражениями: вставка с концов,
+извлечение, конкатенация.
+
+Цель производственной практики~--- довести до работающего состояния
+реализацию базисного подмножества Рефала-5 на Java, в которой объектное
+выражение представлено раскрученной (bootstrapped) двусторонней очередью
+по Окасаки. От этой структуры ожидается амортизированно константная
+конкатенация, и на её фоне реализация должна обогнать классические
+списочные интерпретаторы Рефала-5 на программах, где такая конкатенация
+встречается на каждом шаге нормализации.
+
+Конкретные задачи, поставленные на практику:
+\begin{itemize}
+  \item реализовать структуру данных \prog{Expr} (мелкий и глубокий
+        уровни, конкатенация по четырём случаям) и итеративный цикл
+        нормализации с двумя стеками;
+  \item написать тестовый каркас, в который входят юнит-тесты, интеграционные
+        проверки и прогон чужих наборов автотестов;
+  \item оформить инструкцию пользователя: сборка, запуск, опции командной
+        строки, коды возврата;
+  \item провести сравнительный замер с Refal-5~PZ и Refal-5J на программе,
+        где списочное представление даёт квадратичную сложность,
+        и подтвердить или опровергнуть теоретическое преимущество.
+\end{itemize}
+
+Теоретическое обоснование выбора структуры данных (мелкий и глубокий
+уровни, инварианты, ребалансировка, амортизированные оценки) сделано
+в рамках научно-исследовательской работы и в отчёте по практике не
+повторяется. Здесь акцент смещён на инженерную сторону: что именно
+реализовано, как оно тестируется и какие числа даёт на стенде.
+
+\input{section_tech.tex}
+
+\input{section_anal.tex}
+
+\anonsection{ЗАКЛЮЧЕНИЕ}
+
+В ходе практики реализовано базисное подмножество Рефала-5 на Java~25.
+Объектное выражение представлено иммутабельной раскрученной двусторонней
+очередью \prog{Expr<T>} с двумя реализациями \prog{ShallowDeque} и
+\prog{DeepDeque}; цикл нормализации построен итеративно на двух стеках
+и не зависит от глубины рекурсии исходной программы. Отдельно
+реализована оптимизация \prog{BulkPassive}: значение переменной попадает
+на стек одной операцией, без поэлементного копирования, что превращает
+типовой шаг с конкатенацией e-переменной из $O(k)$ в $O(1)$
+амортизированно.
+
+Тестовый каркас включает 143~JUnit-теста на компоненты и 79~внешних
+программ, унаследованных от существующих реализаций Рефала
+(\prog{refal-5j} и \prog{refal-5-framework}). По обязательной части
+наборов проходит 5/5 автотестов и 18/18 десахаренных тестов;
+оставшиеся отказы вызваны либо расширенным синтаксисом Рефала-5
+(условия, блоки, уточнение типа через двоеточие), либо
+нереализованными в базисном подмножестве встроенными функциями
+(\prog{Time}, \prog{SizeOf}, \prog{Random}, \prog{GetEnv} и др.).
+
+Сравнительный замер на программе Loop/Select подтвердил ожидание:
+у нашей реализации время линейно по $N$, у Refal-5~PZ и Refal-5J
+квадратично. На $N = 20\,000$ наша реализация работает в 3,5~раза
+быстрее Refal-5~PZ и в 4,5~раза быстрее Refal-5J~--- несмотря на
+накладные расходы запуска JVM, которые проигрывают единичным
+миллисекундам нативного бинарника PZ на малых входах.
+
+Дальнейшее развитие реализации укладывается в две линии. Первая~---
+расширить набор встроенных функций до полного интерфейса Рефала-5,
+чтобы покрыть оставшиеся десахаренные тесты (файловый ввод/вывод,
+\prog{Time}, \prog{SizeOf}, \prog{Random}, системные функции).
+Вторая~--- добавить поддержку расширенного синтаксиса Рефала-5
+(условия, блоки, уточнение типа), что позволит обходиться без
+внешнего рассахаривателя и запускать автотесты в их исходном виде.
+
+\clearpage
+\printbibliography[heading=bibintoc,title={СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}]
+
+\input{appendix_bench.tex}
+
+\end{document}

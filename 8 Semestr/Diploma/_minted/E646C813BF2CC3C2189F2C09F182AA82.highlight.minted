@@ -1,0 +1,27 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{n}{String}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{files}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{parsed}\PYG{p}{.}\PYG{n+na}{file}\PYG{p}{.}\PYG{n+na}{split}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}\PYGZbs{}\PYGZbs{}+\PYGZdq{}}\PYG{p}{);}\PYG{+w}{   }\PYG{c+c1}{// (4)}
+\PYG{+w}{    }\PYG{n}{Program}\PYG{+w}{ }\PYG{n}{program}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{f}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{files}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{f}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}\PYG{+w}{ }\PYG{k}{continue}\PYG{p}{;}
+\PYG{+w}{        }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{src}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{try}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{src}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Files}\PYG{p}{.}\PYG{n+na}{readString}\PYG{p}{(}\PYG{n}{Path}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{n}{f}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{StandardCharsets}\PYG{p}{.}\PYG{n+na}{UTF\PYGZus{}8}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (5)}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{catch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{IOException}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{err}\PYG{p}{.}\PYG{n+na}{println}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}[ERROR] cannot read \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{f}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}: \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{.}\PYG{n+na}{getMessage}\PYG{p}{());}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{n}{Program}\PYG{+w}{ }\PYG{n}{part}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{try}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{part}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Parser}\PYG{p}{.}\PYG{n+na}{parse}\PYG{p}{(}\PYG{n}{src}\PYG{p}{);}\PYG{+w}{            }\PYG{c+c1}{// (6)}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{catch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{LexException}\PYG{+w}{ }\PYG{o}{|}\PYG{+w}{ }\PYG{n}{ParseException}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{err}\PYG{p}{.}\PYG{n+na}{println}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}[ERROR] \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{f}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}:\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{.}\PYG{n+na}{getMessage}\PYG{p}{());}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{files}\PYG{p}{.}\PYG{n+na}{length}\PYG{+w}{ }\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{part}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{mangleModule}\PYG{p}{(}\PYG{n}{part}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{modulePrefix}\PYG{p}{(}\PYG{n}{f}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{src}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (7)}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{n}{program}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{program}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{p}{)}\PYG{+w}{              }\PYG{c+c1}{// (8)}
+\PYG{+w}{            }\PYG{o}{?}\PYG{+w}{ }\PYG{n}{part}
+\PYG{+w}{            }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{mergePrograms}\PYG{p}{(}\PYG{n}{program}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{part}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

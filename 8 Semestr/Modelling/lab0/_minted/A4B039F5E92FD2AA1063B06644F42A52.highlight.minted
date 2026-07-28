@@ -1,0 +1,192 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{numpy}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{np}
+
+
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{GridRefinement}\PYG{p}{:}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf+fm}{\PYGZus{}\PYGZus{}init\PYGZus{}\PYGZus{}}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{X}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{Y}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{Z}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{):}
+        \PYG{k}{if} \PYG{n}{X} \PYG{o+ow}{is} \PYG{k+kc}{None}\PYG{p}{:}
+            \PYG{n}{X} \PYG{o}{=} \PYG{p}{[]}
+        \PYG{k}{if} \PYG{n}{Y} \PYG{o+ow}{is} \PYG{k+kc}{None}\PYG{p}{:}
+            \PYG{n}{Y} \PYG{o}{=} \PYG{p}{[]}
+        \PYG{k}{if} \PYG{n}{Z} \PYG{o+ow}{is} \PYG{k+kc}{None}\PYG{p}{:}
+            \PYG{n}{Z} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{([[}\PYG{l+m+mi}{0}\PYG{p}{]])}
+
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{X} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n+nb}{float}\PYG{p}{)}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{Y}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n+nb}{float}\PYG{p}{)}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Z} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{Z}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n+nb}{float}\PYG{p}{)}
+
+        \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{X}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{o+ow}{and} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Y}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0}\PYG{p}{:}
+            \PYG{k}{if} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Z}\PYG{o}{.}\PYG{n}{shape} \PYG{o}{!=} \PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{X}\PYG{p}{),} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Y}\PYG{p}{)):}
+                \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}
+                    \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Размерность Z должна быть (}\PYG{l+s+si}{\PYGZob{}}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{X}\PYG{p}{)}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{, }\PYG{l+s+si}{\PYGZob{}}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Y}\PYG{p}{)}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{), \PYGZdq{}}
+                    \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}получено }\PYG{l+s+si}{\PYGZob{}}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Z}\PYG{o}{.}\PYG{n}{shape}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+                \PYG{p}{)}
+
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{N\PYGZus{}x} \PYG{o}{=} \PYG{n+nb}{max}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{X}\PYG{p}{)} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{)}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{N\PYGZus{}y} \PYG{o}{=} \PYG{n+nb}{max}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Y}\PYG{p}{)} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{)}
+
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{points} \PYG{o}{=} \PYG{k+kc}{None}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{values} \PYG{o}{=} \PYG{k+kc}{None}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{triangles} \PYG{o}{=} \PYG{k+kc}{None}
+
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{\PYGZus{}build\PYGZus{}triangulation}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{):}
+        \PYG{k}{if} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{triangles} \PYG{o+ow}{is} \PYG{o+ow}{not} \PYG{k+kc}{None}\PYG{p}{:}
+            \PYG{k}{return}
+
+        \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{X}\PYG{p}{)} \PYG{o}{==} \PYG{l+m+mi}{0} \PYG{o+ow}{or} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Y}\PYG{p}{)} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{:}
+            \PYG{k}{return}
+
+        \PYG{n}{pts} \PYG{o}{=} \PYG{p}{[]}
+        \PYG{n}{vals} \PYG{o}{=} \PYG{p}{[]}
+        \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{X}\PYG{p}{)):}
+            \PYG{k}{for} \PYG{n}{j} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Y}\PYG{p}{)):}
+                \PYG{n}{pts}\PYG{o}{.}\PYG{n}{append}\PYG{p}{([}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{X}\PYG{p}{[}\PYG{n}{i}\PYG{p}{],} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Y}\PYG{p}{[}\PYG{n}{j}\PYG{p}{]])}
+                \PYG{n}{vals}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Z}\PYG{p}{[}\PYG{n}{i}\PYG{p}{,} \PYG{n}{j}\PYG{p}{])}
+
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{points} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{pts}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n+nb}{float}\PYG{p}{)}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{values} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{vals}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n+nb}{float}\PYG{p}{)}
+
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{triangles} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{\PYGZus{}bowyer\PYGZus{}watson}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{points}\PYG{p}{)}
+
+    \PYG{n+nd}{@staticmethod}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{\PYGZus{}circumcircle}\PYG{p}{(}\PYG{n}{p1}\PYG{p}{,} \PYG{n}{p2}\PYG{p}{,} \PYG{n}{p3}\PYG{p}{):}
+        \PYG{n}{ax}\PYG{p}{,} \PYG{n}{ay} \PYG{o}{=} \PYG{n}{p1}
+        \PYG{n}{bx}\PYG{p}{,} \PYG{n}{by} \PYG{o}{=} \PYG{n}{p2}
+        \PYG{n}{cx}\PYG{p}{,} \PYG{n}{cy} \PYG{o}{=} \PYG{n}{p3}
+
+        \PYG{n}{D} \PYG{o}{=} \PYG{l+m+mf}{2.0} \PYG{o}{*} \PYG{p}{(}\PYG{n}{ax} \PYG{o}{*} \PYG{p}{(}\PYG{n}{by} \PYG{o}{\PYGZhy{}} \PYG{n}{cy}\PYG{p}{)} \PYG{o}{+} \PYG{n}{bx} \PYG{o}{*} \PYG{p}{(}\PYG{n}{cy} \PYG{o}{\PYGZhy{}} \PYG{n}{ay}\PYG{p}{)} \PYG{o}{+} \PYG{n}{cx} \PYG{o}{*} \PYG{p}{(}\PYG{n}{ay} \PYG{o}{\PYGZhy{}} \PYG{n}{by}\PYG{p}{))}
+
+        \PYG{k}{if} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{D}\PYG{p}{)} \PYG{o}{\PYGZlt{}} \PYG{l+m+mf}{1e\PYGZhy{}12}\PYG{p}{:}
+            \PYG{n}{mid\PYGZus{}x} \PYG{o}{=} \PYG{p}{(}\PYG{n}{ax} \PYG{o}{+} \PYG{n}{bx} \PYG{o}{+} \PYG{n}{cx}\PYG{p}{)} \PYG{o}{/} \PYG{l+m+mf}{3.0}
+            \PYG{n}{mid\PYGZus{}y} \PYG{o}{=} \PYG{p}{(}\PYG{n}{ay} \PYG{o}{+} \PYG{n}{by} \PYG{o}{+} \PYG{n}{cy}\PYG{p}{)} \PYG{o}{/} \PYG{l+m+mf}{3.0}
+            \PYG{k}{return} \PYG{n}{mid\PYGZus{}x}\PYG{p}{,} \PYG{n}{mid\PYGZus{}y}\PYG{p}{,} \PYG{n+nb}{float}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}inf\PYGZsq{}}\PYG{p}{)}
+
+        \PYG{n}{a\PYGZus{}sq} \PYG{o}{=} \PYG{n}{ax} \PYG{o}{*} \PYG{n}{ax} \PYG{o}{+} \PYG{n}{ay} \PYG{o}{*} \PYG{n}{ay}
+        \PYG{n}{b\PYGZus{}sq} \PYG{o}{=} \PYG{n}{bx} \PYG{o}{*} \PYG{n}{bx} \PYG{o}{+} \PYG{n}{by} \PYG{o}{*} \PYG{n}{by}
+        \PYG{n}{c\PYGZus{}sq} \PYG{o}{=} \PYG{n}{cx} \PYG{o}{*} \PYG{n}{cx} \PYG{o}{+} \PYG{n}{cy} \PYG{o}{*} \PYG{n}{cy}
+
+        \PYG{n}{ux} \PYG{o}{=} \PYG{p}{(}\PYG{n}{a\PYGZus{}sq} \PYG{o}{*} \PYG{p}{(}\PYG{n}{by} \PYG{o}{\PYGZhy{}} \PYG{n}{cy}\PYG{p}{)} \PYG{o}{+} \PYG{n}{b\PYGZus{}sq} \PYG{o}{*} \PYG{p}{(}\PYG{n}{cy} \PYG{o}{\PYGZhy{}} \PYG{n}{ay}\PYG{p}{)} \PYG{o}{+} \PYG{n}{c\PYGZus{}sq} \PYG{o}{*} \PYG{p}{(}\PYG{n}{ay} \PYG{o}{\PYGZhy{}} \PYG{n}{by}\PYG{p}{))} \PYG{o}{/} \PYG{n}{D}
+        \PYG{n}{uy} \PYG{o}{=} \PYG{p}{(}\PYG{n}{a\PYGZus{}sq} \PYG{o}{*} \PYG{p}{(}\PYG{n}{cx} \PYG{o}{\PYGZhy{}} \PYG{n}{bx}\PYG{p}{)} \PYG{o}{+} \PYG{n}{b\PYGZus{}sq} \PYG{o}{*} \PYG{p}{(}\PYG{n}{ax} \PYG{o}{\PYGZhy{}} \PYG{n}{cx}\PYG{p}{)} \PYG{o}{+} \PYG{n}{c\PYGZus{}sq} \PYG{o}{*} \PYG{p}{(}\PYG{n}{bx} \PYG{o}{\PYGZhy{}} \PYG{n}{ax}\PYG{p}{))} \PYG{o}{/} \PYG{n}{D}
+
+        \PYG{n}{r\PYGZus{}sq} \PYG{o}{=} \PYG{p}{(}\PYG{n}{ax} \PYG{o}{\PYGZhy{}} \PYG{n}{ux}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2} \PYG{o}{+} \PYG{p}{(}\PYG{n}{ay} \PYG{o}{\PYGZhy{}} \PYG{n}{uy}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2}
+        \PYG{k}{return} \PYG{n}{ux}\PYG{p}{,} \PYG{n}{uy}\PYG{p}{,} \PYG{n}{r\PYGZus{}sq}
+
+    \PYG{n+nd}{@staticmethod}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{\PYGZus{}bowyer\PYGZus{}watson}\PYG{p}{(}\PYG{n}{points}\PYG{p}{):}
+        \PYG{n}{n} \PYG{o}{=} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{points}\PYG{p}{)}
+        \PYG{k}{if} \PYG{n}{n} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{3}\PYG{p}{:}
+            \PYG{k}{return} \PYG{p}{[]}
+
+        \PYG{n}{x\PYGZus{}min} \PYG{o}{=} \PYG{n}{points}\PYG{p}{[:,} \PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{min}\PYG{p}{()}
+        \PYG{n}{x\PYGZus{}max} \PYG{o}{=} \PYG{n}{points}\PYG{p}{[:,} \PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{max}\PYG{p}{()}
+        \PYG{n}{y\PYGZus{}min} \PYG{o}{=} \PYG{n}{points}\PYG{p}{[:,} \PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{min}\PYG{p}{()}
+        \PYG{n}{y\PYGZus{}max} \PYG{o}{=} \PYG{n}{points}\PYG{p}{[:,} \PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{max}\PYG{p}{()}
+
+        \PYG{n}{dx} \PYG{o}{=} \PYG{n}{x\PYGZus{}max} \PYG{o}{\PYGZhy{}} \PYG{n}{x\PYGZus{}min}
+        \PYG{n}{dy} \PYG{o}{=} \PYG{n}{y\PYGZus{}max} \PYG{o}{\PYGZhy{}} \PYG{n}{y\PYGZus{}min}
+        \PYG{n}{d\PYGZus{}max} \PYG{o}{=} \PYG{n+nb}{max}\PYG{p}{(}\PYG{n}{dx}\PYG{p}{,} \PYG{n}{dy}\PYG{p}{,} \PYG{l+m+mf}{1e\PYGZhy{}6}\PYG{p}{)}
+
+        \PYG{n}{mid\PYGZus{}x} \PYG{o}{=} \PYG{p}{(}\PYG{n}{x\PYGZus{}min} \PYG{o}{+} \PYG{n}{x\PYGZus{}max}\PYG{p}{)} \PYG{o}{/} \PYG{l+m+mf}{2.0}
+        \PYG{n}{mid\PYGZus{}y} \PYG{o}{=} \PYG{p}{(}\PYG{n}{y\PYGZus{}min} \PYG{o}{+} \PYG{n}{y\PYGZus{}max}\PYG{p}{)} \PYG{o}{/} \PYG{l+m+mf}{2.0}
+
+        \PYG{n}{p0} \PYG{o}{=} \PYG{p}{[}\PYG{n}{mid\PYGZus{}x} \PYG{o}{\PYGZhy{}} \PYG{l+m+mf}{20.0} \PYG{o}{*} \PYG{n}{d\PYGZus{}max}\PYG{p}{,} \PYG{n}{mid\PYGZus{}y} \PYG{o}{\PYGZhy{}} \PYG{n}{d\PYGZus{}max}\PYG{p}{]}
+        \PYG{n}{p1} \PYG{o}{=} \PYG{p}{[}\PYG{n}{mid\PYGZus{}x} \PYG{o}{+} \PYG{l+m+mf}{20.0} \PYG{o}{*} \PYG{n}{d\PYGZus{}max}\PYG{p}{,} \PYG{n}{mid\PYGZus{}y} \PYG{o}{\PYGZhy{}} \PYG{n}{d\PYGZus{}max}\PYG{p}{]}
+        \PYG{n}{p2} \PYG{o}{=} \PYG{p}{[}\PYG{n}{mid\PYGZus{}x}\PYG{p}{,} \PYG{n}{mid\PYGZus{}y} \PYG{o}{+} \PYG{l+m+mf}{20.0} \PYG{o}{*} \PYG{n}{d\PYGZus{}max}\PYG{p}{]}
+
+        \PYG{n}{all\PYGZus{}points} \PYG{o}{=} \PYG{n+nb}{list}\PYG{p}{(}\PYG{n}{points}\PYG{p}{)} \PYG{o}{+} \PYG{p}{[}\PYG{n}{p0}\PYG{p}{,} \PYG{n}{p1}\PYG{p}{,} \PYG{n}{p2}\PYG{p}{]}
+        \PYG{n}{all\PYGZus{}points\PYGZus{}arr} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{all\PYGZus{}points}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n+nb}{float}\PYG{p}{)}
+
+        \PYG{n}{triangles} \PYG{o}{=} \PYG{p}{\PYGZob{}(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{n} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{n} \PYG{o}{+} \PYG{l+m+mi}{2}\PYG{p}{)\PYGZcb{}}
+
+        \PYG{n}{cc\PYGZus{}cache} \PYG{o}{=} \PYG{p}{\PYGZob{}\PYGZcb{}}
+        \PYG{n}{t0} \PYG{o}{=} \PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{n} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{n} \PYG{o}{+} \PYG{l+m+mi}{2}\PYG{p}{)}
+        \PYG{n}{cc\PYGZus{}cache}\PYG{p}{[}\PYG{n}{t0}\PYG{p}{]} \PYG{o}{=} \PYG{n}{GridRefinement}\PYG{o}{.}\PYG{n}{\PYGZus{}circumcircle}\PYG{p}{(}
+            \PYG{n}{all\PYGZus{}points\PYGZus{}arr}\PYG{p}{[}\PYG{n}{t0}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]],} \PYG{n}{all\PYGZus{}points\PYGZus{}arr}\PYG{p}{[}\PYG{n}{t0}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]],} \PYG{n}{all\PYGZus{}points\PYGZus{}arr}\PYG{p}{[}\PYG{n}{t0}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{]]}
+        \PYG{p}{)}
+
+        \PYG{k}{for} \PYG{n}{idx} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{n}\PYG{p}{):}
+            \PYG{n}{px}\PYG{p}{,} \PYG{n}{py} \PYG{o}{=} \PYG{n}{all\PYGZus{}points\PYGZus{}arr}\PYG{p}{[}\PYG{n}{idx}\PYG{p}{]}
+
+            \PYG{n}{bad\PYGZus{}triangles} \PYG{o}{=} \PYG{n+nb}{set}\PYG{p}{()}
+            \PYG{k}{for} \PYG{n}{tri} \PYG{o+ow}{in} \PYG{n}{triangles}\PYG{p}{:}
+                \PYG{n}{cx}\PYG{p}{,} \PYG{n}{cy}\PYG{p}{,} \PYG{n}{r\PYGZus{}sq} \PYG{o}{=} \PYG{n}{cc\PYGZus{}cache}\PYG{p}{[}\PYG{n}{tri}\PYG{p}{]}
+                \PYG{n}{dist\PYGZus{}sq} \PYG{o}{=} \PYG{p}{(}\PYG{n}{px} \PYG{o}{\PYGZhy{}} \PYG{n}{cx}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2} \PYG{o}{+} \PYG{p}{(}\PYG{n}{py} \PYG{o}{\PYGZhy{}} \PYG{n}{cy}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2}
+                \PYG{k}{if} \PYG{n}{dist\PYGZus{}sq} \PYG{o}{\PYGZlt{}} \PYG{n}{r\PYGZus{}sq} \PYG{o}{+} \PYG{l+m+mf}{1e\PYGZhy{}10}\PYG{p}{:}
+                    \PYG{n}{bad\PYGZus{}triangles}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{tri}\PYG{p}{)}
+
+            \PYG{n}{edge\PYGZus{}count} \PYG{o}{=} \PYG{p}{\PYGZob{}\PYGZcb{}}
+            \PYG{k}{for} \PYG{n}{tri} \PYG{o+ow}{in} \PYG{n}{bad\PYGZus{}triangles}\PYG{p}{:}
+                \PYG{n}{edges} \PYG{o}{=} \PYG{p}{[}
+                    \PYG{p}{(}\PYG{n}{tri}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{],} \PYG{n}{tri}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]),}
+                    \PYG{p}{(}\PYG{n}{tri}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{],} \PYG{n}{tri}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{]),}
+                    \PYG{p}{(}\PYG{n}{tri}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{],} \PYG{n}{tri}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{]),}
+                \PYG{p}{]}
+                \PYG{k}{for} \PYG{n}{e} \PYG{o+ow}{in} \PYG{n}{edges}\PYG{p}{:}
+                    \PYG{n}{e\PYGZus{}sorted} \PYG{o}{=} \PYG{n+nb}{tuple}\PYG{p}{(}\PYG{n+nb}{sorted}\PYG{p}{(}\PYG{n}{e}\PYG{p}{))}
+                    \PYG{n}{edge\PYGZus{}count}\PYG{p}{[}\PYG{n}{e\PYGZus{}sorted}\PYG{p}{]} \PYG{o}{=} \PYG{n}{edge\PYGZus{}count}\PYG{o}{.}\PYG{n}{get}\PYG{p}{(}\PYG{n}{e\PYGZus{}sorted}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{)} \PYG{o}{+} \PYG{l+m+mi}{1}
+
+            \PYG{n}{boundary\PYGZus{}edges} \PYG{o}{=} \PYG{p}{[}\PYG{n}{e} \PYG{k}{for} \PYG{n}{e}\PYG{p}{,} \PYG{n}{cnt} \PYG{o+ow}{in} \PYG{n}{edge\PYGZus{}count}\PYG{o}{.}\PYG{n}{items}\PYG{p}{()} \PYG{k}{if} \PYG{n}{cnt} \PYG{o}{==} \PYG{l+m+mi}{1}\PYG{p}{]}
+
+            \PYG{k}{for} \PYG{n}{tri} \PYG{o+ow}{in} \PYG{n}{bad\PYGZus{}triangles}\PYG{p}{:}
+                \PYG{n}{triangles}\PYG{o}{.}\PYG{n}{discard}\PYG{p}{(}\PYG{n}{tri}\PYG{p}{)}
+                \PYG{n}{cc\PYGZus{}cache}\PYG{o}{.}\PYG{n}{pop}\PYG{p}{(}\PYG{n}{tri}\PYG{p}{,} \PYG{k+kc}{None}\PYG{p}{)}
+
+            \PYG{k}{for} \PYG{n}{e} \PYG{o+ow}{in} \PYG{n}{boundary\PYGZus{}edges}\PYG{p}{:}
+                \PYG{n}{new\PYGZus{}tri} \PYG{o}{=} \PYG{n+nb}{tuple}\PYG{p}{(}\PYG{n+nb}{sorted}\PYG{p}{((}\PYG{n}{e}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{],} \PYG{n}{e}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{],} \PYG{n}{idx}\PYG{p}{)))}
+                \PYG{n}{triangles}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{new\PYGZus{}tri}\PYG{p}{)}
+                \PYG{n}{cc\PYGZus{}cache}\PYG{p}{[}\PYG{n}{new\PYGZus{}tri}\PYG{p}{]} \PYG{o}{=} \PYG{n}{GridRefinement}\PYG{o}{.}\PYG{n}{\PYGZus{}circumcircle}\PYG{p}{(}
+                    \PYG{n}{all\PYGZus{}points\PYGZus{}arr}\PYG{p}{[}\PYG{n}{new\PYGZus{}tri}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]],}
+                    \PYG{n}{all\PYGZus{}points\PYGZus{}arr}\PYG{p}{[}\PYG{n}{new\PYGZus{}tri}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]],}
+                    \PYG{n}{all\PYGZus{}points\PYGZus{}arr}\PYG{p}{[}\PYG{n}{new\PYGZus{}tri}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{]],}
+                \PYG{p}{)}
+
+        \PYG{n}{super\PYGZus{}indices} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{n}\PYG{p}{,} \PYG{n}{n} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{n} \PYG{o}{+} \PYG{l+m+mi}{2}\PYG{p}{\PYGZcb{}}
+        \PYG{n}{result} \PYG{o}{=} \PYG{p}{[]}
+        \PYG{k}{for} \PYG{n}{tri} \PYG{o+ow}{in} \PYG{n}{triangles}\PYG{p}{:}
+            \PYG{k}{if} \PYG{n}{super\PYGZus{}indices}\PYG{o}{.}\PYG{n}{isdisjoint}\PYG{p}{(}\PYG{n}{tri}\PYG{p}{):}
+                \PYG{n}{result}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{tri}\PYG{p}{)}
+
+        \PYG{k}{return} \PYG{n}{result}
+
+    \PYG{n+nd}{@staticmethod}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{\PYGZus{}barycentric\PYGZus{}coords}\PYG{p}{(}\PYG{n}{px}\PYG{p}{,} \PYG{n}{py}\PYG{p}{,} \PYG{n}{x1}\PYG{p}{,} \PYG{n}{y1}\PYG{p}{,} \PYG{n}{x2}\PYG{p}{,} \PYG{n}{y2}\PYG{p}{,} \PYG{n}{x3}\PYG{p}{,} \PYG{n}{y3}\PYG{p}{):}
+        \PYG{n}{denom} \PYG{o}{=} \PYG{p}{(}\PYG{n}{y2} \PYG{o}{\PYGZhy{}} \PYG{n}{y3}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{x1} \PYG{o}{\PYGZhy{}} \PYG{n}{x3}\PYG{p}{)} \PYG{o}{+} \PYG{p}{(}\PYG{n}{x3} \PYG{o}{\PYGZhy{}} \PYG{n}{x2}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{y1} \PYG{o}{\PYGZhy{}} \PYG{n}{y3}\PYG{p}{)}
+
+        \PYG{k}{if} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{denom}\PYG{p}{)} \PYG{o}{\PYGZlt{}} \PYG{l+m+mf}{1e\PYGZhy{}14}\PYG{p}{:}
+            \PYG{k}{return} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{1.0}
+
+        \PYG{n}{lam1} \PYG{o}{=} \PYG{p}{((}\PYG{n}{y2} \PYG{o}{\PYGZhy{}} \PYG{n}{y3}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{px} \PYG{o}{\PYGZhy{}} \PYG{n}{x3}\PYG{p}{)} \PYG{o}{+} \PYG{p}{(}\PYG{n}{x3} \PYG{o}{\PYGZhy{}} \PYG{n}{x2}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{py} \PYG{o}{\PYGZhy{}} \PYG{n}{y3}\PYG{p}{))} \PYG{o}{/} \PYG{n}{denom}
+        \PYG{n}{lam2} \PYG{o}{=} \PYG{p}{((}\PYG{n}{y3} \PYG{o}{\PYGZhy{}} \PYG{n}{y1}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{px} \PYG{o}{\PYGZhy{}} \PYG{n}{x3}\PYG{p}{)} \PYG{o}{+} \PYG{p}{(}\PYG{n}{x1} \PYG{o}{\PYGZhy{}} \PYG{n}{x3}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{py} \PYG{o}{\PYGZhy{}} \PYG{n}{y3}\PYG{p}{))} \PYG{o}{/} \PYG{n}{denom}
+        \PYG{n}{lam3} \PYG{o}{=} \PYG{l+m+mf}{1.0} \PYG{o}{\PYGZhy{}} \PYG{n}{lam1} \PYG{o}{\PYGZhy{}} \PYG{n}{lam2}
+
+        \PYG{k}{return} \PYG{n}{lam1}\PYG{p}{,} \PYG{n}{lam2}\PYG{p}{,} \PYG{n}{lam3}
+
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{delaunay\PYGZus{}interpolation}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{x}\PYG{p}{,} \PYG{n}{y}\PYG{p}{):}
+        \PYG{k}{if} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{triangles} \PYG{o+ow}{is} \PYG{k+kc}{None}\PYG{p}{:}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{\PYGZus{}build\PYGZus{}triangulation}\PYG{p}{()}
+
+        \PYG{k}{if} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{triangles} \PYG{o+ow}{is} \PYG{k+kc}{None} \PYG{o+ow}{or} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{triangles}\PYG{p}{)} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{:}
+            \PYG{k}{return} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Z}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{]} \PYG{k}{if} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Z}\PYG{o}{.}\PYG{n}{size} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{k}{else} \PYG{l+m+mf}{0.0}
+
+        \PYG{n}{eps} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{1e\PYGZhy{}10}
+
+        \PYG{k}{for} \PYG{n}{tri} \PYG{o+ow}{in} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{triangles}\PYG{p}{:}
+            \PYG{n}{i0}\PYG{p}{,} \PYG{n}{i1}\PYG{p}{,} \PYG{n}{i2} \PYG{o}{=} \PYG{n}{tri}
+            \PYG{n}{x1}\PYG{p}{,} \PYG{n}{y1} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{points}\PYG{p}{[}\PYG{n}{i0}\PYG{p}{]}
+            \PYG{n}{x2}\PYG{p}{,} \PYG{n}{y2} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{points}\PYG{p}{[}\PYG{n}{i1}\PYG{p}{]}
+            \PYG{n}{x3}\PYG{p}{,} \PYG{n}{y3} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{points}\PYG{p}{[}\PYG{n}{i2}\PYG{p}{]}
+
+            \PYG{n}{lam1}\PYG{p}{,} \PYG{n}{lam2}\PYG{p}{,} \PYG{n}{lam3} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{\PYGZus{}barycentric\PYGZus{}coords}\PYG{p}{(}
+                \PYG{n}{x}\PYG{p}{,} \PYG{n}{y}\PYG{p}{,} \PYG{n}{x1}\PYG{p}{,} \PYG{n}{y1}\PYG{p}{,} \PYG{n}{x2}\PYG{p}{,} \PYG{n}{y2}\PYG{p}{,} \PYG{n}{x3}\PYG{p}{,} \PYG{n}{y3}
+            \PYG{p}{)}
+
+            \PYG{k}{if} \PYG{n}{lam1} \PYG{o}{\PYGZgt{}=} \PYG{n}{eps} \PYG{o+ow}{and} \PYG{n}{lam2} \PYG{o}{\PYGZgt{}=} \PYG{n}{eps} \PYG{o+ow}{and} \PYG{n}{lam3} \PYG{o}{\PYGZgt{}=} \PYG{n}{eps}\PYG{p}{:}
+                \PYG{n}{z} \PYG{o}{=} \PYG{p}{(}\PYG{n}{lam1} \PYG{o}{*} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{values}\PYG{p}{[}\PYG{n}{i0}\PYG{p}{]}
+                     \PYG{o}{+} \PYG{n}{lam2} \PYG{o}{*} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{values}\PYG{p}{[}\PYG{n}{i1}\PYG{p}{]}
+                     \PYG{o}{+} \PYG{n}{lam3} \PYG{o}{*} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{values}\PYG{p}{[}\PYG{n}{i2}\PYG{p}{])}
+                \PYG{k}{return} \PYG{n}{z}
+
+        \PYG{n}{dists} \PYG{o}{=} \PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{points}\PYG{p}{[:,} \PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{\PYGZhy{}} \PYG{n}{x}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2} \PYG{o}{+} \PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{points}\PYG{p}{[:,} \PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{\PYGZhy{}} \PYG{n}{y}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2}
+        \PYG{n}{nearest} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{argmin}\PYG{p}{(}\PYG{n}{dists}\PYG{p}{)}
+        \PYG{k}{return} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{values}\PYG{p}{[}\PYG{n}{nearest}\PYG{p}{]}
+\end{MintedVerbatim}

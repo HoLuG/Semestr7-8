@@ -1,0 +1,6 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{advance}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}\PYG{+w}{    }\PYG{c+c1}{// сдвигаем позицию}
+\PYG{+w}{    }\PYG{n}{col}\PYG{o}{++}\PYG{p}{;}\PYG{+w}{  }\PYG{c+c1}{// увеличиваем столбец}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

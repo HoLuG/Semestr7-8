@@ -1,0 +1,22 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{sealed}\PYG{+w}{ }\PYG{k+kd}{interface} \PYG{n+nc}{Term}\PYG{+w}{ }\PYG{n}{permits}\PYG{+w}{ }\PYG{n}{Sym}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Num}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Str}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Var}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Br}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Call}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+
+\PYG{c+c1}{// Atomic terms:}
+\PYG{k+kd}{record} \PYG{n+nc}{Sym}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{name}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Term}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}\PYG{+w}{        }\PYG{c+c1}{// symbol identifier}
+\PYG{k+kd}{record} \PYG{n+nc}{Num}\PYG{p}{(}\PYG{n}{BigInteger}\PYG{+w}{ }\PYG{n}{value}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Term}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}\PYG{+w}{   }\PYG{c+c1}{// arbitrary precision integer}
+\PYG{k+kd}{record} \PYG{n+nc}{Str}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{value}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Term}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}\PYG{+w}{       }\PYG{c+c1}{// char from single\PYGZhy{}quoted string}
+
+\PYG{c+c1}{// Variables (sealed hierarchy):}
+\PYG{k+kd}{sealed}\PYG{+w}{ }\PYG{k+kd}{interface} \PYG{n+nc}{Var}\PYG{+w}{ }\PYG{k+kd}{extends}\PYG{+w}{ }\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{permits}\PYG{+w}{ }\PYG{n}{SVar}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{TVar}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{EVar}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kt}{char}\PYG{+w}{ }\PYG{n+nf}{kind}\PYG{p}{();}\PYG{+w}{    }\PYG{c+c1}{// \PYGZsq{}s\PYGZsq{}, \PYGZsq{}t\PYGZsq{}, or \PYGZsq{}e\PYGZsq{}}
+\PYG{+w}{    }\PYG{n}{String}\PYG{+w}{ }\PYG{n+nf}{name}\PYG{p}{();}\PYG{+w}{  }\PYG{c+c1}{// name without prefix}
+\PYG{+w}{    }\PYG{n}{String}\PYG{+w}{ }\PYG{n+nf}{key}\PYG{p}{();}\PYG{+w}{   }\PYG{c+c1}{// full key, e.g. \PYGZdq{}e.Rest\PYGZdq{}}
+\PYG{p}{\PYGZcb{}}
+\PYG{k+kd}{record} \PYG{n+nc}{SVar}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{name}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Var}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}\PYG{+w}{ }\PYG{c+c1}{// s. \PYGZhy{}\PYGZhy{} single atom (not brackets)}
+\PYG{k+kd}{record} \PYG{n+nc}{TVar}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{name}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Var}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}\PYG{+w}{ }\PYG{c+c1}{// t. \PYGZhy{}\PYGZhy{} any single term}
+\PYG{k+kd}{record} \PYG{n+nc}{EVar}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{name}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Var}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}\PYG{+w}{ }\PYG{c+c1}{// e. \PYGZhy{}\PYGZhy{} 0 or more terms}
+
+\PYG{c+c1}{// Compound terms:}
+\PYG{k+kd}{record} \PYG{n+nc}{Br}\PYG{p}{(}\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{items}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Term}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}\PYG{+w}{             }\PYG{c+c1}{// bracket term (A B C)}
+\PYG{k+kd}{record} \PYG{n+nc}{Call}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{fn}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{args}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Term}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}\PYG{+w}{ }\PYG{c+c1}{// function call (Result only)}
+\end{MintedVerbatim}

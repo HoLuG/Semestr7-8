@@ -1,0 +1,973 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Builtins.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.runtime</a> &gt; <span class="el_source">Builtins.java</span></div><h1>Builtins.java</h1><pre class="source lang-java linenums">package refal.runtime;
+
+import refal.ast.AstFormatter;
+import refal.ast.Br;
+import refal.ast.Num;
+import refal.ast.Str;
+import refal.ast.Sym;
+import refal.ast.Term;
+import refal.deque.Expr;
+import refal.deque.PeekResult;
+
+import java.math.BigInteger;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+// Встроенные функции Рефала-5. Все принимают и возвращают Expr&lt;Term&gt;.
+public final class Builtins {
+
+    private Builtins() {
+    }
+
+    // Специальный сигнал для нормального завершения программы.
+    public static final String EXIT_SIGNAL = &quot;refal.runtime.Builtins.EXIT_SIGNAL&quot;;
+
+    public static Map&lt;String, BuiltinFn&gt; defaultBuiltins() {
+<span class="fc" id="L27">        Map&lt;String, BuiltinFn&gt; m = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L28">        m.put(&quot;Prout&quot;, Builtins::prout);</span>
+<span class="fc" id="L29">        m.put(&quot;Print&quot;, Builtins::print);</span>
+<span class="fc" id="L30">        m.put(&quot;Putout&quot;, Builtins::putout);</span>
+<span class="fc" id="L31">        m.put(&quot;Exit&quot;, Builtins::exit);</span>
+
+<span class="fc" id="L33">        m.put(&quot;Add&quot;, Builtins::add);</span>
+<span class="fc" id="L34">        m.put(&quot;+&quot;, Builtins::add);</span>
+<span class="fc" id="L35">        m.put(&quot;Sub&quot;, Builtins::sub);</span>
+<span class="fc" id="L36">        m.put(&quot;-&quot;, Builtins::sub);</span>
+<span class="fc" id="L37">        m.put(&quot;Mul&quot;, Builtins::mul);</span>
+<span class="fc" id="L38">        m.put(&quot;*&quot;, Builtins::mul);</span>
+<span class="fc" id="L39">        m.put(&quot;Div&quot;, Builtins::div);</span>
+<span class="fc" id="L40">        m.put(&quot;/&quot;, Builtins::div);</span>
+<span class="fc" id="L41">        m.put(&quot;Mod&quot;, Builtins::mod);</span>
+<span class="fc" id="L42">        m.put(&quot;%&quot;, Builtins::mod);</span>
+<span class="fc" id="L43">        m.put(&quot;Divmod&quot;, Builtins::divmod);</span>
+<span class="fc" id="L44">        m.put(&quot;Compare&quot;, Builtins::compare);</span>
+
+<span class="fc" id="L46">        m.put(&quot;Lower&quot;, Builtins::lower);</span>
+<span class="fc" id="L47">        m.put(&quot;Upper&quot;, Builtins::upper);</span>
+<span class="fc" id="L48">        m.put(&quot;Symb&quot;, Builtins::symb);</span>
+<span class="fc" id="L49">        m.put(&quot;Numb&quot;, Builtins::numb);</span>
+<span class="fc" id="L50">        m.put(&quot;Chr&quot;, Builtins::chr);</span>
+<span class="fc" id="L51">        m.put(&quot;Ord&quot;, Builtins::ord);</span>
+
+<span class="fc" id="L53">        m.put(&quot;Mu&quot;, Builtins::mu);</span>
+<span class="fc" id="L54">        m.put(&quot;?&quot;, Builtins::mu);</span>
+<span class="fc" id="L55">        m.put(&quot;Residue&quot;, Builtins::mu);</span>
+
+<span class="fc" id="L57">        m.put(&quot;Lenw&quot;, Builtins::lenw);</span>
+<span class="fc" id="L58">        m.put(&quot;First&quot;, Builtins::first);</span>
+<span class="fc" id="L59">        m.put(&quot;Last&quot;, Builtins::last);</span>
+<span class="fc" id="L60">        m.put(&quot;Explode&quot;, Builtins::explode);</span>
+<span class="fc" id="L61">        m.put(&quot;Explode_Ext&quot;, Builtins::explode);</span>
+<span class="fc" id="L62">        m.put(&quot;Implode&quot;, Builtins::implode);</span>
+<span class="fc" id="L63">        m.put(&quot;Implode_Ext&quot;, Builtins::implodeExt);</span>
+<span class="fc" id="L64">        m.put(&quot;Step&quot;, Builtins::step);</span>
+<span class="fc" id="L65">        m.put(&quot;Card&quot;, Builtins::card);</span>
+<span class="fc" id="L66">        m.put(&quot;Type&quot;, Builtins::type);</span>
+<span class="fc" id="L67">        m.put(&quot;ListOfBuiltin&quot;, Builtins::listOfBuiltin);</span>
+<span class="fc" id="L68">        m.put(&quot;Arg&quot;, Builtins::arg);</span>
+<span class="fc" id="L69">        m.put(&quot;Open&quot;, Builtins::open);</span>
+<span class="fc" id="L70">        m.put(&quot;Close&quot;, Builtins::close);</span>
+<span class="fc" id="L71">        m.put(&quot;Get&quot;, Builtins::get);</span>
+<span class="fc" id="L72">        m.put(&quot;Put&quot;, Builtins::put);</span>
+<span class="fc" id="L73">        m.put(&quot;Putout-chan&quot;, Builtins::putoutChan);</span>
+<span class="fc" id="L74">        m.put(&quot;Write&quot;, Builtins::write);</span>
+<span class="fc" id="L75">        m.put(&quot;TimeElapsed&quot;, Builtins::timeElapsed);</span>
+        // Sysfun регистрируется как заглушка, чтобы при запуске .FAIL.ref-тестов
+        // получали runtime-ошибку (exit 2), а не семантическую (exit 1).
+<span class="fc" id="L78">        m.put(&quot;Sysfun&quot;, Builtins::sysfun);</span>
+
+<span class="fc" id="L80">        return m;</span>
+    }
+
+    // --- вспомогательные функции ---
+
+    /** Склейка термов в строку для текстовых функций (без пробелов, для numb/explode/open). */
+    static String termsToText(Expr&lt;Term&gt; args) {
+<span class="fc" id="L87">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        for (Term t : args) {</span>
+<span class="pc bpc" id="L89" title="2 of 4 branches missed.">            switch (t) {</span>
+<span class="fc" id="L90">                case Sym s -&gt; sb.append(s.name());</span>
+<span class="nc" id="L91">                case Num n -&gt; sb.append(n.value());</span>
+<span class="fc" id="L92">                case Str s -&gt; sb.append(s.value());</span>
+<span class="nc" id="L93">                default -&gt; sb.append(AstFormatter.format(t));</span>
+            }
+<span class="fc" id="L95">        }</span>
+<span class="fc" id="L96">        return sb.toString();</span>
+    }
+
+    /**
+     * Форматирование выражения для вывода (Prout/Put/Write):
+     * — Str (символьные литералы 'x'): без пробела после
+     * — Sym, Num: с пробелом после
+     * — Br: рекурсивно в скобках, без пробела после ')'
+     */
+    static String printExpr(Expr&lt;Term&gt; args) {
+<span class="fc" id="L106">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (Term t : args) {</span>
+<span class="pc bpc" id="L108" title="1 of 5 branches missed.">            switch (t) {</span>
+<span class="fc" id="L109">                case Sym s -&gt; sb.append(s.name()).append(' ');</span>
+<span class="fc" id="L110">                case Num n -&gt; sb.append(n.value()).append(' ');</span>
+<span class="fc" id="L111">                case Str s -&gt; sb.append(s.value());</span>
+<span class="fc" id="L112">                case Br br -&gt; sb.append('(').append(printExpr(br.items())).append(')');</span>
+<span class="nc" id="L113">                default    -&gt; sb.append(AstFormatter.format(t)).append(' ');</span>
+            }
+<span class="fc" id="L115">        }</span>
+<span class="fc" id="L116">        return sb.toString();</span>
+    }
+
+    // Основание макроцифры Рефала-5: 2^32.
+<span class="fc" id="L120">    static final BigInteger MACRO_BASE = BigInteger.ONE.shiftLeft(32);</span>
+
+    /**
+     * Разбирает последовательность макроцифр (опциональный знак Str + Num термы)
+     * в одно целое число произвольной точности.
+     */
+    static BigInteger parseMacroNum(String name, Expr&lt;Term&gt; expr) {
+<span class="fc" id="L127">        int sign = 1;</span>
+<span class="fc" id="L128">        Expr&lt;Term&gt; cur = expr;</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        if (!cur.isEmpty()) {</span>
+<span class="fc" id="L130">            PeekResult&lt;Term&gt; pr = cur.separateFront();</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">            if (pr.term() instanceof Str s</span>
+<span class="pc bpc" id="L132" title="1 of 4 branches missed.">                    &amp;&amp; (s.value().equals(&quot;+&quot;) || s.value().equals(&quot;-&quot;))) {</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">                sign = s.value().equals(&quot;-&quot;) ? -1 : 1;</span>
+<span class="fc" id="L134">                cur = pr.rest();</span>
+            }
+        }
+<span class="fc" id="L137">        BigInteger result = BigInteger.ZERO;</span>
+<span class="fc" id="L138">        boolean any = false;</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        for (Term t : cur) {</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">            if (!(t instanceof Num n)) {</span>
+<span class="nc" id="L141">                throw new RefalException(name + &quot;: expected Num, got &quot;</span>
+<span class="nc" id="L142">                        + AstFormatter.format(t));</span>
+            }
+<span class="fc" id="L144">            result = result.multiply(MACRO_BASE).add(n.value());</span>
+<span class="fc" id="L145">            any = true;</span>
+<span class="fc" id="L146">        }</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if (!any) {</span>
+<span class="nc" id="L148">            return BigInteger.ZERO;</span>
+        }
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        return sign &lt; 0 ? result.negate() : result;</span>
+    }
+
+    /**
+     * Разбирает два арифметических аргумента из общего выражения args.
+     * Первый: Br(e) | Str(sign) Num | Num.
+     * Второй: всё оставшееся (опц. Str(sign) + макроцифры).
+     */
+    static BigInteger[] parseTwoArgs(String name, Expr&lt;Term&gt; args) {
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if (args.isEmpty()) {</span>
+<span class="nc" id="L160">            throw new RefalException(name + &quot;: missing arguments&quot;);</span>
+        }
+<span class="fc" id="L162">        PeekResult&lt;Term&gt; pr = args.separateFront();</span>
+<span class="fc" id="L163">        Term head = pr.term();</span>
+<span class="fc" id="L164">        Expr&lt;Term&gt; rest = pr.rest();</span>
+        BigInteger first;
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (head instanceof Br br) {</span>
+<span class="fc" id="L167">            first = parseMacroNum(name, br.items());</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        } else if (head instanceof Str s</span>
+<span class="pc bpc" id="L169" title="1 of 4 branches missed.">                &amp;&amp; (s.value().equals(&quot;+&quot;) || s.value().equals(&quot;-&quot;))) {</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">            int sign = s.value().equals(&quot;-&quot;) ? -1 : 1;</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">            if (rest.isEmpty()) {</span>
+<span class="nc" id="L172">                throw new RefalException(name + &quot;: missing digit after sign&quot;);</span>
+            }
+<span class="fc" id="L174">            PeekResult&lt;Term&gt; pr2 = rest.separateFront();</span>
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">            if (!(pr2.term() instanceof Num n)) {</span>
+<span class="nc" id="L176">                throw new RefalException(name + &quot;: expected Num after sign, got &quot;</span>
+<span class="nc" id="L177">                        + AstFormatter.format(pr2.term()));</span>
+            }
+<span class="fc bfc" id="L179" title="All 2 branches covered.">            first = sign &lt; 0 ? n.value().negate() : n.value();</span>
+<span class="fc" id="L180">            rest = pr2.rest();</span>
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">        } else if (head instanceof Num n) {</span>
+<span class="fc" id="L182">            first = n.value();</span>
+        } else {
+<span class="nc" id="L184">            throw new RefalException(name + &quot;: invalid first arg: &quot;</span>
+<span class="nc" id="L185">                    + AstFormatter.format(head));</span>
+        }
+<span class="fc" id="L187">        BigInteger second = parseMacroNum(name, rest);</span>
+<span class="fc" id="L188">        return new BigInteger[]{first, second};</span>
+    }
+
+    /** BigInteger -&gt; макроцифровое выражение (опц. знак Str + Num термы, MSB вперёд). */
+    static Expr&lt;Term&gt; bigIntToMacrodigits(BigInteger v) {
+<span class="fc bfc" id="L193" title="All 2 branches covered.">        if (v.signum() == 0) {</span>
+<span class="fc" id="L194">            return Expr.singleton(new Num(BigInteger.ZERO));</span>
+        }
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        boolean negative = v.signum() &lt; 0;</span>
+<span class="fc" id="L197">        BigInteger abs = v.abs();</span>
+<span class="fc" id="L198">        java.util.ArrayDeque&lt;BigInteger&gt; digits = new java.util.ArrayDeque&lt;&gt;();</span>
+<span class="fc" id="L199">        BigInteger cur = abs;</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        while (cur.signum() &gt; 0) {</span>
+<span class="fc" id="L201">            BigInteger[] dm = cur.divideAndRemainder(MACRO_BASE);</span>
+<span class="fc" id="L202">            digits.addFirst(dm[1]);</span>
+<span class="fc" id="L203">            cur = dm[0];</span>
+<span class="fc" id="L204">        }</span>
+<span class="fc" id="L205">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        if (negative) {</span>
+<span class="fc" id="L207">            out = out.pushBack(new Str(&quot;-&quot;));</span>
+        }
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        for (BigInteger d : digits) {</span>
+<span class="fc" id="L210">            out = out.pushBack(new Num(d));</span>
+<span class="fc" id="L211">        }</span>
+<span class="fc" id="L212">        return out;</span>
+    }
+
+    private static Term singleArg(String name, Expr&lt;Term&gt; args) {
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">        if (args.size() != 1) {</span>
+<span class="nc" id="L217">            throw new RefalException(name + &quot;: expected one argument, got &quot;</span>
+<span class="nc" id="L218">                    + AstFormatter.format(args.toList()));</span>
+        }
+<span class="fc" id="L220">        return args.separateFront().term();</span>
+    }
+
+    // --- ввод-вывод ---
+
+    private static Expr&lt;Term&gt; prout(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L226">        rt.appendStdout(printExpr(args) + &quot;\n&quot;);</span>
+<span class="fc" id="L227">        return Expr.empty();</span>
+    }
+
+    /** Печатает аргумент и возвращает его без изменений (как refgo Print). */
+    private static Expr&lt;Term&gt; print(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L232">        rt.appendStdout(AstFormatter.format(args.toList()) + &quot;\n&quot;);</span>
+<span class="fc" id="L233">        return args;</span>
+    }
+
+    private static Expr&lt;Term&gt; putout(Runtime rt, Expr&lt;Term&gt; args) {
+        // Классический Рефал-5: первый терм — номер канала.
+        // Канал 0 — stderr, остальные — открытые файлы.
+        // Для обратной совместимости со старыми тестами: если первый терм
+        // не Num, печатаем всё содержимое в stdout без перевода строки.
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">        if (!args.isEmpty()) {</span>
+<span class="fc" id="L242">            PeekResult&lt;Term&gt; pr = args.separateFront();</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">            if (pr.term() instanceof Num n) {</span>
+<span class="fc" id="L244">                rt.writeFile(n.value().longValue(), printExpr(pr.rest()) + &quot;\n&quot;);</span>
+<span class="fc" id="L245">                return Expr.empty();</span>
+            }
+        }
+<span class="fc" id="L248">        rt.appendStdout(printExpr(args));</span>
+<span class="fc" id="L249">        return Expr.empty();</span>
+    }
+
+    /** Write — то же, что Putout, но без перевода строки. */
+    private static Expr&lt;Term&gt; write(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="pc bpc" id="L254" title="1 of 2 branches missed.">        if (!args.isEmpty()) {</span>
+<span class="fc" id="L255">            PeekResult&lt;Term&gt; pr = args.separateFront();</span>
+<span class="pc bpc" id="L256" title="1 of 2 branches missed.">            if (pr.term() instanceof Num n) {</span>
+<span class="fc" id="L257">                rt.writeFile(n.value().longValue(), printExpr(pr.rest()));</span>
+<span class="fc" id="L258">                return Expr.empty();</span>
+            }
+        }
+<span class="nc" id="L261">        rt.appendStdout(printExpr(args));</span>
+<span class="nc" id="L262">        return Expr.empty();</span>
+    }
+
+    private static Expr&lt;Term&gt; exit(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L266">        int code = 0;</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">        if (!args.isEmpty()) {</span>
+<span class="fc" id="L268">            Term first = args.separateFront().term();</span>
+<span class="pc bpc" id="L269" title="1 of 2 branches missed.">            if (first instanceof Num n) {</span>
+<span class="fc" id="L270">                code = n.value().intValue();</span>
+            }
+        }
+<span class="fc" id="L273">        throw new ExitSignal(code);</span>
+    }
+
+    // --- арифметика ---
+
+    private static Expr&lt;Term&gt; add(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L279">        BigInteger[] ab = parseTwoArgs(&quot;Add&quot;, args);</span>
+<span class="fc" id="L280">        return bigIntToMacrodigits(ab[0].add(ab[1]));</span>
+    }
+
+    private static Expr&lt;Term&gt; sub(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L284">        BigInteger[] ab = parseTwoArgs(&quot;Sub&quot;, args);</span>
+<span class="fc" id="L285">        return bigIntToMacrodigits(ab[0].subtract(ab[1]));</span>
+    }
+
+    private static Expr&lt;Term&gt; mul(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L289">        BigInteger[] ab = parseTwoArgs(&quot;Mul&quot;, args);</span>
+<span class="fc" id="L290">        return bigIntToMacrodigits(ab[0].multiply(ab[1]));</span>
+    }
+
+    private static Expr&lt;Term&gt; div(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L294">        BigInteger[] ab = parseTwoArgs(&quot;Div&quot;, args);</span>
+<span class="fc bfc" id="L295" title="All 2 branches covered.">        if (ab[1].signum() == 0) {</span>
+<span class="fc" id="L296">            throw new RefalException(&quot;Div: division by zero&quot;);</span>
+        }
+<span class="fc" id="L298">        return bigIntToMacrodigits(ab[0].divide(ab[1]));</span>
+    }
+
+    private static Expr&lt;Term&gt; mod(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L302">        BigInteger[] ab = parseTwoArgs(&quot;Mod&quot;, args);</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">        if (ab[1].signum() == 0) {</span>
+<span class="fc" id="L304">            throw new RefalException(&quot;Mod: modulo by zero&quot;);</span>
+        }
+<span class="fc" id="L306">        return bigIntToMacrodigits(ab[0].remainder(ab[1]));</span>
+    }
+
+    /**
+     * Целочисленное деление с остатком: частное в круглых скобках,
+     * следом — остаток в виде макроцифровой последовательности (без скобок).
+     * Используется усечённое (truncated) деление — как в refgo.
+     */
+    private static Expr&lt;Term&gt; divmod(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L315">        BigInteger[] ab = parseTwoArgs(&quot;Divmod&quot;, args);</span>
+<span class="pc bpc" id="L316" title="1 of 2 branches missed.">        if (ab[1].signum() == 0) {</span>
+<span class="nc" id="L317">            throw new RefalException(&quot;Divmod: division by zero&quot;);</span>
+        }
+<span class="fc" id="L319">        BigInteger[] qr = ab[0].divideAndRemainder(ab[1]);</span>
+<span class="fc" id="L320">        Expr&lt;Term&gt; quotient = bigIntToMacrodigits(qr[0]);</span>
+<span class="fc" id="L321">        Expr&lt;Term&gt; out = Expr.singleton(new Br(quotient));</span>
+<span class="fc" id="L322">        return Expr.concat(out, bigIntToMacrodigits(qr[1]));</span>
+    }
+
+    private static Expr&lt;Term&gt; compare(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L326">        BigInteger[] ab = parseTwoArgs(&quot;Compare&quot;, args);</span>
+<span class="fc" id="L327">        int c = ab[0].compareTo(ab[1]);</span>
+<span class="fc bfc" id="L328" title="All 2 branches covered.">        if (c &lt; 0) {</span>
+<span class="fc" id="L329">            return Expr.singleton(new Str(&quot;-&quot;));</span>
+        }
+<span class="fc bfc" id="L331" title="All 2 branches covered.">        if (c &gt; 0) {</span>
+<span class="fc" id="L332">            return Expr.singleton(new Str(&quot;+&quot;));</span>
+        }
+<span class="fc" id="L334">        return Expr.singleton(new Str(&quot;0&quot;));</span>
+    }
+
+    // --- строки / символы ---
+
+    private static Expr&lt;Term&gt; lower(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L340">        return caseFold(args, true);</span>
+    }
+
+    private static Expr&lt;Term&gt; upper(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L344">        return caseFold(args, false);</span>
+    }
+
+    /**
+     * Применяет toLowerCase/toUpperCase к каждому символу/строке/символу-идентификатору
+     * по отдельности, сохраняя структуру термов (числа/скобки — без изменений,
+     * содержимое скобок рекурсивно).
+     */
+    private static Expr&lt;Term&gt; caseFold(Expr&lt;Term&gt; args, boolean toLower) {
+<span class="fc" id="L353">        java.util.Locale loc = java.util.Locale.ROOT;</span>
+<span class="fc" id="L354">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc bfc" id="L355" title="All 2 branches covered.">        for (Term t : args) {</span>
+<span class="fc bfc" id="L356" title="All 3 branches covered.">            switch (t) {</span>
+<span class="fc" id="L357">                case Str s -&gt; out = out.pushBack(new Str(</span>
+<span class="fc bfc" id="L358" title="All 2 branches covered.">                        toLower ? s.value().toLowerCase(loc) : s.value().toUpperCase(loc)));</span>
+                // Sym (идентификаторы) — оставляем как есть, в refgo Lower/Upper их не трогает.
+<span class="fc" id="L360">                case Br br -&gt; out = out.pushBack(new Br(</span>
+<span class="fc" id="L361">                        caseFold(br.items(), toLower)));</span>
+<span class="fc" id="L362">                default -&gt; out = out.pushBack(t);</span>
+            }
+<span class="fc" id="L364">        }</span>
+<span class="fc" id="L365">        return out;</span>
+    }
+
+    /**
+     * Преобразует макроцифровое число в последовательность односимвольных
+     * Str-термов десятичного представления (классическое поведение Symb).
+     * Если в аргументе нет ни одной макроцифры — возвращает '0'.
+     */
+    private static Expr&lt;Term&gt; symb(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc bfc" id="L374" title="All 2 branches covered.">        if (args.isEmpty()) {</span>
+<span class="fc" id="L375">            return Expr.empty();</span>
+        }
+<span class="fc" id="L377">        BigInteger v = parseMacroNum(&quot;Symb&quot;, args);</span>
+<span class="fc" id="L378">        String text = v.toString();</span>
+<span class="fc" id="L379">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc bfc" id="L380" title="All 2 branches covered.">        for (int i = 0; i &lt; text.length(); i++) {</span>
+<span class="fc" id="L381">            out = out.pushBack(new Str(String.valueOf(text.charAt(i))));</span>
+        }
+<span class="fc" id="L383">        return out;</span>
+    }
+
+    /**
+     * Преобразует строковое десятичное представление в макроцифровую
+     * последовательность. Аргумент собирается через termsToText (поддерживает
+     * Str-«посимвольный» формат); пустой/невалидный вход даёт 0.
+     */
+    private static Expr&lt;Term&gt; numb(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L392">        String text = termsToText(args).strip();</span>
+<span class="pc bpc" id="L393" title="1 of 2 branches missed.">        if (text.isEmpty()) {</span>
+<span class="nc" id="L394">            return bigIntToMacrodigits(BigInteger.ZERO);</span>
+        }
+<span class="fc" id="L396">        int i = 0;</span>
+<span class="fc" id="L397">        boolean negative = false;</span>
+<span class="pc bpc" id="L398" title="1 of 4 branches missed.">        if (text.charAt(0) == '+' || text.charAt(0) == '-') {</span>
+<span class="pc bpc" id="L399" title="1 of 2 branches missed.">            negative = text.charAt(0) == '-';</span>
+<span class="fc" id="L400">            i = 1;</span>
+        }
+<span class="fc" id="L402">        int j = i;</span>
+<span class="fc bfc" id="L403" title="All 4 branches covered.">        while (j &lt; text.length() &amp;&amp; Character.isDigit(text.charAt(j))) {</span>
+<span class="fc" id="L404">            j++;</span>
+        }
+<span class="fc bfc" id="L406" title="All 2 branches covered.">        if (j == i) {</span>
+<span class="fc" id="L407">            return bigIntToMacrodigits(BigInteger.ZERO);</span>
+        }
+<span class="fc" id="L409">        BigInteger v = new BigInteger(text.substring(i, j));</span>
+<span class="fc bfc" id="L410" title="All 2 branches covered.">        if (negative) {</span>
+<span class="fc" id="L411">            v = v.negate();</span>
+        }
+<span class="fc" id="L413">        return bigIntToMacrodigits(v);</span>
+    }
+
+    /**
+     * Для каждого числа заменяет его строкой с символом этого кода;
+     * остальные термы (включая скобочные — рекурсивно) переносятся без изменений.
+     */
+    private static Expr&lt;Term&gt; chr(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L421">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc bfc" id="L422" title="All 2 branches covered.">        for (Term t : args) {</span>
+<span class="fc bfc" id="L423" title="All 3 branches covered.">            switch (t) {</span>
+<span class="fc" id="L424">                case Num n -&gt; out = out.pushBack(new Str(</span>
+<span class="fc" id="L425">                        String.valueOf((char) (n.value().longValue() &amp; 0xFF))));</span>
+<span class="fc" id="L426">                case Br br -&gt; out = out.pushBack(new Br(chr(rt, br.items())));</span>
+<span class="fc" id="L427">                default -&gt; out = out.pushBack(t);</span>
+            }
+<span class="fc" id="L429">        }</span>
+<span class="fc" id="L430">        return out;</span>
+    }
+
+    /**
+     * Для каждой односимвольной строки или символа заменяет его числом — кодом символа;
+     * остальные термы переносятся без изменений.
+     */
+    private static Expr&lt;Term&gt; ord(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L438">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc bfc" id="L439" title="All 2 branches covered.">        for (Term t : args) {</span>
+<span class="pc bpc" id="L440" title="1 of 4 branches missed.">            switch (t) {</span>
+<span class="fc" id="L441">                case Str s -&gt; {</span>
+<span class="fc" id="L442">                    String v = s.value();</span>
+<span class="pc bpc" id="L443" title="1 of 2 branches missed.">                    if (v.length() == 1) {</span>
+<span class="fc" id="L444">                        out = out.pushBack(new Num(v.charAt(0)));</span>
+<span class="nc bnc" id="L445" title="All 2 branches missed.">                    } else if (v.isEmpty()) {</span>
+                        // пропускаем пустую строку
+                    } else {
+                        // многосимвольная строка: оставляем без изменений, чтобы
+                        // тест сравнения не сопоставлял с числом, но и не падал.
+<span class="nc" id="L450">                        out = out.pushBack(t);</span>
+                    }
+<span class="fc" id="L452">                }</span>
+<span class="fc" id="L453">                case Sym s -&gt; {</span>
+<span class="pc bpc" id="L454" title="1 of 2 branches missed.">                    if (s.name().length() == 1) {</span>
+<span class="nc" id="L455">                        out = out.pushBack(new Num(s.name().charAt(0)));</span>
+                    } else {
+<span class="fc" id="L457">                        out = out.pushBack(t);</span>
+                    }
+<span class="fc" id="L459">                }</span>
+<span class="fc" id="L460">                case Br br -&gt; out = out.pushBack(new Br(ord(rt, br.items())));</span>
+<span class="nc" id="L461">                default -&gt; out = out.pushBack(t);</span>
+            }
+<span class="fc" id="L463">        }</span>
+<span class="fc" id="L464">        return out;</span>
+    }
+
+    /**
+     * Читает строку со стандартного ввода до перевода строки;
+     * при конце ввода возвращает число 0.
+     */
+    private static Expr&lt;Term&gt; card(Runtime rt, Expr&lt;Term&gt; args) {
+        // По соглашению Рефала-5 — то же, что &lt;Get 0&gt;: посимвольная строка
+        // или 0 при достижении EOF.
+<span class="nc" id="L474">        String line = rt.readStdinLine();</span>
+<span class="nc bnc" id="L475" title="All 2 branches missed.">        if (line == null) {</span>
+<span class="nc" id="L476">            return Expr.singleton(new Num(0));</span>
+        }
+<span class="nc" id="L478">        return explodeString(line);</span>
+    }
+
+    /**
+     * Определяет тип первого терма (N — число, W — слово, L — строка, O — скобочное
+     * выражение по соглашению Рефала-5), подкатегорию и исходное выражение.
+     */
+    private static Expr&lt;Term&gt; type(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc bfc" id="L486" title="All 2 branches covered.">        if (args.isEmpty()) {</span>
+<span class="fc" id="L487">            return Expr.fromList(java.util.List.of(</span>
+                    (Term) new Str(&quot;*&quot;), new Str(&quot;0&quot;)));
+        }
+<span class="fc" id="L490">        PeekResult&lt;Term&gt; pr = args.separateFront();</span>
+<span class="fc" id="L491">        Term first = pr.term();</span>
+<span class="fc" id="L492">        Expr&lt;Term&gt; tail = pr.rest();</span>
+        String cat;
+        String sub;
+<span class="pc bpc" id="L495" title="1 of 5 branches missed.">        switch (first) {</span>
+<span class="fc" id="L496">            case Num ignored -&gt; {</span>
+<span class="fc" id="L497">                cat = &quot;N&quot;;</span>
+<span class="fc" id="L498">                sub = &quot;0&quot;;</span>
+<span class="fc" id="L499">            }</span>
+<span class="fc" id="L500">            case Sym s -&gt; {</span>
+                // Идентификатор-слово: 'W' 'i' если корректный идентификатор, иначе 'W' 'q'.
+<span class="fc" id="L502">                cat = &quot;W&quot;;</span>
+<span class="fc bfc" id="L503" title="All 2 branches covered.">                sub = isIdentifier(s.name()) ? &quot;i&quot; : &quot;q&quot;;</span>
+<span class="fc" id="L504">            }</span>
+<span class="fc" id="L505">            case Str s -&gt; {</span>
+<span class="fc" id="L506">                String v = s.value();</span>
+<span class="pc bpc" id="L507" title="1 of 2 branches missed.">                if (v.length() == 1) {</span>
+<span class="fc" id="L508">                    char ch = v.charAt(0);</span>
+<span class="fc bfc" id="L509" title="All 2 branches covered.">                    if (Character.isDigit(ch)) {</span>
+<span class="fc" id="L510">                        cat = &quot;D&quot;;</span>
+<span class="fc" id="L511">                        sub = &quot;0&quot;;</span>
+<span class="fc bfc" id="L512" title="All 2 branches covered.">                    } else if (Character.isUpperCase(ch)) {</span>
+<span class="fc" id="L513">                        cat = &quot;L&quot;;</span>
+<span class="fc" id="L514">                        sub = &quot;u&quot;;</span>
+<span class="fc bfc" id="L515" title="All 2 branches covered.">                    } else if (Character.isLowerCase(ch)) {</span>
+<span class="fc" id="L516">                        cat = &quot;L&quot;;</span>
+<span class="fc" id="L517">                        sub = &quot;l&quot;;</span>
+<span class="fc bfc" id="L518" title="All 2 branches covered.">                    } else if (Character.isISOControl(ch)) {</span>
+<span class="fc" id="L519">                        cat = &quot;O&quot;;</span>
+<span class="fc" id="L520">                        sub = &quot;l&quot;;</span>
+                    } else {
+<span class="fc" id="L522">                        cat = &quot;P&quot;;</span>
+<span class="fc" id="L523">                        sub = &quot;l&quot;;</span>
+                    }
+<span class="fc" id="L525">                } else {</span>
+                    // Многосимвольная строка — слово в кавычках.
+<span class="nc" id="L527">                    cat = &quot;W&quot;;</span>
+<span class="nc" id="L528">                    sub = &quot;q&quot;;</span>
+                }
+<span class="fc" id="L530">            }</span>
+<span class="fc" id="L531">            case Br ignored -&gt; {</span>
+<span class="fc" id="L532">                cat = &quot;B&quot;;</span>
+<span class="fc" id="L533">                sub = &quot;0&quot;;</span>
+<span class="fc" id="L534">            }</span>
+            default -&gt; {
+<span class="nc" id="L536">                cat = &quot;*&quot;;</span>
+<span class="nc" id="L537">                sub = &quot;0&quot;;</span>
+            }
+        }
+<span class="fc" id="L540">        Expr&lt;Term&gt; out = Expr.singleton((Term) new Str(cat));</span>
+<span class="fc" id="L541">        out = out.pushBack(new Str(sub));</span>
+        // Возвращаем исходный терм + хвост (исходное выражение остаётся целым).
+<span class="fc" id="L543">        out = out.pushBack(first);</span>
+<span class="fc" id="L544">        return Expr.concat(out, tail);</span>
+    }
+
+    // --- функции высшего порядка ---
+
+    /** Применяет именованную функцию к аргументам (метапрограммирование). */
+    private static Expr&lt;Term&gt; mu(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="pc bpc" id="L551" title="1 of 2 branches missed.">        if (args.isEmpty()) {</span>
+<span class="nc" id="L552">            throw new RefalException(&quot;Mu: missing function name&quot;);</span>
+        }
+<span class="fc" id="L554">        PeekResult&lt;Term&gt; pr = args.separateFront();</span>
+<span class="fc" id="L555">        String name = extractName(&quot;Mu&quot;, pr.term());</span>
+<span class="fc" id="L556">        return rt.evalCall(name, pr.rest());</span>
+    }
+
+    private static String extractName(String fn, Term t) {
+<span class="pc bpc" id="L560" title="2 of 4 branches missed.">        return switch (t) {</span>
+<span class="fc" id="L561">            case Sym s -&gt; s.name();</span>
+<span class="nc" id="L562">            case Str s -&gt; s.value();</span>
+<span class="fc" id="L563">            case Br br -&gt; {</span>
+                // Имя может быть «упаковано» как (Sym) либо как
+                // (Str Str Str ...) — последовательность односимвольных строк
+                // от 'Foo'. Склеиваем содержимое скобки в одно имя.
+<span class="fc" id="L567">                StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L568" title="All 2 branches covered.">                for (Term it : br.items()) {</span>
+<span class="pc bpc" id="L569" title="2 of 3 branches missed.">                    switch (it) {</span>
+<span class="nc" id="L570">                        case Sym s -&gt; sb.append(s.name());</span>
+<span class="fc" id="L571">                        case Str s -&gt; sb.append(s.value());</span>
+<span class="nc" id="L572">                        default -&gt; throw new RefalException(</span>
+                                fn + &quot;: first argument must be a function name, got &quot;
+<span class="nc" id="L574">                                        + AstFormatter.format(t));</span>
+                    }
+<span class="fc" id="L576">                }</span>
+<span class="fc" id="L577">                yield sb.toString();</span>
+            }
+<span class="nc" id="L579">            default -&gt; throw new RefalException(</span>
+                    fn + &quot;: first argument must be a function name, got &quot;
+<span class="nc" id="L581">                            + AstFormatter.format(t));</span>
+        };
+    }
+
+    // --- операции над списками / последовательностями ---
+
+    /** Длина выражения в начале, затем те же термы. */
+    private static Expr&lt;Term&gt; lenw(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L589">        return args.pushFront(new Num(args.size()));</span>
+    }
+
+    /** Текущее число шагов нормализации. */
+    private static Expr&lt;Term&gt; step(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L594">        return Expr.singleton(new Num(rt.currentStep()));</span>
+    }
+
+    /** Оставляет последние N термов снаружи, остальное помещает в скобки. */
+    private static Expr&lt;Term&gt; last(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="pc bpc" id="L599" title="1 of 2 branches missed.">        if (args.isEmpty()) {</span>
+<span class="nc" id="L600">            throw new RefalException(&quot;Last: missing count argument&quot;);</span>
+        }
+<span class="fc" id="L602">        PeekResult&lt;Term&gt; pr = args.separateFront();</span>
+<span class="pc bpc" id="L603" title="1 of 2 branches missed.">        if (!(pr.term() instanceof Num n)) {</span>
+<span class="nc" id="L604">            throw new RefalException(&quot;Last: count must be a number, got &quot;</span>
+<span class="nc" id="L605">                    + AstFormatter.format(pr.term()));</span>
+        }
+<span class="fc" id="L607">        long count = n.value().longValue();</span>
+<span class="pc bpc" id="L608" title="1 of 2 branches missed.">        if (count &lt; 0) {</span>
+<span class="nc" id="L609">            throw new RefalException(&quot;Last: negative count&quot;);</span>
+        }
+<span class="fc" id="L611">        Expr&lt;Term&gt; rest = pr.rest();</span>
+<span class="fc" id="L612">        long total = rest.size();</span>
+<span class="fc bfc" id="L613" title="All 2 branches covered.">        if (count &gt; total) {</span>
+<span class="fc" id="L614">            count = total;</span>
+        }
+<span class="fc" id="L616">        long headLen = total - count;</span>
+<span class="fc" id="L617">        Expr&lt;Term&gt; head = Expr.empty();</span>
+<span class="fc" id="L618">        Expr&lt;Term&gt; cur = rest;</span>
+<span class="fc bfc" id="L619" title="All 2 branches covered.">        for (long i = 0; i &lt; headLen; i++) {</span>
+<span class="fc" id="L620">            PeekResult&lt;Term&gt; step = cur.separateFront();</span>
+<span class="fc" id="L621">            head = head.pushBack(step.term());</span>
+<span class="fc" id="L622">            cur = step.rest();</span>
+        }
+<span class="fc" id="L624">        Expr&lt;Term&gt; out = Expr.singleton(new Br(head));</span>
+<span class="fc" id="L625">        return Expr.concat(out, cur);</span>
+    }
+
+    /**
+     * Первые N термов выделяются в скобки, остальное остаётся снаружи.
+     */
+    private static Expr&lt;Term&gt; first(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="pc bpc" id="L632" title="1 of 2 branches missed.">        if (args.isEmpty()) {</span>
+<span class="nc" id="L633">            throw new RefalException(&quot;First: missing count argument&quot;);</span>
+        }
+<span class="fc" id="L635">        PeekResult&lt;Term&gt; pr = args.separateFront();</span>
+<span class="pc bpc" id="L636" title="1 of 2 branches missed.">        if (!(pr.term() instanceof Num n)) {</span>
+<span class="nc" id="L637">            throw new RefalException(&quot;First: count must be a number, got &quot;</span>
+<span class="nc" id="L638">                    + AstFormatter.format(pr.term()));</span>
+        }
+<span class="fc" id="L640">        long count = n.value().longValue();</span>
+<span class="pc bpc" id="L641" title="1 of 2 branches missed.">        if (count &lt; 0) {</span>
+<span class="nc" id="L642">            throw new RefalException(&quot;First: negative count&quot;);</span>
+        }
+<span class="fc" id="L644">        Expr&lt;Term&gt; rest = pr.rest();</span>
+<span class="fc bfc" id="L645" title="All 2 branches covered.">        if (count &gt; rest.size()) {</span>
+<span class="fc" id="L646">            count = rest.size();</span>
+        }
+<span class="fc" id="L648">        Expr&lt;Term&gt; head = Expr.empty();</span>
+<span class="fc" id="L649">        Expr&lt;Term&gt; cur = rest;</span>
+<span class="fc bfc" id="L650" title="All 2 branches covered.">        for (long i = 0; i &lt; count; i++) {</span>
+<span class="fc" id="L651">            PeekResult&lt;Term&gt; step = cur.separateFront();</span>
+<span class="fc" id="L652">            head = head.pushBack(step.term());</span>
+<span class="fc" id="L653">            cur = step.rest();</span>
+        }
+<span class="fc" id="L655">        Expr&lt;Term&gt; out = Expr.singleton(new Br(head));</span>
+<span class="fc" id="L656">        return Expr.concat(out, cur);</span>
+    }
+
+    /** Разбивает строку на односимвольные строковые атомы. */
+    private static Expr&lt;Term&gt; explode(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L661">        String text = termsToText(args);</span>
+<span class="fc" id="L662">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc bfc" id="L663" title="All 2 branches covered.">        for (int i = 0; i &lt; text.length(); i++) {</span>
+<span class="fc" id="L664">            out = out.pushBack(new Str(String.valueOf(text.charAt(i))));</span>
+        }
+<span class="fc" id="L666">        return out;</span>
+    }
+
+    /**
+     * Склеивает символы и строки в один идентификатор или строку.
+     */
+    private static Expr&lt;Term&gt; implode(Runtime rt, Expr&lt;Term&gt; args) {
+        // Собираем «головную» цепочку односимвольных Str-термов в строку,
+        // остальное (нечары, скобки, числа, многосимвольные строки) добавляем
+        // в результат без изменений.
+<span class="fc" id="L676">        StringBuilder head = new StringBuilder();</span>
+<span class="fc" id="L677">        Expr&lt;Term&gt; tail = Expr.empty();</span>
+<span class="fc" id="L678">        boolean stopped = false;</span>
+<span class="fc bfc" id="L679" title="All 2 branches covered.">        for (Term t : args) {</span>
+<span class="pc bpc" id="L680" title="1 of 6 branches missed.">            if (!stopped &amp;&amp; t instanceof Str s &amp;&amp; s.value().length() == 1) {</span>
+<span class="fc" id="L681">                head.append(s.value().charAt(0));</span>
+            } else {
+<span class="fc" id="L683">                stopped = true;</span>
+<span class="fc" id="L684">                tail = tail.pushBack(t);</span>
+            }
+<span class="fc" id="L686">        }</span>
+<span class="fc" id="L687">        String text = head.toString();</span>
+<span class="pc bpc" id="L688" title="1 of 4 branches missed.">        if (text.isEmpty() &amp;&amp; tail.isEmpty()) {</span>
+<span class="nc" id="L689">            return Expr.empty();</span>
+        }
+<span class="fc" id="L691">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc bfc" id="L692" title="All 2 branches covered.">        if (text.isEmpty()) {</span>
+            // Чары впереди отсутствуют — возвращаем хвост как есть.
+<span class="fc" id="L694">            return tail;</span>
+        }
+<span class="fc bfc" id="L696" title="All 2 branches covered.">        if (!Character.isLetter(text.charAt(0))) {</span>
+            // refgo: «0» + посимвольный хвост.
+<span class="fc" id="L698">            out = out.pushBack(new Num(BigInteger.ZERO));</span>
+<span class="fc bfc" id="L699" title="All 2 branches covered.">            for (int k = 0; k &lt; text.length(); k++) {</span>
+<span class="fc" id="L700">                out = out.pushBack(new Str(String.valueOf(text.charAt(k))));</span>
+            }
+<span class="fc" id="L702">            return Expr.concat(out, tail);</span>
+        }
+<span class="fc" id="L704">        int j = 0;</span>
+<span class="fc bfc" id="L705" title="All 4 branches covered.">        while (j &lt; text.length() &amp;&amp; isImplodeIdentChar(text.charAt(j))) {</span>
+<span class="fc" id="L706">            j++;</span>
+        }
+<span class="fc" id="L708">        out = out.pushBack(new Sym(text.substring(0, j)));</span>
+<span class="fc bfc" id="L709" title="All 2 branches covered.">        for (int k = j; k &lt; text.length(); k++) {</span>
+<span class="fc" id="L710">            out = out.pushBack(new Str(String.valueOf(text.charAt(k))));</span>
+        }
+<span class="fc" id="L712">        return Expr.concat(out, tail);</span>
+    }
+
+    /**
+     * Множество «идентификаторных» символов для Implode/Implode_Ext.
+     * Соответствует refgo: буквы, цифры, '_', '-', '$' (и любые
+     * другие неблочные печатные знаки, кроме явно перечисленных разделителей).
+     */
+    private static boolean isImplodeIdentChar(char c) {
+<span class="fc bfc" id="L721" title="All 8 branches covered.">        return Character.isLetterOrDigit(c)</span>
+                || c == '_' || c == '-' || c == '$';
+    }
+
+    /** Расширенный Implode: всегда возвращает символ (без проверки формата). */
+    private static Expr&lt;Term&gt; implodeExt(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L727">        String text = termsToText(args);</span>
+<span class="pc bpc" id="L728" title="1 of 2 branches missed.">        return text.isEmpty() ? Expr.empty() : Expr.singleton(new Sym(text));</span>
+    }
+
+    private static boolean isIdentifier(String s) {
+<span class="pc bpc" id="L732" title="2 of 4 branches missed.">        if (s.isEmpty() || !Character.isLetter(s.charAt(0))) {</span>
+<span class="nc" id="L733">            return false;</span>
+        }
+<span class="fc bfc" id="L735" title="All 2 branches covered.">        for (int i = 1; i &lt; s.length(); i++) {</span>
+<span class="fc" id="L736">            char c = s.charAt(i);</span>
+<span class="fc bfc" id="L737" title="All 6 branches covered.">            if (!Character.isLetterOrDigit(c) &amp;&amp; c != '_' &amp;&amp; c != '-') {</span>
+<span class="fc" id="L738">                return false;</span>
+            }
+        }
+<span class="fc" id="L741">        return true;</span>
+    }
+
+    /** Список имён всех зарегистрированных встроенных функций. */
+    // Стандартный набор встроенных Рефала-5 в формате (number name type),
+    // совместимый с refgo / Refal-5 PZ.
+    // '+'/'-'/'*'/'/''%'/'?' намеренно исключены: R5FW-Parser хардкодит их сам.
+<span class="fc" id="L748">    private static final Object[][] STANDARD_BUILTINS = {</span>
+<span class="fc" id="L749">        { 1,  &quot;Mu&quot;,           &quot;special&quot;  },</span>
+<span class="fc" id="L750">        { 2,  &quot;Add&quot;,          &quot;regular&quot;  },</span>
+<span class="fc" id="L751">        { 3,  &quot;Arg&quot;,          &quot;regular&quot;  },</span>
+<span class="fc" id="L752">        { 5,  &quot;Card&quot;,         &quot;regular&quot;  },</span>
+<span class="fc" id="L753">        { 6,  &quot;Chr&quot;,          &quot;regular&quot;  },</span>
+<span class="fc" id="L754">        { 10, &quot;Div&quot;,          &quot;regular&quot;  },</span>
+<span class="fc" id="L755">        { 11, &quot;Divmod&quot;,       &quot;regular&quot;  },</span>
+<span class="fc" id="L756">        { 12, &quot;Explode&quot;,      &quot;regular&quot;  },</span>
+<span class="fc" id="L757">        { 13, &quot;First&quot;,        &quot;regular&quot;  },</span>
+<span class="fc" id="L758">        { 14, &quot;Get&quot;,          &quot;regular&quot;  },</span>
+<span class="fc" id="L759">        { 15, &quot;Implode&quot;,      &quot;regular&quot;  },</span>
+<span class="fc" id="L760">        { 16, &quot;Last&quot;,         &quot;regular&quot;  },</span>
+<span class="fc" id="L761">        { 17, &quot;Lenw&quot;,         &quot;regular&quot;  },</span>
+<span class="fc" id="L762">        { 18, &quot;Lower&quot;,        &quot;regular&quot;  },</span>
+<span class="fc" id="L763">        { 19, &quot;Mod&quot;,          &quot;regular&quot;  },</span>
+<span class="fc" id="L764">        { 20, &quot;Mul&quot;,          &quot;regular&quot;  },</span>
+<span class="fc" id="L765">        { 21, &quot;Numb&quot;,         &quot;regular&quot;  },</span>
+<span class="fc" id="L766">        { 22, &quot;Open&quot;,         &quot;regular&quot;  },</span>
+<span class="fc" id="L767">        { 23, &quot;Ord&quot;,          &quot;regular&quot;  },</span>
+<span class="fc" id="L768">        { 24, &quot;Print&quot;,        &quot;regular&quot;  },</span>
+<span class="fc" id="L769">        { 25, &quot;Prout&quot;,        &quot;regular&quot;  },</span>
+<span class="fc" id="L770">        { 26, &quot;Put&quot;,          &quot;regular&quot;  },</span>
+<span class="fc" id="L771">        { 27, &quot;Putout&quot;,       &quot;regular&quot;  },</span>
+<span class="fc" id="L772">        { 29, &quot;Step&quot;,         &quot;regular&quot;  },</span>
+<span class="fc" id="L773">        { 30, &quot;Sub&quot;,          &quot;regular&quot;  },</span>
+<span class="fc" id="L774">        { 31, &quot;Symb&quot;,         &quot;regular&quot;  },</span>
+<span class="fc" id="L775">        { 33, &quot;Type&quot;,         &quot;regular&quot;  },</span>
+<span class="fc" id="L776">        { 34, &quot;Upper&quot;,        &quot;regular&quot;  },</span>
+<span class="fc" id="L777">        { 35, &quot;Sysfun&quot;,       &quot;regular&quot;  },</span>
+<span class="fc" id="L778">        { 50, &quot;Residue&quot;,      &quot;special&quot;  },</span>
+<span class="fc" id="L779">        { 53, &quot;Exit&quot;,         &quot;regular&quot;  },</span>
+<span class="fc" id="L780">        { 54, &quot;Close&quot;,        &quot;regular&quot;  },</span>
+<span class="fc" id="L781">        { 58, &quot;Implode_Ext&quot;,  &quot;regular&quot;  },</span>
+<span class="fc" id="L782">        { 59, &quot;Explode_Ext&quot;,  &quot;regular&quot;  },</span>
+<span class="fc" id="L783">        { 60, &quot;TimeElapsed&quot;,  &quot;regular&quot;  },</span>
+<span class="fc" id="L784">        { 61, &quot;Compare&quot;,      &quot;regular&quot;  },</span>
+<span class="fc" id="L785">        { 66, &quot;Write&quot;,        &quot;regular&quot;  },</span>
+<span class="fc" id="L786">        { 67, &quot;ListOfBuiltin&quot;, &quot;regular&quot;  },</span>
+    };
+
+    private static Expr&lt;Term&gt; listOfBuiltin(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L790">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc bfc" id="L791" title="All 2 branches covered.">        for (Object[] row : STANDARD_BUILTINS) {</span>
+<span class="fc" id="L792">            int num = (int) row[0];</span>
+<span class="fc" id="L793">            String name = (String) row[1];</span>
+<span class="fc" id="L794">            String type = (String) row[2];</span>
+<span class="fc" id="L795">            Expr&lt;Term&gt; triple = Expr.empty();</span>
+<span class="fc" id="L796">            triple = triple.pushBack(new Num(BigInteger.valueOf(num)));</span>
+<span class="fc" id="L797">            triple = triple.pushBack(new Sym(name));</span>
+<span class="fc" id="L798">            triple = triple.pushBack(new Sym(type));</span>
+<span class="fc" id="L799">            out = out.pushBack(new Br(triple));</span>
+        }
+<span class="fc" id="L801">        return out;</span>
+    }
+
+    /** N-й аргумент командной строки (или пусто, если индекс вне диапазона). */
+    private static Expr&lt;Term&gt; arg(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L806">        Term t = singleArg(&quot;Arg&quot;, args);</span>
+<span class="pc bpc" id="L807" title="1 of 2 branches missed.">        if (!(t instanceof Num n)) {</span>
+<span class="nc" id="L808">            throw new RefalException(&quot;Arg: expected integer index, got &quot;</span>
+<span class="nc" id="L809">                    + AstFormatter.format(t));</span>
+        }
+<span class="fc" id="L811">        int idx = n.value().intValue();</span>
+<span class="fc" id="L812">        String[] cli = rt.programArgs();</span>
+<span class="pc bpc" id="L813" title="1 of 4 branches missed.">        if (idx &lt; 0 || idx &gt;= cli.length) {</span>
+<span class="fc" id="L814">            return Expr.empty();</span>
+        }
+        // Возвращаем аргумент как последовательность односимвольных строк
+        // (классический Рефал-5 трактует &lt;Arg N&gt; именно так — это совместимо
+        // с шаблонами вида e.Source : e.Base '.' e.Ref).
+<span class="fc" id="L819">        String s = cli[idx];</span>
+<span class="fc" id="L820">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc bfc" id="L821" title="All 2 branches covered.">        for (int i = 0; i &lt; s.length(); i++) {</span>
+<span class="fc" id="L822">            out = out.pushBack(new Str(String.valueOf(s.charAt(i))));</span>
+        }
+<span class="fc" id="L824">        return out;</span>
+    }
+
+    // --- файловый ввод-вывод ---
+
+    /** Открывает файл: режим, номер канала, имя файла (опционально). */
+    private static Expr&lt;Term&gt; open(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="pc bpc" id="L831" title="1 of 2 branches missed.">        if (args.size() &lt; 2) {</span>
+<span class="nc" id="L832">            throw new RefalException(&quot;Open: expected at least mode and channel&quot;);</span>
+        }
+<span class="fc" id="L834">        List&lt;Term&gt; a = args.toList();</span>
+<span class="fc" id="L835">        String mode = termAsText(a.get(0)).toLowerCase(java.util.Locale.ROOT);</span>
+        // Бинарный флаг 'b' (как в &quot;wb&quot;, &quot;rb&quot;, &quot;ab&quot;) отбрасываем —
+<span class="pc bpc" id="L837" title="1 of 4 branches missed.">        if (mode.endsWith(&quot;b&quot;) &amp;&amp; mode.length() &gt; 1) {</span>
+<span class="fc" id="L838">            mode = mode.substring(0, mode.length() - 1);</span>
+        }
+<span class="pc bpc" id="L840" title="1 of 2 branches missed.">        if (!(a.get(1) instanceof Num n)) {</span>
+<span class="nc" id="L841">            throw new RefalException(&quot;Open: channel must be integer&quot;);</span>
+        }
+        String filename;
+<span class="fc bfc" id="L844" title="All 2 branches covered.">        if (a.size() &gt;= 3) {</span>
+<span class="fc" id="L845">            filename = termsToText(Expr.fromList(a.subList(2, a.size())));</span>
+        } else {
+            try {
+<span class="fc" id="L848">                filename = java.nio.file.Files</span>
+<span class="fc" id="L849">                        .createTempFile(&quot;refal5j-ch&quot; + n.value(), &quot;.tmp&quot;)</span>
+<span class="fc" id="L850">                        .toString();</span>
+<span class="nc" id="L851">            } catch (java.io.IOException e) {</span>
+<span class="nc" id="L852">                throw new RefalException(&quot;Open: cannot create temp file: &quot; + e.getMessage());</span>
+<span class="fc" id="L853">            }</span>
+        }
+<span class="fc" id="L855">        rt.openFile(n.value().longValue(), mode, filename);</span>
+<span class="fc" id="L856">        return Expr.empty();</span>
+    }
+
+    /** Закрывает файловый канал. */
+    private static Expr&lt;Term&gt; close(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="fc" id="L861">        Term t = singleArg(&quot;Close&quot;, args);</span>
+<span class="pc bpc" id="L862" title="1 of 2 branches missed.">        if (!(t instanceof Num n)) {</span>
+<span class="nc" id="L863">            throw new RefalException(&quot;Close: channel must be integer&quot;);</span>
+        }
+<span class="fc" id="L865">        rt.closeFile(n.value().longValue());</span>
+<span class="fc" id="L866">        return Expr.empty();</span>
+    }
+
+    /** Читает строку из файла или канала; при конце файла возвращает пусто. */
+    private static Expr&lt;Term&gt; get(Runtime rt, Expr&lt;Term&gt; args) {
+        // На конце файла Get возвращает число 0,
+        // а прочитанная строка — последовательность односимвольных строк.
+<span class="nc bnc" id="L873" title="All 2 branches missed.">        if (args.isEmpty()) {</span>
+<span class="nc" id="L874">            String line = rt.readStdinLine();</span>
+<span class="nc bnc" id="L875" title="All 2 branches missed.">            return line == null ? Expr.singleton(new Num(0)) : explodeString(line);</span>
+        }
+<span class="nc" id="L877">        Term t = singleArg(&quot;Get&quot;, args);</span>
+<span class="nc bnc" id="L878" title="All 2 branches missed.">        if (!(t instanceof Num n)) {</span>
+<span class="nc" id="L879">            throw new RefalException(&quot;Get: channel must be integer&quot;);</span>
+        }
+<span class="nc" id="L881">        long ch = n.value().longValue();</span>
+<span class="nc bnc" id="L882" title="All 2 branches missed.">        if (ch == 0) {</span>
+<span class="nc" id="L883">            String line = rt.readStdinLine();</span>
+<span class="nc bnc" id="L884" title="All 2 branches missed.">            return line == null ? Expr.singleton(new Num(0)) : explodeString(line);</span>
+        }
+<span class="nc" id="L886">        String line = rt.readFileLine(ch);</span>
+<span class="nc bnc" id="L887" title="All 2 branches missed.">        return line == null ? Expr.singleton(new Num(0)) : explodeString(line);</span>
+    }
+
+    /** Разбивает строку на последовательность односимвольных Str-термов. */
+    private static Expr&lt;Term&gt; explodeString(String s) {
+<span class="nc" id="L892">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="nc bnc" id="L893" title="All 2 branches missed.">        for (int i = 0; i &lt; s.length(); i++) {</span>
+<span class="nc" id="L894">            out = out.pushBack(new Str(String.valueOf(s.charAt(i))));</span>
+        }
+<span class="nc" id="L896">        return out;</span>
+    }
+
+    /** Записывает данные в файл с переводом строки; возвращает записанное выражение. */
+    private static Expr&lt;Term&gt; put(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="pc bpc" id="L901" title="1 of 2 branches missed.">        if (args.isEmpty()) {</span>
+<span class="nc" id="L902">            throw new RefalException(&quot;Put: missing channel&quot;);</span>
+        }
+<span class="fc" id="L904">        PeekResult&lt;Term&gt; pr = args.separateFront();</span>
+<span class="pc bpc" id="L905" title="1 of 2 branches missed.">        if (!(pr.term() instanceof Num n)) {</span>
+<span class="nc" id="L906">            throw new RefalException(&quot;Put: channel must be integer&quot;);</span>
+        }
+<span class="fc" id="L908">        rt.writeFile(n.value().longValue(), printExpr(pr.rest()) + &quot;\n&quot;);</span>
+<span class="fc" id="L909">        return pr.rest();</span>
+    }
+
+    /** Записывает данные в файл без перевода строки. */
+    private static Expr&lt;Term&gt; putoutChan(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="nc bnc" id="L914" title="All 2 branches missed.">        if (args.isEmpty()) {</span>
+<span class="nc" id="L915">            throw new RefalException(&quot;Putout: missing channel&quot;);</span>
+        }
+<span class="nc" id="L917">        PeekResult&lt;Term&gt; pr = args.separateFront();</span>
+<span class="nc bnc" id="L918" title="All 2 branches missed.">        if (!(pr.term() instanceof Num n)) {</span>
+<span class="nc" id="L919">            throw new RefalException(&quot;Putout: channel must be integer&quot;);</span>
+        }
+<span class="nc" id="L921">        rt.writeFile(n.value().longValue(), printExpr(pr.rest()));</span>
+<span class="nc" id="L922">        return pr.rest();</span>
+    }
+
+    private static Expr&lt;Term&gt; sysfun(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="nc" id="L926">        throw new RefalException(&quot;Sysfun: not supported&quot;);</span>
+    }
+
+    /** Время работы интерпретатора в секундах (строка).
+     * &lt;TimeElapsed 0&gt; — сбрасывает таймер (возвращает пусто).
+     * &lt;TimeElapsed&gt;   — возвращает прошедшее время строкой &quot;%.2f&quot;. */
+    private static Expr&lt;Term&gt; timeElapsed(Runtime rt, Expr&lt;Term&gt; args) {
+<span class="pc bpc" id="L933" title="1 of 2 branches missed.">        if (!args.isEmpty()) {</span>
+<span class="nc" id="L934">            PeekResult&lt;Term&gt; pr = args.separateFront();</span>
+<span class="nc bnc" id="L935" title="All 2 branches missed.">            if (pr.term() instanceof Num n</span>
+<span class="nc bnc" id="L936" title="All 2 branches missed.">                    &amp;&amp; n.value().signum() == 0</span>
+<span class="nc bnc" id="L937" title="All 2 branches missed.">                    &amp;&amp; pr.rest().isEmpty()) {</span>
+<span class="nc" id="L938">                rt.resetStartNanos();</span>
+<span class="nc" id="L939">                return Expr.empty();</span>
+            }
+        }
+<span class="fc" id="L942">        double sec = rt.timeElapsedSeconds();</span>
+<span class="fc" id="L943">        return Expr.singleton(new Str(String.format(java.util.Locale.ROOT, &quot;%.2f&quot;, sec)));</span>
+    }
+
+    private static String termAsText(Term t) {
+<span class="pc bpc" id="L947" title="2 of 4 branches missed.">        return switch (t) {</span>
+<span class="fc" id="L948">            case Sym s -&gt; s.name();</span>
+<span class="fc" id="L949">            case Str s -&gt; s.value();</span>
+<span class="nc" id="L950">            case Num n -&gt; n.value().toString();</span>
+<span class="nc" id="L951">            default -&gt; AstFormatter.format(t);</span>
+        };
+    }
+
+    /**
+     * Внутренний сигнал завершения программы Exit: пробрасывается сквозь стек редукции,
+     * Runtime/Main преобразует его в код возврата процесса.
+     */
+    public static final class ExitSignal extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        private final int code;
+
+        public ExitSignal(int code) {
+<span class="fc" id="L964">            super(&quot;Exit(&quot; + code + &quot;)&quot;);</span>
+<span class="fc" id="L965">            this.code = code;</span>
+<span class="fc" id="L966">        }</span>
+
+        public int code() {
+<span class="fc" id="L969">            return code;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

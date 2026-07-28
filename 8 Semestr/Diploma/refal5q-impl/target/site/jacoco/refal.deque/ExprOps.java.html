@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExprOps.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.deque</a> &gt; <span class="el_source">ExprOps.java</span></div><h1>ExprOps.java</h1><pre class="source lang-java linenums">package refal.deque;
+
+import static refal.deque.ShallowDeque.CAPACITY;
+
+// Конкатенация двух Expr через слияние пограничных буферов (алгоритм Окасаки).
+// Четыре комбинации: Shallow+Shallow, Shallow+Deep, Deep+Shallow, Deep+Deep.
+final class ExprOps {
+
+    private ExprOps() {
+    }
+
+    static &lt;T&gt; Expr&lt;T&gt; concat(Expr&lt;T&gt; a, Expr&lt;T&gt; b) {
+<span class="fc bfc" id="L13" title="All 2 branches covered.">        if (a.isEmpty()) {</span>
+<span class="fc" id="L14">            return b;</span>
+        }
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        if (b.isEmpty()) {</span>
+<span class="fc" id="L17">            return a;</span>
+        }
+<span class="fc bfc" id="L19" title="All 4 branches covered.">        if (a instanceof ShallowDeque&lt;T&gt; sa &amp;&amp; b instanceof ShallowDeque&lt;T&gt; sb) {</span>
+<span class="fc" id="L20">            return concatSS(sa, sb);</span>
+        }
+<span class="pc bpc" id="L22" title="1 of 4 branches missed.">        if (a instanceof ShallowDeque&lt;T&gt; sa &amp;&amp; b instanceof DeepDeque&lt;T&gt; db) {</span>
+<span class="fc" id="L23">            return concatSD(sa, db);</span>
+        }
+<span class="pc bpc" id="L25" title="1 of 4 branches missed.">        if (a instanceof DeepDeque&lt;T&gt; da &amp;&amp; b instanceof ShallowDeque&lt;T&gt; sb) {</span>
+<span class="fc" id="L26">            return concatDS(da, sb);</span>
+        }
+        // Обе стороны Deep.
+<span class="fc" id="L29">        DeepDeque&lt;T&gt; da = (DeepDeque&lt;T&gt;) a;</span>
+<span class="fc" id="L30">        DeepDeque&lt;T&gt; db = (DeepDeque&lt;T&gt;) b;</span>
+<span class="fc" id="L31">        return concatDD(da, db);</span>
+    }
+
+    private static &lt;T&gt; Expr&lt;T&gt; concatSS(ShallowDeque&lt;T&gt; a, ShallowDeque&lt;T&gt; b) {
+<span class="fc" id="L35">        int total = a.size() + b.size();</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (total &lt;= CAPACITY) {</span>
+<span class="fc" id="L37">            ShallowDeque&lt;T&gt; r = a;</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">            for (T x : iter(b)) {</span>
+<span class="fc" id="L39">                r = r.pushBackTight(x);</span>
+<span class="fc" id="L40">            }</span>
+<span class="fc" id="L41">            return r;</span>
+        }
+        // total &gt; CAPACITY: один из буферов «полный или почти полный»;
+        // делаем новый Deep с пустой mid.
+<span class="fc" id="L45">        return DeepDeque.mkDeep(a, ShallowDeque.empty(), b, total);</span>
+    }
+
+    private static &lt;T&gt; Expr&lt;T&gt; concatSD(ShallowDeque&lt;T&gt; a, DeepDeque&lt;T&gt; b) {
+<span class="fc" id="L49">        ShallowDeque&lt;T&gt; bf = b.front();</span>
+<span class="fc" id="L50">        int total = b.size() + a.size();</span>
+        // Сливаем 'a' слева в b.front. Если итог влезает в один Shallow,
+        // он становится новым front; иначе — расщепляем на два, второй идёт
+        // в начало mid.
+<span class="fc" id="L54">        int bfTotal = a.size() + bf.size();</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (bfTotal &lt;= CAPACITY) {</span>
+<span class="fc" id="L56">            ShallowDeque&lt;T&gt; mergedFront = ShallowDeque.empty();</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">            for (T x : iter(a)) {</span>
+<span class="fc" id="L58">                mergedFront = mergedFront.pushBackTight(x);</span>
+<span class="fc" id="L59">            }</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">            for (T x : iter(bf)) {</span>
+<span class="fc" id="L61">                mergedFront = mergedFront.pushBackTight(x);</span>
+<span class="fc" id="L62">            }</span>
+<span class="fc" id="L63">            return DeepDeque.mkDeep(mergedFront, b.mid(), b.back(), total);</span>
+        }
+        // Иначе формируем плоский массив и делим примерно пополам.
+<span class="fc" id="L66">        Object[] tmp = new Object[bfTotal];</span>
+<span class="fc" id="L67">        int i = 0;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (T x : iter(a)) {</span>
+<span class="fc" id="L69">            tmp[i++] = x;</span>
+<span class="fc" id="L70">        }</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        for (T x : iter(bf)) {</span>
+<span class="fc" id="L72">            tmp[i++] = x;</span>
+<span class="fc" id="L73">        }</span>
+<span class="fc" id="L74">        int leftLen = bfTotal - CAPACITY;</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (leftLen &lt; ShallowDeque.MIN_FILL) {</span>
+<span class="fc" id="L76">            leftLen = ShallowDeque.MIN_FILL;</span>
+        }
+<span class="fc" id="L78">        int rightLen = bfTotal - leftLen;</span>
+<span class="fc" id="L79">        ShallowDeque&lt;T&gt; head = ShallowDeque.ofArray(tmp, 0, leftLen);</span>
+<span class="fc" id="L80">        ShallowDeque&lt;T&gt; tail = ShallowDeque.ofArray(tmp, leftLen, rightLen);</span>
+        // head становится новым front; tail — первым бакетом mid.
+<span class="fc" id="L82">        Expr&lt;ShallowDeque&lt;T&gt;&gt; newMid = b.mid().pushFront(tail);</span>
+<span class="fc" id="L83">        return DeepDeque.mkDeep(head, newMid, b.back(), total);</span>
+    }
+
+    private static &lt;T&gt; Expr&lt;T&gt; concatDS(DeepDeque&lt;T&gt; a, ShallowDeque&lt;T&gt; b) {
+<span class="fc" id="L87">        ShallowDeque&lt;T&gt; ab = a.back();</span>
+<span class="fc" id="L88">        int total = a.size() + b.size();</span>
+<span class="fc" id="L89">        int abTotal = ab.size() + b.size();</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (abTotal &lt;= CAPACITY) {</span>
+<span class="fc" id="L91">            ShallowDeque&lt;T&gt; mergedBack = ShallowDeque.empty();</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">            for (T x : iter(ab)) {</span>
+<span class="fc" id="L93">                mergedBack = mergedBack.pushBackTight(x);</span>
+<span class="fc" id="L94">            }</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">            for (T x : iter(b)) {</span>
+<span class="fc" id="L96">                mergedBack = mergedBack.pushBackTight(x);</span>
+<span class="fc" id="L97">            }</span>
+<span class="fc" id="L98">            return DeepDeque.mkDeep(a.front(), a.mid(), mergedBack, total);</span>
+        }
+<span class="fc" id="L100">        Object[] tmp = new Object[abTotal];</span>
+<span class="fc" id="L101">        int i = 0;</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        for (T x : iter(ab)) {</span>
+<span class="fc" id="L103">            tmp[i++] = x;</span>
+<span class="fc" id="L104">        }</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        for (T x : iter(b)) {</span>
+<span class="fc" id="L106">            tmp[i++] = x;</span>
+<span class="fc" id="L107">        }</span>
+<span class="fc" id="L108">        int rightLen = abTotal - CAPACITY;</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        if (rightLen &lt; ShallowDeque.MIN_FILL) {</span>
+<span class="fc" id="L110">            rightLen = ShallowDeque.MIN_FILL;</span>
+        }
+<span class="fc" id="L112">        int leftLen = abTotal - rightLen;</span>
+<span class="fc" id="L113">        ShallowDeque&lt;T&gt; head = ShallowDeque.ofArray(tmp, 0, leftLen);</span>
+<span class="fc" id="L114">        ShallowDeque&lt;T&gt; tail = ShallowDeque.ofArray(tmp, leftLen, rightLen);</span>
+<span class="fc" id="L115">        Expr&lt;ShallowDeque&lt;T&gt;&gt; newMid = a.mid().pushBack(head);</span>
+<span class="fc" id="L116">        return DeepDeque.mkDeep(a.front(), newMid, tail, total);</span>
+    }
+
+    private static &lt;T&gt; Expr&lt;T&gt; concatDD(DeepDeque&lt;T&gt; a, DeepDeque&lt;T&gt; b) {
+<span class="fc" id="L120">        int total = a.size() + b.size();</span>
+<span class="fc" id="L121">        ShallowDeque&lt;T&gt; ab = a.back();</span>
+<span class="fc" id="L122">        ShallowDeque&lt;T&gt; bf = b.front();</span>
+<span class="fc" id="L123">        int boundary = ab.size() + bf.size();</span>
+
+<span class="fc" id="L125">        Expr&lt;ShallowDeque&lt;T&gt;&gt; aMidPlus = a.mid();</span>
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        if (boundary == 0) {</span>
+            // оба пограничных пусты — ничего не добавляем.
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        } else if (boundary &lt;= CAPACITY) {</span>
+<span class="nc" id="L129">            ShallowDeque&lt;T&gt; merged = ShallowDeque.empty();</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            for (T x : iter(ab)) {</span>
+<span class="nc" id="L131">                merged = merged.pushBackTight(x);</span>
+<span class="nc" id="L132">            }</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">            for (T x : iter(bf)) {</span>
+<span class="nc" id="L134">                merged = merged.pushBackTight(x);</span>
+<span class="nc" id="L135">            }</span>
+<span class="nc" id="L136">            aMidPlus = aMidPlus.pushBack(merged);</span>
+<span class="nc" id="L137">        } else {</span>
+<span class="fc" id="L138">            Object[] tmp = new Object[boundary];</span>
+<span class="fc" id="L139">            int i = 0;</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">            for (T x : iter(ab)) {</span>
+<span class="fc" id="L141">                tmp[i++] = x;</span>
+<span class="fc" id="L142">            }</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">            for (T x : iter(bf)) {</span>
+<span class="fc" id="L144">                tmp[i++] = x;</span>
+<span class="fc" id="L145">            }</span>
+<span class="fc" id="L146">            int rightLen = boundary - CAPACITY;</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">            if (rightLen &lt; ShallowDeque.MIN_FILL) {</span>
+<span class="fc" id="L148">                rightLen = ShallowDeque.MIN_FILL;</span>
+            }
+<span class="fc" id="L150">            int leftLen = boundary - rightLen;</span>
+<span class="fc" id="L151">            ShallowDeque&lt;T&gt; m1 = ShallowDeque.ofArray(tmp, 0, leftLen);</span>
+<span class="fc" id="L152">            ShallowDeque&lt;T&gt; m2 = ShallowDeque.ofArray(tmp, leftLen, rightLen);</span>
+<span class="fc" id="L153">            aMidPlus = aMidPlus.pushBack(m1).pushBack(m2);</span>
+        }
+
+        // Рекурсивное склеивание middle-очередей буферов.
+<span class="fc" id="L157">        Expr&lt;ShallowDeque&lt;T&gt;&gt; newMid = concat(aMidPlus, b.mid());</span>
+<span class="fc" id="L158">        return DeepDeque.mkDeep(a.front(), newMid, b.back(), total);</span>
+    }
+
+    private static &lt;X&gt; Iterable&lt;X&gt; iter(Expr&lt;X&gt; e) {
+<span class="fc" id="L162">        return e::iterator;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

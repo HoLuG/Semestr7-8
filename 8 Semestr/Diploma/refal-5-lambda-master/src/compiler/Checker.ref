@@ -1,0 +1,1125 @@
+$INCLUDE "LibraryEx";
+
+*$FROM Error
+$EXTERN EL-AddErrorAt, EL-AddWarningAt;
+
+*$FROM GenericMatch
+$EXTERN GenericMatch;
+
+*$FROM Desugaring
+$EXTERN RemovePos-Expr;
+
+*$FROM TreeUtils
+$EXTERN ExtractVariables-Expr;
+
+*$FROM Checker-Screening
+$EXTERN CheckScreening;
+
+*$FROM Checker-MultiScreening
+$EXTERN CheckMultiScreening;
+
+$ENTRY CheckProgram {
+  (e.WarningIds) t.ErrorList e.AST
+    = <Reduce
+        {
+          t.ErrorList^ (Error t.SrcPos e.Message)
+            = <EL-AddErrorAt t.ErrorList t.SrcPos <PrepareMessage e.Message>>;
+          t.ErrorList^ (Warning s.WarningId t.SrcPos e.Message)
+            = <EL-AddWarningAt
+                t.ErrorList s.WarningId t.SrcPos <PrepareMessage e.Message>
+              >;
+        }
+        t.ErrorList
+        <FindErrors (e.WarningIds) e.AST>
+      >;
+}
+
+PrepareMessage {
+  AlreadyDefined e.Name = 'Function ' e.Name ' is already defined';
+
+  ForwardForEntry e.Name = '$FORWARD ' e.Name ' for $ENTRY ' e.Name;
+
+  InitFinalEntry e.Name = 'Function ' e.Name ' should not be declared $ENTRY';
+
+  ForwardNotDefined e.Name = 'Function for $FORWARD ' e.Name ' is not defined';
+
+  NotDefined e.Name = 'Function ' e.Name ' is not defined';
+
+  AlreadyBounded s.Mode e.Index
+    = 'Variable hide operator^ must be applied to first occurence of '
+      'variable ' s.Mode '.' e.Index;
+
+  UnnamedNewVariable s.Mode e.Index
+    = 'Unnamed new variable is forbidden: ' s.Mode '.' e.Index '^';
+
+  UnnamedVariableInResult s.Mode e.Index
+    = 'Unnamed variable ' s.Mode '.' e.Index ' can\'t appear '
+      'in result expression';
+
+  InvalidMode s.OldMode s.NewMode e.Index
+    = 'Variables ' s.OldMode '.' e.Index ' and '
+      s.NewMode '.' e.Index ' have different modes';
+
+  VariableNotFound s.Mode e.Index
+    = 'Variable ' s.Mode '.' e.Index ' not found';
+
+  DanglingEntry e.Name = '$ENTRY ' e.Name '; declaration for missed function';
+
+  DanglingInline e.Name = '$INLINE ' e.Name '; inline label for missed function';
+
+  DanglingDrive e.Name = '$DRIVE ' e.Name '; drive label for missed function';
+
+  NativeOptimizable s.Label e.Name
+    = 'Function ' e.Name ' can\'t be $' <Upper <Explode s.Label>>;
+
+  /* Ошибки специализации */
+  RedefineSpec e.FnName = 'Specialization of function ' e.FnName 'is redefined';
+
+  MustBeHardPattern e.FnName
+    = 'Pattern of function specialization for ' e.FnName ' must be hard';
+
+  BadSpecForFunction e.FnName = 'Bad function specialization for ' e.FnName;
+
+  OrphanSpec e.FnName = 'Orphan function specialization for ' e.FnName;
+
+  RepVarInSpecPattern s.Mode e.Index
+    = 'Repeated variable ' s.Mode '.' e.Index ' in specialization pattern';
+
+  RedundantCaret s.Mode e.Index
+    = 'Useless sign ^: no old variable ' s.Mode '.' e.Index ' in current scope';
+
+  RepeatedVariable s.Mode e.Index
+    = 'Suspicious repeated variable ' s.Mode '.' e.Index;
+
+  UnnamedVariableInSpecPattern s.Mode e.Index
+    = 'Unnamed variable ' s.Mode '.' e.Index ' can\'t appear '
+      'in $SPEC pattern';
+
+  SpecStaticParamTypeMismatching (s.Mode e.Index) e.FnName
+    = 'Type mismatching of static parameter 's.Mode '.' e.Index
+      ' in specialization of function ' e.FnName;
+
+  SpecStaticParamRepeatingVars (s.Mode e.Index) e.FnName
+    = 'Repeating variables match static parameter ' s.Mode '.' e.Index
+      ' in specialization of function ' e.FnName;
+
+  Screening (e.FunName) (e.Screening) (e.Screened)
+    = 'Function `' e.FunName '\': sentence ' e.Screening
+      ' screens sentence ' e.Screened;
+
+  MultiScreening (e.FunName) (e.Screening) (e.Screened)
+    = 'Function \'' e.FunName '\': sentence ' e.Screened
+      ' screened by group of sentences: ' e.Screening;
+
+  TaggedPseudofunction s.Tag e.Name
+    = 'Pseudofunction ' e.Name ' should not have optimization tag '
+      '$' <Upper <Explode s.Tag>>;
+
+  EntryPseudofunction e.Name
+    = 'Pseudofunction ' e.Name ' should be local, in other case function '
+      'can\'t be encountered as pseudofunction';
+
+  BadPseudofunctionBody e.Name
+    = 'Pseudofunction ' e.Name ' should have a body { e.X = e.X }, '
+      'in other case function can\'t be encountered as pseudofunction';
+}
+
+FindErrors {
+  (e.WarningIds) e.AST
+    = <CheckPseudofunctions e.AST> : (e.PFErrors) e.AST^
+    = <CheckSpecs e.AST> : (e.SpecErrors) e.AST^
+    = <SeparateDefines e.AST> : (e.Declarations) e.FunctionBodies
+    = e.PFErrors e.SpecErrors
+      <CheckValidUsings
+        (<CheckDeclarations (e.WarningIds) e.Declarations>)
+        <Map &CheckFunctionBody e.FunctionBodies>
+      >
+      <CheckScreening (e.WarningIds) (e.AST)>
+      <CheckMultiScreening (e.WarningIds) (e.AST)>;
+}
+
+CheckPseudofunctions {
+  e.AST
+    = <Map
+        {
+          (s.Tag t.SrcPos s.ScopeClass e.Name)
+            , Drive Inline Intrinsic : e._ s.Tag e._
+            , <Pseudofunctions> : e._ (e.Name) e._
+            = (Error t.SrcPos TaggedPseudofunction s.Tag e.Name);
+
+          (Spec t.SrcPos (e.Name) e._)
+            , <Pseudofunctions> : e._ (e.Name) e._
+            = (Error t.SrcPos TaggedPseudofunction Spec e.Name);
+
+          (Entry t.SrcPos GN-Entry e.Name)
+            , <Pseudofunctions> : e._ (e.Name) e._
+            = (Warning pseudofunctions t.SrcPos EntryPseudofunction e.Name);
+
+          (Function t.SrcPos s.ScopeClass (e.Name) e.Body)
+            , <Pseudofunctions> : e._ (e.Name) e._
+            = (Function t.SrcPos s.ScopeClass (e.Name) e.Body)
+              <CheckPseudofunctions-Entry t.SrcPos e.Name s.ScopeClass>
+              <CheckPseudofunctions-Body t.SrcPos (e.Name) e.Body>;
+
+          t.Other = t.Other;
+        }
+        e.AST
+      >
+    : e.AST-and-messages
+    = <SeparateErrors e.AST-and-messages>;
+}
+
+SeparateErrors {
+  e.AST-and-messages
+    = <MapAccum
+        {
+          (e.Messages) (Error e.Error) = (e.Messages (Error e.Error));
+          (e.Messages) (Warning e.Warning) = (e.Messages (Warning e.Warning));
+
+          (e.Messages) t.Other = (e.Messages) t.Other;
+        }
+        (/* messages */) e.AST-and-messages
+      >
+}
+
+Pseudofunctions {
+  = ('gen_e__') ('gen-e__')
+}
+
+CheckPseudofunctions-Entry {
+  t.SrcPos e.Name GN-Local = /* нет ошибок */;
+
+  t.SrcPos e.Name GN-Entry
+    = (Warning pseudofunctions t.SrcPos EntryPseudofunction e.Name);
+}
+
+CheckPseudofunctions-Body {
+  t.SrcPos (e.Name) Sentences ((e.Pattern) (e.Result) (e.Blocks))
+    , <WholeEVar e.Pattern> : True e.Index
+    , <WholeEVar e.Result> : True e.Index /* SAME */
+    , e.Blocks : /* нет блоков */
+    = /* пусто, правильное тело gen-функции */;
+
+  t.SrcPos (e.Name) e._
+    = (Warning pseudofunctions t.SrcPos BadPseudofunctionBody e.Name);
+}
+
+WholeEVar {
+  (Var t._pos 'e' e.Index) = True e.Index;
+  e._ = False;
+}
+
+CheckSpecs {
+  e.AST
+    = <CheckSpecs-Redefine e.AST> : e.AST-and-errors
+    = <CheckSpecs-Formats e.AST-and-errors> : e.AST-and-errors^
+    = <CheckSpecs-Functions e.AST-and-errors> : e.AST-and-errors^
+    = <SeparateErrors e.AST-and-errors>;
+}
+
+* Проверка переопределения специализации
+CheckSpecs-Redefine {
+  e.AST-B
+  (Spec t.SrcPos1 (e.Name) e.Pattern1) e.AST-M
+  (Spec t.SrcPos2 (e.Name) e.Pattern2) e.AST-E
+    = <CheckSpecs-Redefine
+        e.AST-B
+        (Spec t.SrcPos1 (e.Name) e.Pattern1) e.AST-M
+        (Error t.SrcPos2 RedefineSpec e.Name) e.AST-E
+      >;
+
+  e.AST = e.AST;
+}
+
+* Проверка форматов образцов специализаций
+CheckSpecs-Formats {
+  e.AST
+    = <Map
+        {
+          (Spec t.SrcPos (e.Name) e.Pattern)
+            = <IsHardPattern e.Pattern>
+            : {
+                True
+                  = <CheckRepeatedVariables e.Pattern>
+                  : {
+                    /* пусто */ = (Spec t.SrcPos (e.Name) e.Pattern);
+
+                    e.Errors = e.Errors;
+                  };
+
+                False = (Error t.SrcPos MustBeHardPattern e.Name);
+              };
+
+          t.Other = t.Other;
+        }
+        e.AST
+      >;
+}
+
+* Проверка жёсткости образцв в специализации
+IsHardPattern {
+  /* empty */ = True;
+
+  (Var t.SrcPos1 'e' e.Index) = True;
+
+  (Var t.SrcPos1 'e' e.Index1) e.Pattern-M
+  (Var t.SrcPos2 'e' e.Index2) e.Pattern-E
+    = False;
+
+  (Brackets e.PatternPart1) e.PatternPart2
+    = <IsHardPattern e.PatternPart1>
+    : {
+        True = <IsHardPattern e.PatternPart2>;
+
+        False = False;
+      };
+
+  e.PatternPart1 (Brackets e.PatternPart2)
+    = <IsHardPattern e.PatternPart1>
+    : {
+        True = <IsHardPattern e.PatternPart2>;
+
+        False = False;
+      };
+
+  (ADT-Brackets t.SrcPos (e.Name) e.PatternPart1) e.PatternPart2
+    = <IsHardPattern e.PatternPart1>
+    : {
+        True = <IsHardPattern e.PatternPart2>;
+
+        False = False;
+      };
+
+  e.PatternPart1 (ADT-Brackets t.SrcPos (e.Name) e.PatternPart2)
+    = <IsHardPattern e.PatternPart1>
+    : {
+        True = <IsHardPattern e.PatternPart2>;
+
+        False = False;
+      };
+
+  t.Term e.Pattern-E, <IsHardTerm t.Term> : True = <IsHardPattern e.Pattern-E>;
+
+  e.Pattern-B t.Term, <IsHardTerm t.Term> : True = <IsHardPattern e.Pattern-B>;
+}
+
+IsHardTerm {
+  (Symbol s.Type e.Info) = True;
+
+  (Var t.SrcPos 's' e.Index) = True;
+
+  (Var t.SrcPos 't' e.Index) = True;
+
+  t.Term = False;
+}
+
+* Проверка на повторные переменные в образце специализации
+CheckRepeatedVariables {
+  e.Pattern = <ErrorsForRepeatedVariables <FindVariables e.Pattern>>;
+}
+
+ErrorsForRepeatedVariables {
+  e.VarList-B
+  (Var t.SrcPos1 s.Mode e.Index) e.VarList-M
+  (Var t.SrcPos2 s.Mode e.Index) e.VarList-E
+    = <ErrorsForRepeatedVariables
+        e.VarList-B
+        (Var t.SrcPos1 s.Mode e.Index) e.VarList-M
+        e.VarList-E
+      >
+      (Error t.SrcPos2 RepVarInSpecPattern s.Mode e.Index);
+
+  e.VarList-B (Var t.SrcPos s.Mode '_' e.Index) e.VarList-E
+    = <ErrorsForRepeatedVariables e.VarList-B e.VarList-E>
+      (Error t.SrcPos UnnamedVariableInSpecPattern s.Mode '_' e.Index);
+
+  e.VarList = /* empty */;
+}
+
+FindVariables {
+  e.Pattern
+    = <Map
+        {
+          (Var t.SrcPos s.Mode e.Index)
+            = (Var t.SrcPos s.Mode e.Index);
+
+          (Brackets e.InBrackets) = <FindVariables e.InBrackets>;
+
+          (ADT-Brackets t.SrcPos (e.Name) e.InBrackets)
+            = <FindVariables e.InBrackets>;
+
+          t.Term = /* empty */;
+        }
+        e.Pattern
+      >;
+}
+
+* Проверка, что упоминаемые функции определены
+CheckSpecs-Functions {
+  e.AST-B
+  (Spec t.SrcPos1 (e.Name) e.Pattern) e.AST-M
+  (Function t.SrcPos2 s.ScopeClass (e.Name) e.Body) e.AST-E
+    = <ValidBodyForSpec (e.Name) (e.Pattern) e.Body>
+    : {
+        True =
+          e.AST-B e.AST-M
+          (Function t.SrcPos2 s.ScopeClass (e.Name) e.Body)
+          e.AST-E;
+
+        False e.Messages =
+          e.AST-B
+          (Error t.SrcPos1 BadSpecForFunction e.Name)
+          <Map
+            {
+              (e.Message) = (Error t.SrcPos2 e.Message e.Name);
+            }
+            e.Messages
+          >
+          e.AST-M
+          (Function t.SrcPos2 s.ScopeClass (e.Name) e.Body)
+          e.AST-E;
+      }
+    : e.AST
+    = <CheckSpecs-Functions e.AST>;
+
+  e.AST-B
+  (Function t.SrcPos1 s.ScopeClass (e.Name) e.Body) e.AST-M
+  (Spec t.SrcPos2 (e.Name) e.Pattern) e.AST-E
+    = <ValidBodyForSpec (e.Name) (e.Pattern) e.Body>
+    : {
+        True =
+          e.AST-B
+          (Function t.SrcPos1 s.ScopeClass (e.Name) e.Body)
+          e.AST-M e.AST-E;
+
+        False e.Messages =
+          e.AST-B
+          (Function t.SrcPos1 s.ScopeClass (e.Name) e.Body)
+          e.AST-M
+          (Error t.SrcPos2 BadSpecForFunction e.Name)
+          <Map
+            {
+              (e.Message) = (Error t.SrcPos2 e.Message e.Name);
+            }
+            e.Messages
+          >
+          e.AST-E;
+      }
+    : e.AST
+    = <CheckSpecs-Functions e.AST>;
+
+  e.AST-B (Spec t.SrcPos (e.Name) e.Pattern) e.AST-E
+    = <CheckSpecs-Functions
+        e.AST-B (Error t.SrcPos OrphanSpec e.Name) e.AST-E
+      >;
+
+  e.AST = e.AST;
+}
+
+ValidBodyForSpec {
+  (e.Name) t.Pattern Sentences e.Sentences
+    = <Reduce
+        (&ValidBodyForSpec-CheckSentensePattern t.Pattern)
+        (True /* for messages */) e.Sentences
+      >
+    : (s.BoolResult e.Messages)
+    = s.BoolResult e.Messages;
+
+  (e.Name) t.Pattern NativeBody e.Code = False (NativeOptimizable Spec e.Name);
+}
+
+ValidBodyForSpec-CheckSentensePattern {
+  (e.SpecPattern) (True e.Messages)
+  ((e.SentencePattern) e.OtherSentenceConstruction)
+    = <GenericMatch
+        (<RemovePos-Expr e.SentencePattern>) (<RemovePos-Expr e.SpecPattern>)
+      >
+    : {
+        Clear e.Vars
+          = <Reduce
+              {
+                (True (e.NMessages) e.ExtractedVars) (e.Val ':' t.Var)
+                  , <IsSpecStaticVar t.Var> : True
+                  = <CheckSpec-VarTypeMatching (e.Val) t.Var>
+                  : {
+                      True
+                        = <CheckSpec-RepeatingVarInStaticParams
+                            e.ExtractedVars <ExtractVariables-Expr e.Val>
+                          >
+                        : {
+                            True e.ExtractedVars^
+                              = (True (e.NMessages) e.ExtractedVars);
+
+                            False e.ExtractedVars^
+                              = (
+                                  False
+                                  (
+                                    e.NMessages
+                                    (SpecStaticParamRepeatingVars t.Var)
+                                  )
+                                  e.ExtractedVars
+                                );
+                          };
+
+                      False
+                        = (
+                            False
+                            (e.NMessages (SpecStaticParamTypeMismatching t.Var))
+                            e.ExtractedVars
+                          );
+                  };
+
+                (s.Other (e.NMessages) e.ExtractedVars)  (e.Val ':' t.Var)
+                  = (s.Other (e.NMessages) e.ExtractedVars);
+              }
+              (True (/* for messages */) /* for extracted vars */)
+              e.Vars
+            >
+          : (s.BoolResult (e.Messages^) e.ExtractedVars)
+          = (s.BoolResult e.Messages);
+        Contracted e.Vars = (False e.Messages);
+        Failure = (False e.Messages);
+        Undefined = (False e.Messages);
+    };
+
+  t.SpecPattern (False e.Messages) e.Anything = (False e.Messages);
+}
+
+CheckSpec-VarTypeMatching {
+  ((Var s.Mode e.Val)) (s.Mode e.Var) = True;
+
+  (e.Val) (e.Var) = False;
+}
+
+CheckSpec-RepeatingVarInStaticParams {
+  /* Игнорируем безымянные переменные */
+  e.ExtractedVars-B (s.Mode '_' e.Index) e.ExtractedVars-E
+    = True e.ExtractedVars-B e.ExtractedVars-E;
+
+  e.ExtractedVars-B (e.Var) e.ExtractedVars-M (e.Var) e.ExtractedVars-E
+    = False e.ExtractedVars-B (e.Var) e.ExtractedVars-M e.ExtractedVars-E;
+
+  e.ExtractedVars = True e.ExtractedVars;
+}
+
+IsSpecStaticVar {
+  (s.Mode s.FirstSymbol e.Index)
+    , <Type s.FirstSymbol>
+    : {
+        'Lu' s._ = True;
+        e._ = False;
+      };
+}
+
+SeparateDefines {
+  e.AST
+    = <MapAccum
+        {
+          (e.Declarations)
+          (Function t.SrcPos s.ScopeClass (e.Name) Sentences e.Body) =
+            (e.Declarations (Define t.SrcPos s.ScopeClass e.Name))
+            (Sentences e.Body);
+
+          (e.Declarations)
+          (Function t.SrcPos s.ScopeClass (e.Name) NativeBody e.Body) =
+            (
+              e.Declarations
+              (Define t.SrcPos s.ScopeClass e.Name) (NativeBody e.Name)
+            )
+            (NativeBody e.Body);
+
+          (e.Declarations) (Swap t.SrcPos s.ScopeClass e.Name) =
+            (e.Declarations (Define t.SrcPos s.ScopeClass e.Name));
+
+          (e.Declarations) (Enum t.SrcPos s.ScopeClass e.Name) =
+            (e.Declarations (Define t.SrcPos s.ScopeClass e.Name));
+
+          (e.Declarations) (Meta t.SrcPos s.ScopeClass e.Name) =
+            (e.Declarations
+              (Define t.SrcPos s.ScopeClass e.Name)
+              (Declare t.SrcPos GN-Entry '__Meta_' e.Name)
+              (Declare t.SrcPos GN-Entry '__Step-Drop')
+            );
+
+          (e.Declarations) (Declaration t.SrcPos s.ScopeClass e.Name) =
+            (e.Declarations (Declare t.SrcPos s.ScopeClass e.Name));
+
+          (e.Declarations) (Entry t.SrcPos GN-Entry e.Name) =
+            (e.Declarations (Entry t.SrcPos e.Name));
+
+          (e.Declarations) (Inline t.SrcPos s.ScopeClass e.Name) =
+            (e.Declarations (Inline t.SrcPos e.Name));
+
+          (e.Declarations) (Drive t.SrcPos s.ScopeClass e.Name) =
+            (e.Declarations (Drive t.SrcPos e.Name));
+
+          (e.Declarations) (Intrinsic t.SrcPos s.ScopeClass e.Name) =
+            (e.Declarations (Intrinsic t.SrcPos e.Name));
+
+          /* определения идентификаторов игнорируем */
+          (e.Declarations) (Ident t.SrcPos e.Name) =
+            (e.Declarations);
+
+          (e.Declarations) (NativeBlock e.Block) =
+            (e.Declarations);
+        }
+        (/* объявления */)
+        e.AST
+      >;
+}
+
+CheckDeclarations {
+  (e.WarningIds) e.Declarations
+    = <Fetch
+        e.Declarations
+        <Pipe
+          &CleanupValidEntry
+          &FindInvalidEntry
+          &CleanupValidForwards
+          &FindInvalidForwards
+          &FindInvalidDriveInline
+          &CheckRedefinitions
+          &FindFinalInitEntry
+        >
+      >
+}
+
+FindInvalidDriveInline {
+  e.Declarations
+
+    /* находим все $DRIVE и $INLINE */
+    = <MapAccum
+        {
+          (e.DriveInline) (Inline t.SrcPos e.Name)
+            = (e.DriveInline (Inline t.SrcPos e.Name));
+
+          (e.DriveInline) (Drive t.SrcPos e.Name)
+            = (e.DriveInline (Drive t.SrcPos e.Name));
+
+          (e.DriveInline) t.OtherDeclaration
+            = (e.DriveInline) t.OtherDeclaration;
+        }
+        (/* drive inline */)
+        e.Declarations
+      >
+    : (e.DriveInline) e.Declarations^
+
+    /* Проверяем, что метки $DRIVE и $INLINE не назначены нативным функциям */
+    = <Map
+        {
+          (NativeBody e.Name)
+            = e.DriveInline
+            : {
+                e._ (s.Label t.SrcPos e.Name) e._
+                  = (Error t.SrcPos NativeOptimizable s.Label e.Name);
+
+                e._ = /* пропускаем */;
+              };
+
+          t.Other = t.Other;
+        }
+        e.Declarations
+      >
+    : e.Declarations^
+
+    /* Удаляем валидные $DRIVE и $INLINE */
+    = <MapAccum
+        {
+          (e.DriveInline^) t.Definition
+            , t.Definition : (Define t.SrcPosDefine s.ScopeClass e.Name)
+            = <Map
+                {
+                  (s.Label t.SrcPos e.Name) = /* пусто */;
+                  t.DriveInline = t.DriveInline;
+                }
+                e.DriveInline
+              >
+            : e.DriveInline^
+            = (e.DriveInline) t.Definition;
+
+          (e.DriveInline^) t.OtherDeclaration
+            = (e.DriveInline) t.OtherDeclaration;
+        }
+        (e.DriveInline) e.Declarations
+      >
+    : (e.InvalidDriveInline) e.Declarations^
+
+    = <Map
+        {
+          (Inline t.SrcPos e.Name) = (Error t.SrcPos DanglingInline e.Name);
+          (Drive t.SrcPos e.Name) = (Error t.SrcPos DanglingDrive e.Name);
+        }
+        e.InvalidDriveInline
+      >
+      e.Declarations;
+}
+
+CleanupValidEntry {
+  /*
+    При помощи $ENTRY Foo, Bar; можно объявлять и $ENTRY Foo { ... },
+    поэтому и s.ScopeClass в Define. Но потом для определения устанавливаем
+    GN-Entry.
+  */
+  e.Declarations-B
+  (Entry t.SrcPosEntry e.Name) e.Declarations-M
+  (Define t.SrcPosDefine s.ScopeClass e.Name) e.Declarations-E
+    = <CleanupValidEntry
+        e.Declarations-B e.Declarations-M
+        (Define t.SrcPosDefine GN-Entry e.Name) e.Declarations-E
+      >;
+
+  e.Declarations-B
+  (Define t.SrcPosDefine s.ScopeClass e.Name) e.Declarations-M
+  (Entry t.SrcPosEntry e.Name) e.Declarations-E
+    = <CleanupValidEntry
+        e.Declarations-B
+        (Define t.SrcPosDefine GN-Entry e.Name) e.Declarations-M
+        e.Declarations-E
+      >;
+
+  e.Declarations = e.Declarations;
+}
+
+FindInvalidEntry {
+  e.Declarations
+    = <Map
+        {
+          (Entry t.SrcPos e.Name) = (Error t.SrcPos DanglingEntry e.Name);
+
+          t.Other = t.Other;
+        }
+        e.Declarations
+      >;
+}
+
+CleanupValidForwards {
+  e.Declarations-B
+  (Declare t.SrcPosForward GN-Local e.Name) e.Declarations-M
+  (Define t.SrcPosDefine GN-Local e.Name) e.Declarations-E =
+    /* Правильный $FORWARD, уничтожаем */
+    <CleanupValidForwards
+      e.Declarations-B e.Declarations-M
+      (Define t.SrcPosDefine GN-Local e.Name) e.Declarations-E
+    >;
+
+  e.Declarations-B
+  (Define t.SrcPosDefine GN-Local e.Name) e.Declarations-M
+  (Declare t.SrcPosForward GN-Local e.Name) e.Declarations-E =
+    /* Правильный $FORWARD, уничтожаем */
+    <CleanupValidForwards
+      e.Declarations-B
+      (Define t.SrcPosDefine GN-Local e.Name) e.Declarations-M
+      e.Declarations-E
+    >;
+
+  e.Declarations = e.Declarations;
+}
+
+FindInvalidForwards {
+  e.Declarations-B
+  (Declare t.SrcPosForward GN-Local e.Name) e.Declarations-M
+  (Define t.SrcPosDefine GN-Entry e.Name) e.Declarations-E =
+    <FindInvalidForwards
+      e.Declarations-B
+      (Error t.SrcPosForward ForwardForEntry e.Name) e.Declarations-M
+      (Define t.SrcPosDefine GN-Entry e.Name) e.Declarations-E
+    >;
+
+  e.Declarations-B
+  (Define t.SrcPosDefine GN-Entry e.Name) e.Declarations-M
+  (Declare t.SrcPosForward GN-Local e.Name) e.Declarations-E =
+    <FindInvalidForwards
+      e.Declarations-B
+      (Define t.SrcPosDefine GN-Entry e.Name) e.Declarations-M
+      (Error t.SrcPosForward ForwardForEntry e.Name) e.Declarations-E
+    >;
+
+  e.Declarations-B
+  (Declare t.SrcPosForward GN-Local e.Name) e.Declarations-E =
+    <FindInvalidForwards
+      e.Declarations-B
+      (Error t.SrcPosForward ForwardNotDefined e.Name) e.Declarations-E
+    >;
+
+  e.Declarations = e.Declarations;
+}
+
+FindFinalInitEntry {
+  e.Declarations
+    = <Map
+        {
+          (Define t.ScrPosDefine GN-Entry e.Name)
+            , <OneOf (e.Name) ('__FINAL') ('__INIT')> : True
+            = (Define t.ScrPosDefine GN-Entry e.Name)
+              (Error t.ScrPosDefine InitFinalEntry e.Name);
+
+          t.OtherDeclaraion = t.OtherDeclaraion
+        }
+        e.Declarations
+      >;
+}
+
+CheckRedefinitions {
+  e.Declarations-B
+  (Define t.SrcPos1 s.ScopeClass1 e.Name) e.Declarations-M
+  (Define t.SrcPos2 s.ScopeClass2 e.Name) e.Declarations-E =
+    e.Declarations-B
+    <CheckRedefinitions
+      (Define t.SrcPos1 s.ScopeClass1 e.Name) e.Declarations-M
+      (Error t.SrcPos2 AlreadyDefined e.Name) e.Declarations-E
+    >;
+
+  e.Declarations = e.Declarations;
+}
+
+CheckFunctionBody {
+  (e.Body) =
+    <CheckFunctionBodyRec (/* vars */) e.Body>;
+}
+
+CheckFunctionBodyRec {
+  (e.ScopeVars) Sentences e.Sentences =
+    <CheckSentenceRec (e.ScopeVars) e.Sentences>;
+
+  (e.ScopeVars) NativeBody e.Code =
+    /* пусто, нет ни имён функций, ни ошибок внутри */;
+}
+
+CheckSentenceRec {
+  (e.ScopeVars) t.LastSentence
+    = <CheckSentence e.ScopeVars t.LastSentence OneWay> ;
+
+  (e.ScopeVars) t.Sentence e.Sentences
+    = <CheckSentence e.ScopeVars t.Sentence WithBacktrack>
+      <CheckSentenceRec (e.ScopeVars) e.Sentences>;
+
+  (e.ScopeVars) /* предложений нет (пустая лямбда) */ = /* пусто */ ;
+}
+
+CheckSentence {
+  e.ScopeVars ((e.Pattern) e.Assignments (e.Result) (e.Blocks)) s.Backtrack
+
+    = <CheckPattern (e.ScopeVars) (e.Pattern) s.Backtrack>
+    : (e.ScopeVars^) e.PatternFunctionsAndErrors
+
+    = <DoCheckAssignments
+        (e.Assignments) (e.ScopeVars) /* нет ошибок */
+        <FixBacktrackForOpenEVars e.Pattern s.Backtrack>
+      >
+    : (e.ScopeVars^) e.AssignmentsFunctionsAndErrors
+
+    = <CheckResult (e.ScopeVars) <FlatExpr e.Result>>
+    : e.ResultFunctionsAndErrors
+
+    = <CheckBlocks (e.ScopeVars) e.Blocks> : e.BlocksFunctionsAndErrors
+
+    = e.PatternFunctionsAndErrors
+      e.AssignmentsFunctionsAndErrors
+      e.ResultFunctionsAndErrors
+      e.BlocksFunctionsAndErrors;
+}
+
+CheckBlocks {
+  (e.ScopeVars) e.Blocks
+    = <Map
+        {
+          (e.BlockBody) = <CheckFunctionBodyRec (e.ScopeVars) e.BlockBody>;
+        }
+        e.Blocks
+      >;
+}
+
+DoCheckAssignments {
+  () (e.ScopeVars) e.Errors s.Backtrack = (e.ScopeVars) e.Errors;
+
+  ((s.ChainType (e.Result) (e.Blocks) (e.Pattern)) e.Assignments)
+  (e.ScopeVars) e.Errors s.Backtrack
+
+    = <CheckResult (e.ScopeVars) <FlatExpr e.Result>>
+    : e.ResultFunctionsAndErrors
+
+    = <CheckBlocks (e.ScopeVars) e.Blocks> : e.BlocksFunctionsAndErrors
+
+    = s.ChainType
+    : {
+        Assign = OneWay;
+        Condition = s.Backtrack;
+      }
+    : s.Backtrack^
+
+    = <CheckPattern (e.ScopeVars) (e.Pattern) s.Backtrack>
+    : (e.ScopeVars^) e.PatternFunctionsAndErrors
+
+    = <FixBacktrackForOpenEVars e.Pattern s.Backtrack> : s.Backtrack^
+
+    = <DoCheckAssignments
+        (e.Assignments) (e.ScopeVars)
+        e.Errors
+        e.ResultFunctionsAndErrors
+        e.BlocksFunctionsAndErrors
+        e.PatternFunctionsAndErrors
+        s.Backtrack
+      >;
+}
+
+FixBacktrackForOpenEVars {
+  e.Pattern OneWay, <FindOpenEVars e.Pattern> : /* пусто */ = OneWay;
+
+  e.Pattern s.Backtrack = WithBacktrack;
+}
+
+FindOpenEVars {
+  e._ (Var t._ 'e' e._) e._ (Var t._ 'e' e._) e._ = OpenE;
+
+  e.Terms
+    = <Map
+        {
+          (Brackets e.Inner) = <FindOpenEVars e.Inner>;
+          (ADT-Brackets t.Pos (e.Name) e.Inner) = <FindOpenEVars e.Inner>;
+          t.Other = /* нет открытых переменных */;
+        }
+        e.Terms
+      >;
+}
+
+FlatExpr {
+  e.Expr =
+    <Map
+      {
+        (Var t.SrcPos s.Mode e.Index) =
+          (Var t.SrcPos s.Mode e.Index);
+
+        (NewVar t.SrcPos s.Mode e.Index) =
+          (NewVar t.SrcPos s.Mode e.Index);
+
+        (Symbol Name t.SrcPos e.Name) = (Symbol Name t.SrcPos e.Name);
+
+        (Brackets e.InBrackets) = <FlatExpr e.InBrackets>;
+
+        (ADT-Brackets t.SrcPos (UnnamedADT) e.InBrackets) =
+          <FlatExpr e.InBrackets>;
+
+        (ADT-Brackets t.SrcPos (e.Name) e.InBrackets) =
+          (Symbol Name t.SrcPos e.Name) <FlatExpr e.InBrackets>;
+
+        (CallBrackets e.InBrackets) = <FlatExpr e.InBrackets>;
+
+        (Closure e.Sentences) = (Closure e.Sentences);
+
+        t.OtherTerm = /* игнорируем, нам не интересен */;
+      }
+      e.Expr
+    >;
+}
+
+CheckPattern {
+  (e.ScopeVars) (e.Pattern) s.Backtrack
+    = <CheckPattern-Flatten (e.ScopeVars) <FlatExpr e.Pattern>>
+      <CheckPattern-WarnRepeated (e.ScopeVars) s.Backtrack (e.Pattern)>;
+}
+
+CheckPattern-WarnRepeated {
+ (e.ScopeVars) OneWay (e.Pattern)
+   = <CheckPattern-WarnRepeatedRec (e.ScopeVars) (e.Pattern)>;
+
+ (e.ScopeVars) WithBacktrack (e.Pattern) = /* не выдаём предупреждений */;
+}
+
+CheckPattern-WarnRepeatedRec {
+  (e.ScopeVars) (e.OpenEPattern)
+    , e.OpenEPattern
+    : e._ (Var t._ 'e' e._) e._ (Var t._ 'e' e._) e._
+    = <CheckPattern-WarnRepeatedRec
+        (e.ScopeVars) (<ReducePattern e.OpenEPattern>)
+      >;
+
+  (e.ScopeVars) ((Var e.Info) e.Tail)
+    = <CheckVariableRepeating (e.ScopeVars) (Var e.Info)>
+      <CheckPattern-WarnRepeatedRec (e.ScopeVars) (e.Tail)>;
+
+  (e.ScopeVars) ((NewVar e.Info) e.Tail)
+    = <CheckPattern-WarnRepeatedRec (e.ScopeVars) (e.Tail)>;
+
+  (e.ScopeVars) ((Symbol e.Info) e.Tail)
+    = <CheckPattern-WarnRepeatedRec (e.ScopeVars) (e.Tail)>;
+
+  (e.ScopeVars) ((Brackets e.InBrackets) e.Tail)
+    = <CheckPattern-WarnRepeatedRec (e.ScopeVars) (e.InBrackets)>
+      <CheckPattern-WarnRepeatedRec (e.ScopeVars) (e.Tail)>;
+
+  (e.ScopeVars) ((ADT-Brackets t.SrcPos (e.Name) e.InBrackets) e.Tail)
+    = <CheckPattern-WarnRepeatedRec (e.ScopeVars) (e.InBrackets)>
+      <CheckPattern-WarnRepeatedRec (e.ScopeVars) (e.Tail)>;
+
+  (e.ScopeVars) () = /* предложения кончились */;
+}
+
+
+ReducePattern {
+  e.Begin (Var t.Pos1 'e' e._) e._ (Var t.Pos2 'e' e._) e.End
+    = e.Begin <ReducePattern (Var t.Pos1 'e' '_') e.End>;
+
+  e.ReducedPattern = e.ReducedPattern;
+}
+
+CheckVariableRepeating {
+  (e.ScopeVars) (Var t.SrcPos s.Mode '_' e.Index)
+    = /* не выдаём предупреждения на безымянные переменные */;
+
+  (e.Vars-B (s.Mode e.Index) e.Vars-E) (Var t.SrcPos s.Mode e.Index)
+    = (Warning repeated t.SrcPos RepeatedVariable s.Mode e.Index);
+
+  (e.ScopeVars) t.OtherVariable = /* не предупреждаем */;
+}
+
+CheckPattern-Flatten {
+  (e.ScopeVars) e.Items-B (NewVar t.SrcPos s.Mode '_' e.Index) e.Items-E
+    = <CheckPattern-Flatten
+        (e.ScopeVars)
+        e.Items-B
+        (Var t.SrcPos s.Mode '_' e.Index)
+        (Error t.SrcPos UnnamedNewVariable s.Mode '_' e.Index)
+        e.Items-E
+      >;
+
+  (e.ScopeVars)
+  e.Items-B (Var t.SrcPos1 s.Mode1 e.Index) e.Items-M
+  (NewVar t.SrcPos2 s.Mode2 e.Index) e.Items-E =
+    <CheckPattern-Flatten
+      (e.ScopeVars)
+      e.Items-B (Var t.SrcPos1 s.Mode1 e.Index) e.Items-M
+      (Var t.SrcPos2 s.Mode2 e.Index)
+      (Error t.SrcPos2 AlreadyBounded s.Mode2 e.Index)
+      e.Items-E
+    >;
+
+  (e.ScopeVars) e.Items =
+    <MapAccum
+      {
+        (e.KnownVars-B (s.Mode e.Index) e.KnownVars-E)
+        (Var t.SrcPos s.Mode e.Index) =
+          (e.KnownVars-B (s.Mode e.Index) e.KnownVars-E);
+
+        (e.KnownVars) (Var t.SrcPos s.Mode e.Index) =
+          (e.KnownVars (s.Mode e.Index));
+
+        (e.KnownVars) (NewVar t.SrcPos s.NewMode e.Index)
+          = e.KnownVars
+          : {
+              e.KnownVars-B (s.OldMode e.Index) e.KnownVars-E
+                = (e.KnownVars-B (s.NewMode e.Index) e.KnownVars-E);
+
+              e.KnownVars^
+                = (e.KnownVars (s.NewMode e.Index))
+                  (Warning deprecated t.SrcPos RedundantCaret s.NewMode e.Index);
+            };
+
+        (e.KnownVars) (Symbol Name t.SrcPos e.Name) =
+          (e.KnownVars) (Symbol Name t.SrcPos e.Name);
+
+        (e.KnownVars) (Error t.SrcPos s.Type e.Info) =
+          (e.KnownVars) (Error t.SrcPos s.Type e.Info);
+      }
+      (e.ScopeVars) e.Items
+    >;
+}
+
+CheckResult {
+  (e.ScopeVars) e.Items =
+    <Map
+      (
+        {
+          e.KnownVars (Var t.SrcPos s.Mode '_' e.Index)
+            = (Error t.SrcPos UnnamedVariableInResult s.Mode '_' e.Index);
+
+          e.KnownVars-B (s.Mode e.Index) e.KnownVars-E
+          (Var t.SrcPos s.Mode e.Index) =
+            /* пропускаем, правильная переменная */;
+
+          e.KnownVars-B (s.OldMode e.Index) e.KnownVars-E
+          (Var t.SrcPos s.NewMode e.Index) =
+            (Error t.SrcPos InvalidMode s.OldMode s.NewMode e.Index);
+
+          e.KnownVars (Var t.SrcPos s.Mode e.Index) =
+            (Error t.SrcPos VariableNotFound s.Mode e.Index);
+
+          e.KnownVars (Symbol Name t.SrcPos e.Name) =
+            (Symbol Name t.SrcPos e.Name);
+
+          e.KnownVars (Closure e.Body) =
+            <CheckFunctionBodyRec (e.KnownVars) e.Body>;
+
+          e.KnownVars (Error t.SrcPos s.Type e.Info) =
+            (Error t.SrcPos s.Type e.Info);
+        }
+        e.ScopeVars
+      )
+      e.Items
+    >;
+}
+
+CheckValidUsings {
+  (
+    e.DeclarationsAndErrors-B
+    (Declare t.SrcPos s.ScopeClass e.Name)
+    e.DeclarationsAndErrors-E
+  )
+  (Symbol Name t.SrcPosName e.Name) e.NameRefsAndErrors =
+    <CheckValidUsings
+      (
+        e.DeclarationsAndErrors-B
+        (Declare t.SrcPos s.ScopeClass e.Name)
+        e.DeclarationsAndErrors-E
+      )
+      e.NameRefsAndErrors
+    >;
+
+  (
+    e.DeclarationsAndErrors-B
+    (Define t.SrcPos s.ScopeClass e.Name)
+    e.DeclarationsAndErrors-E
+  )
+  (Symbol Name t.SrcPosName e.Name) e.NameRefsAndErrors =
+    <CheckValidUsings
+      (
+        e.DeclarationsAndErrors-B
+        (Define t.SrcPos s.ScopeClass e.Name)
+        e.DeclarationsAndErrors-E
+      )
+      e.NameRefsAndErrors
+    >;
+
+  (e.DeclarationsAndErrors)
+  (Symbol Name t.SrcPos e.Name) e.NameRefsAndErrors =
+    <CheckValidUsings
+      (e.DeclarationsAndErrors (Error t.SrcPos NotDefined e.Name))
+      e.NameRefsAndErrors
+    >;
+
+  (e.DeclarationsAndErrors)
+  (Error t.SrcPos s.Type e.Info) e.NameRefsAndErrors =
+    <CheckValidUsings
+      (e.DeclarationsAndErrors (Error t.SrcPos s.Type e.Info))
+      e.NameRefsAndErrors
+    >;
+
+  (e.DeclarationsAndErrors)
+    (Warning s.WarningId t.SrcPos s.Type e.Info) e.NameRefsAndErrors =
+      <CheckValidUsings
+        (e.DeclarationsAndErrors (Warning s.WarningId t.SrcPos s.Type e.Info))
+        e.NameRefsAndErrors
+      >;
+
+  (e.DeclarationsAndErrors) /* кончились ошибки и имена */ =
+    <Map
+      {
+        (Error t.SrcPos s.Type e.Info)
+          = (Error t.SrcPos s.Type e.Info);
+        (Warning s.WarningId t.SrcPos s.Type e.Info)
+          = (Warning s.WarningId t.SrcPos s.Type e.Info);
+
+        t.OtherItem = /* пропускаем */;
+      }
+      e.DeclarationsAndErrors
+    >;
+}

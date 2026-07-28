@@ -1,0 +1,6 @@
+$ENTRY Main;
+
+* Swap two atomic terms via s-variables
+Main {
+  s.A s.B = s.B s.A;
+}

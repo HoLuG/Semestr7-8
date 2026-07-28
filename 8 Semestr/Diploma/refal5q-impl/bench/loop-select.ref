@@ -1,0 +1,19 @@
+* Бенчмарк Loop/Select — демонстрирует O(N) для раскрученной очереди
+* Запуск: java -jar target/refal5q.jar bench/loop-select.ref 10000
+
+$ENTRY Go {
+  = <TimeElapsed 0>
+    <Loop Left () <Numb <Arg 1>>>
+    <Prout <TimeElapsed>>;
+}
+
+Loop {
+  s.Side (e.Acc) 0 = /* всё */;
+  s.Side (e.Acc) s.Rest
+    = <Loop <Select s.Side (e.Acc A) (e.Acc B)> <- s.Rest 1>>;
+}
+
+Select {
+  Left  t.Left t.Right = Right t.Left;
+  Right t.Left t.Right = Left  t.Right;
+}

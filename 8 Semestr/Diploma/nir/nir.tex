@@ -1,0 +1,1230 @@
+% !TEX program = pdflatex
+\documentclass[14pt, russian]{scrartcl}
+\let\counterwithout\relax
+\let\counterwithin\relax
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{extsizes}
+\usepackage{subfig}
+\usepackage[export]{adjustbox}
+\usepackage{tocvsec2}
+\usepackage[subfigure]{tocloft}
+\usepackage[newfloat]{minted}
+
+\makeatletter
+\AddToHook{begindocument/before}{\@ifpackageloaded{minted}{\removefromtoclist[float]{lol}}{}}
+\makeatother
+
+\AtBeginEnvironment{figure}{\vspace{0.5cm}}
+\AtBeginEnvironment{table}{\vspace{0.5cm}}
+\AtBeginEnvironment{listing}{\vspace{0.5cm}}
+\AtBeginEnvironment{algorithm}{\vspace{0.5cm}}
+\AtBeginEnvironment{minted}{\vspace{-0.5cm}}
+
+\usepackage{fancyvrb}
+\usepackage{ulem,bm,mathrsfs,ifsym}
+\normalem
+\renewcommand{\emph}[1]{#1}
+\usepackage{sectsty}
+
+%%% Поля и разметка страницы %%%
+\usepackage{pdflscape}
+\usepackage{geometry}
+\geometry{a4paper,tmargin=2cm,bmargin=2cm,lmargin=3cm,rmargin=1cm}
+
+%%% Математические пакеты %%%
+\usepackage{amsthm,amsfonts,amsmath,amssymb,amscd}
+\usepackage{mathtools}
+\usepackage[perpage]{footmisc}
+
+\KOMAoptions{fontsize=14pt}
+
+\makeatletter
+\def\showfontsize{\f@size{} point}
+\makeatother
+
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
+
+\usepackage{tempora}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, main=russian]{babel}
+\usepackage{indentfirst}
+
+%%% Таблицы %%%
+\usepackage{longtable}
+\usepackage{multirow,makecell,array}
+\usepackage{booktabs}
+
+%%% Общее форматирование
+\usepackage{soulutf8}
+\usepackage{icomma}
+
+%%% Изображения %%%
+\usepackage{graphicx}
+\usepackage{wrapfig}
+
+%%% Списки %%%
+\usepackage{enumitem}
+
+%%% Подписи %%%
+\usepackage{caption}
+
+\addto\captionsrussian{%
+  \renewcommand{\listingname}{Листинг}%
+}
+%%% Счётчики %%%
+\usepackage[figure,table,section]{totalcount}
+\DeclareTotalCounter{lstlisting}
+\usepackage{totcount}
+\usepackage{totpages}
+
+\linespread{1.3}
+
+%%% Гиперссылки %%%
+\usepackage{hyperref}
+
+%%% Выравнивание и переносы %%%
+\sloppy
+\clubpenalty=10000
+\widowpenalty=10000
+
+\makeatletter
+\let\@@scshape=\scshape
+\renewcommand{\scshape}{%
+  \ifnum\strcmp{\f@series}{bx}=\z@
+    \usefont{T1}{cmr}{bx}{sc}%
+  \else
+    \ifnum\strcmp{\f@shape}{it}=\z@
+      \fontshape{scsl}\selectfont
+    \else
+      \@@scshape
+    \fi
+  \fi}
+\makeatother
+
+\usepackage{ifthen}
+\newcounter{intvl}
+\newcounter{otstup}
+\newcounter{contnumeq}
+\newcounter{contnumfig}
+\newcounter{contnumtab}
+\newcounter{pgnum}
+\newcounter{bibliosel}
+\newcounter{chapstyle}
+\newcounter{headingdelim}
+\newcounter{headingalign}
+\newcounter{headingsize}
+\newcounter{tabcap}
+\newcounter{tablaba}
+\newcounter{tabtita}
+
+\setcounter{intvl}{3}
+\setcounter{otstup}{0}
+\setcounter{contnumeq}{1}
+\setcounter{contnumfig}{1}
+\setcounter{contnumtab}{1}
+\setcounter{pgnum}{0}
+\setcounter{bibliosel}{1}
+\setcounter{chapstyle}{1}
+\setcounter{headingdelim}{1}
+\setcounter{headingalign}{0}
+\setcounter{headingsize}{0}
+\setcounter{tabcap}{0}
+\setcounter{tablaba}{2}
+\setcounter{tabtita}{1}
+
+\DeclareCaptionLabelSeparator*{emdash}{~--- }
+\captionsetup[listing]{position=top,labelsep=colon,justification=centering,singlelinecheck=false}
+\captionsetup[lstlisting]{position=top,labelsep=colon,justification=centering,singlelinecheck=false}
+\captionsetup[figure]{labelsep=emdash,font=onehalfspacing,position=bottom}
+
+\ifthenelse{\equal{\thetabcap}{0}}{%
+    \newcommand{\tabcapalign}{\raggedright}
+}
+
+\DeclareCaptionFormat{tablecaption}{\tabcapalign #1#2#3}
+\captionsetup[table]{labelsep=emdash}
+\captionsetup[table]{format=tablecaption,singlelinecheck=off,font=onehalfspacing,position=top,skip=-5pt}
+\DeclareCaptionLabelFormat{continued}{Продолжение таблицы~#2}
+\setlength{\belowcaptionskip}{.2cm}
+\setlength{\intextsep}{0ex}
+
+\renewcommand{\thesubfigure}{\asbuk{subfigure}}
+\captionsetup[subfigure]{font={normalsize},
+    labelformat=brace,
+    justification=centering,
+}
+
+\definecolor{linkcolor}{rgb}{0.0,0,0}
+\definecolor{citecolor}{rgb}{0,0.0,0}
+\definecolor{urlcolor}{rgb}{0,0,0}
+
+\hypersetup{
+    linktocpage=true,
+    plainpages=true,
+    colorlinks,
+    linkcolor={linkcolor},
+    citecolor={citecolor},
+    urlcolor={urlcolor},
+    pdflang={ru},
+}
+\urlstyle{same}
+
+\setlength{\parindent}{2.5em}
+
+\renewcommand{\labelitemi}{---}
+\setlist{nosep,
+    labelindent=\parindent,leftmargin=*
+}
+
+\usepackage{ragged2e}
+\usepackage{needspace}
+\usepackage[explicit]{titlesec}
+\usepackage{placeins}
+\usepackage{xparse}
+\usepackage{csquotes}
+
+\usepackage{listingsutf8}
+\usepackage{url}
+\usepackage{algorithm, algorithmicx}
+\usepackage[noend]{algpseudocode}
+\usepackage{blkarray}
+\usepackage{chngcntr}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+
+% --- Библиография ---
+\usepackage[backend=biber,
+    bibstyle=gost-numeric,
+    citestyle=nature]{biblatex}
+\addbibresource{biblio.bib}
+% Как в РПЗ: [Электронный ресурс] у @online (поле media = {eresource} в .bib)
+\DefineBibliographyStrings{russian}{%
+  mediaeresource = {{Электронный ресурс}},%
+}
+
+\titleformat{name=\section,numberless}[block]{\normalfont\Large\centering}{}{0em}{#1}
+\titleformat{\section}[block]{\normalfont\Large\bfseries\raggedright}{}{0em}{\thesection\hspace{0.25em}#1}
+\titleformat{\subsection}[block]{\normalfont\Large\bfseries\raggedright}{}{0em}{\thesubsection\hspace{0.25em}#1}
+\titleformat{\subsubsection}[block]{\normalfont\large\bfseries\raggedright}{}{0em}{\thesubsubsection\hspace{0.25em}#1}
+
+\let\Algorithm\algorithm
+\renewcommand\algorithm[1][]{\Algorithm[#1]\setstretch{1.5}}
+
+\usepackage{pifont}
+\usepackage{calc}
+\usepackage{suffix}
+\DeclareQuoteStyle{russian}
+    {\guillemotleft}{\guillemotright}[0.025em]
+    {\quotedblbase}{\textquotedblleft}
+\ExecuteQuoteOptions{style=russian}
+\newcommand{\enq}[1]{\enquote{#1}}
+\newcommand{\eng}[1]{\begin{english}#1\end{english}}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\renewcommand{\listalgorithmname}{Список алгоритмов}
+\floatname{algorithm}{Листинг}
+\renewcommand{\lstlistingname}{Листинг}
+\renewcommand{\thealgorithm}{\arabic{algorithm}}
+
+\newcommand{\refAlgo}[1]{(листинг \ref{#1})}
+\newcommand{\refImage}[1]{(рисунок \ref{#1})}
+
+\renewcommand{\theenumi}{\arabic{enumi}.}
+\renewcommand{\labelenumi}{\arabic{enumi}.}
+\renewcommand{\theenumii}{\arabic{enumii}}
+\renewcommand{\labelenumii}{(\arabic{enumii})}
+\renewcommand{\theenumiii}{\roman{enumiii}}
+\renewcommand{\labelenumiii}{(\roman{enumiii})}
+\renewcommand{\labelitemi}{---}
+\renewcommand{\labelitemii}{---}
+
+\lstdefinelanguage{GoLike}{
+  keywords={package,const,type,var,func,function,struct,class,dynvar,if,else,while,for,return,int,char,nil,weak,true,false},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{mygreen},
+  morestring=[b]",
+  stringstyle=\color{mymauve}
+}
+
+\lstdefinelanguage{Refal}{
+  sensitive=true,
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{mygreen},
+  morestring=[b]',
+  stringstyle=\color{mymauve}
+}
+
+\makeatletter
+\def\p@subsection{}
+\def\p@subsubsection{\thesection\,\thesubsection\,}
+\makeatother
+\newcommand{\prog}[1]{{\ttfamily\small#1}}
+\lstset{
+  backgroundcolor=\color{white},
+  basicstyle=\ttfamily\footnotesize,
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=top,
+  commentstyle=\color{mygreen},
+  extendedchars=true,
+  inputencoding=utf8,
+  frame=single,
+  keepspaces=true,
+  keywordstyle=\normalfont,
+  language=GoLike,
+  numbers=left,
+  numbersep=5pt,
+  xleftmargin=25pt,
+  xrightmargin=25pt,
+  numberstyle=\small\color{black},
+  rulecolor=\color{black},
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  stepnumber=1,
+  stringstyle=\color{mymauve},
+  tabsize=8,
+  title=\lstname
+}
+
+\newcommand{\anonsection}[1]{\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{section}{\protect\numberline{}#1}
+\section*{#1}\vspace*{2.5ex}}
+\newcommand{\sectionbreak}{\clearpage}
+\renewcommand{\sectionfont}{\normalsize}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+
+\renewcommand{\cftsecfont}{\normalfont\large}
+\renewcommand{\cftsubsecfont}{\normalfont\large}
+
+\setlength{\cftsecindent}{0pt}
+\setlength{\cftsubsecindent}{0pt}
+\setlength{\cftsubsubsecindent}{0pt}
+
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+    \DeclarePairedDelimiter\abs{\lvert}{\rvert}
+    \DeclarePairedDelimiter\norm{\lVert}{\rVert}
+\DeclareTextCommandDefault{\textvisiblespace}{%
+  \mbox{\kern.06em\vrule \@height.3ex}%
+  \vbox{\hrule \@width.3em}%
+  \hbox{\vrule \@height.3ex}}
+\newsavebox{\spacebox}
+\begin{lrbox}{\spacebox}
+\verb*! !
+\end{lrbox}
+\newcommand{\aspace}{\usebox{\spacebox}}
+\DeclareTotalCounter{listing}
+
+\makeatletter
+\renewcommand*{\p@subsubsection}{}
+\makeatother
+
+\begin{document}
+\sloppy
+
+\def\figurename{Рисунок}
+
+\begin{titlepage}
+\thispagestyle{empty}
+\newpage
+
+\vspace*{-30pt}
+\hspace{-45pt}
+\begin{minipage}{0.17\textwidth}
+\hspace*{-20pt}\centering
+\includegraphics[width=1.3\textwidth]{Emblem.png}
+\end{minipage}
+\begin{minipage}{0.82\textwidth}\small \textbf{
+\vspace*{-0.7ex}
+\hspace*{-10pt}\centerline{Министерство науки и высшего образования Российской Федерации}
+\vspace*{-0.7ex}
+\centerline{Федеральное государственное автономное образовательное учреждение }
+\vspace*{-0.7ex}
+\centerline{высшего образования}
+\vspace*{-0.7ex}
+\centerline{<<Московский государственный технический университет}
+\vspace*{-0.7ex}
+\centerline{имени Н.Э. Баумана}
+\vspace*{-0.7ex}
+\centerline{(национальный исследовательский университет)>>}
+\vspace*{-0.7ex}
+\centerline{(МГТУ им. Н.Э. Баумана)}}
+\end{minipage}
+
+\vspace{-2pt}
+\hspace{-34.5pt}\rule{\textwidth}{2.5pt}
+
+\vspace*{-20.3pt}
+\hspace{-34.5pt}\rule{\textwidth}{0.4pt}
+
+\vspace{0.5ex}
+\noindent \small ФАКУЛЬТЕТ\hspace{80pt} <<Информатика и системы управления>>
+
+\vspace*{-16pt}
+\hspace{35pt}\rule{0.855\textwidth}{0.4pt}
+
+\vspace{0.5ex}
+\noindent \small КАФЕДРА\hspace{50pt} <<Теоретическая информатика и компьютерные технологии>>
+
+\vspace*{-16pt}
+\hspace{25pt}\rule{0.875\textwidth}{0.4pt}
+
+\vspace{3em}
+
+\begin{center}
+\Large \bf{РАСЧЕТНО-ПОЯСНИТЕЛЬНАЯ ЗАПИСКА\\\textbf{\textit{К НАУЧНО-ИССЛЕДОВАТЕЛЬСКОЙ РАБОТЕ\\НА ТЕМУ:}} \\}
+\end{center}
+
+\vspace*{-6ex}
+\begin{center}
+\Large
+% Тема: как в rpz_go_nuiyap.tex — линии 0.9\textwidth, 1.2pt; после строки текста \vspace*{-3ex}, чтобы базовая линия «примыкала» к правилу; две нижние пустые линии — плотный стек как в РПЗ.
+\textit{\textbf{«\,Компилятор базисного подмножества}}\par
+\vspace*{-3ex}
+\rule{0.9\textwidth}{1.2pt}
+
+\vspace*{0.55ex}
+\textit{\textbf{Рефала-5 с представлением данных,}}\par
+\vspace*{-3ex}
+\rule{0.9\textwidth}{1.2pt}
+
+\vspace*{0.55ex}
+\textit{\textbf{использующим раскрученные очереди\,»}}\par
+\vspace*{-3ex}
+\rule{0.9\textwidth}{1.2pt}
+
+\vspace*{-0.2ex}
+\rule{0.9\textwidth}{1.2pt}
+
+\vspace*{-0.2ex}
+\rule{0.9\textwidth}{1.2pt}
+\end{center}
+
+\vspace{\fill}
+
+\newlength{\ML}
+\settowidth{\ML}{«\underline{\hspace{0.7cm}}» \underline{\hspace{2cm}}}
+
+\noindent Студент \underline{\hspace{1.5cm}} \hfill \underline{\hspace{4cm}}\quad
+\underline{\hspace{4cm}}
+
+\vspace{-2.1ex}
+\noindent\hspace{9ex}\scriptsize{(Группа)}\normalsize\hspace{170pt}\hspace{2ex}\scriptsize{(Подпись, дата)}\normalsize\hspace{30pt}\hspace{6ex}\scriptsize{(И.О. Фамилия)}\normalsize
+
+\bigskip
+
+\noindent Руководитель  \hfill \underline{\hspace{4cm}}\quad
+\underline{\hspace{4cm}}
+
+\vspace{-2ex}
+\noindent\hspace{13.5ex}\normalsize\hspace{170pt}\hspace{2ex}\scriptsize{(Подпись, дата)}\normalsize\hspace{30pt}\hspace{6ex}\scriptsize{(И.О. Фамилия)}\normalsize
+\vfill
+
+\begin{center}
+\textsl{\the\year{} г.}
+\end{center}
+\end{titlepage}
+
+\setlength{\tabcolsep}{3pt}
+\newpage
+\setcounter{page}{2}
+
+
+\renewcommand\contentsname{\hfill{\normalfont{СОДЕРЖАНИЕ}}\hfill}
+\tableofcontents
+\newpage
+
+\anonsection{ВВЕДЕНИЕ}
+
+Язык Рефал-5 относится к семейству языков, основанных на переписывании термов:
+программа задаётся набором правил сопоставления образца с объектным выражением и
+построения результирующего выражения. На практике стоимость вычислений в таком подходе
+часто определяется не только числом применённых правил, но и эффективностью
+представления объектных выражений и операций над ними (вставка/удаление с концов,
+конкатенация).
+
+Цель НИР: исследовать и обосновать применение раскрученных двусторонних
+очередей для представления объектных выражений при реализации базисного подмножества
+Рефала-5, а также выполнить проектирование программной системы, реализующей выбранное
+подмножество языка.
+
+Для достижения цели решаются задачи:
+\begin{itemize}
+  \item изучить базовые конструкции Рефала-5 и определить состав базисного подмножества, достаточного для практического использования;
+  \item исследовать операции над объектными выражениями, определяющие вычислительную стоимость выполнения правил;
+  \item описать раскрученную двустороннюю очередь (мелкий и глубокий уровни представления), её инварианты и принцип ребалансировки;
+  \item сравнить предложенное представление с альтернативами и сформулировать область применимости;
+  \item спроектировать архитектуру программной системы (входной язык, внутренние представления, модули и интерфейсы).
+\end{itemize}
+
+\section{Обзор предметной области}
+
+В разделе кратко описаны базовые конструкции и терминология языка Рефал-5,
+необходимые для дальнейшего обсуждения. Основными понятиями являются
+объектное выражение, сопоставление с образцом и построение результата правила.
+В качестве иллюстраций приведены несколько простых функций, которые будут
+использоваться в разделе~\ref{sec:research} при разборе вычислительной стоимости
+разных представлений объектных выражений в памяти.
+
+\subsection{Программа, функции и предложения}
+\label{sec:refal-program}
+
+Программа на Рефале --- это набор функций. Каждая функция задаётся одним или
+несколькими \textbf{предложениями} (правилами) вида \enq{образец = результат},
+заключёнными в фигурные скобки. При вызове функции интерпретатор просматривает
+её предложения сверху вниз и берёт первое, чей образец сопоставим с
+аргументом~\cite{refal_book,refal05_site}. По подстановке, полученной при
+сопоставлении, строится результирующее выражение, которое заменяет вызов в
+текущем поле зрения.
+
+Простейший пример --- рекурсивная функция, вычисляющая длину объектного
+выражения (листинг~\ref{lst:length}):
+
+\begin{lstlisting}[language=Refal,caption={Функция подсчёта длины выражения},label={lst:length}]
+Length {
+   = 0;
+  s.First e.Rest = <Add 1 <Length e.Rest>>;
+}
+\end{lstlisting}
+
+Функция \prog{Length} имеет два предложения. Первое срабатывает на пустом
+выражении и возвращает \prog{0}. Второе сопоставляется с непустым выражением:
+оно связывает первый терм с переменной \prog{s.First}, остаток --- с
+переменной \prog{e.Rest} и рекурсивно подсчитывает длину остатка.
+Имена с префиксами \prog{s.}, \prog{t.}, \prog{e.} обозначают переменные
+образца разных типов; их семантика рассматривается ниже.
+
+\subsection{Объектные выражения, термы и символы}
+
+Все данные в Рефале представлены \textbf{объектными выражениями}.
+Объектное выражение --- это конечная последовательность \textbf{термов}
+(возможно пустая). Каждый терм имеет один из двух видов:
+
+\begin{itemize}
+  \item \textbf{атомарный терм} --- собственно \textbf{символ} в
+        терминологии Рефала; в Рефале-5 различают три разновидности
+        символов: \textbf{символ-слово} (идентификатор: \prog{Found},
+        \prog{True}, \prog{Nil}), \textbf{макроцифра} (целое число
+        произвольной длины) и \textbf{литера} (один знак строкового
+        литерала);
+  \item \textbf{скобочный терм} --- объектное выражение, заключённое в
+        круглые скобки.
+\end{itemize}
+
+Важно не смешивать понятия \enq{символ} и \enq{литера}. Символ-слово ---
+это атомарный объект (метка), а не последовательность литер: при
+сопоставлении \prog{Found} ведёт себя как один атомарный терм. Запись в
+одинарных кавычках, например \prog{'abc'}, обозначает три литеры подряд,
+то есть объектное выражение длины три. Аналогично, число \prog{42} --- это
+один символ (макроцифра), а не последовательность из двух цифр-литер.
+
+Сопоставление с образцом опирается на три класса \textbf{переменных
+образца}:
+
+\begin{itemize}
+  \item \(s\)-\textbf{переменная} (\prog{s.X}) связывается с одним
+        \emph{символом} --- одним атомарным термом любой из трёх
+        разновидностей;
+  \item \(t\)-\textbf{переменная} (\prog{t.X}) связывается с одним
+        \emph{термом}, в том числе со скобочным;
+  \item \(e\)-\textbf{переменная} (\prog{e.X}) связывается с произвольной,
+        возможно пустой, цепочкой термов.
+\end{itemize}
+
+Простой пример с переменной \(e\)-типа --- функция, возвращающая последний
+символ непустой последовательности атомарных термов (листинг~\ref{lst:last}):
+
+\begin{lstlisting}[language=Refal,caption={Функция получения последнего символа},label={lst:last}]
+Last {
+  e.Init s.Last = s.Last;
+}
+\end{lstlisting}
+
+При вызове \prog{<Last 1 2 3>} переменная \prog{e.Init} связывается с
+выражением \prog{1 2}, а \prog{s.Last} --- с символом \prog{3}. Вариант, в
+котором \prog{e.Init} забирала бы всё выражение целиком, не годится:
+тогда для \prog{s.Last} не осталось бы ни одного терма, и сопоставление
+было бы неудачным. Алгоритм сопоставления учитывает требования к концам
+образца и подбирает разбиение, при котором все переменные связываются
+согласованно.
+
+\subsection{Неоднозначное сопоставление}
+\label{sec:ambiguous-matching}
+
+Если в образце встречается несколько \(e\)-переменных, сопоставление
+становится \textbf{неоднозначным}: одно и то же объектное выражение можно
+разбить разными способами. Стандартный пример --- функция, проверяющая
+вхождение заданного символа в выражение (листинг~\ref{lst:contains}):
+
+\begin{lstlisting}[language=Refal,caption={Неоднозначное сопоставление при поиске символа},label={lst:contains}]
+Contains {
+  s.Needle e.Left s.Needle e.Right = True;
+  s.Needle e.Any                   = False;
+}
+\end{lstlisting}
+
+Первое предложение требует, чтобы и в начале, и где-то дальше в выражении
+встретился один и тот же символ \prog{s.Needle}. Образец содержит две
+\(e\)-переменные \prog{e.Left} и \prog{e.Right}, и при сопоставлении
+интерпретатор перебирает варианты: он начинает с пустого \prog{e.Left}, и
+если очередной \prog{s.Needle} не оказывается на текущей позиции,
+удлиняет \prog{e.Left} на один терм и пробует снова. Каждое такое
+удлинение --- это комбинация операций \enq{взять один терм с начала
+остатка} и \enq{дописать этот терм в конец накапливаемого префикса}, то
+есть \emph{отделение начала} и \emph{конкатенация}.
+
+Иными словами, даже логически простое правило приводит к множеству шагов,
+на каждом из которых интерпретатор разбивает и собирает фрагменты
+выражения. Стоимость отдельного такого шага зависит от того, как
+выражение представлено в памяти. Этому вопросу посвящён
+раздел~\ref{sec:research}.
+
+\section{Исследование и анализ решений}
+\label{sec:research}
+
+В разделе рассматривается, как объектное выражение хранится и преобразуется в
+памяти при реализации Рефала-5. Сначала фиксируется набор базовых операций над
+выражением (\ref{sec:adt-ops}), который нужен интерпретатору при сопоставлении и
+построении результата. Далее обсуждаются распространённые представления объектных
+выражений и их практические компромиссы. Завершает раздел описание представления,
+предлагаемого в данной работе, и сводное сравнение с альтернативами.
+
+\subsection{Объектное выражение как абстрактный тип}
+\label{sec:adt-ops}
+
+Чтобы говорить о стоимости разных представлений, удобно зафиксировать набор
+операций, через которые выражается интерпретация любого предложения:
+
+\begin{itemize}
+  \item \textbf{проверка на пустоту};
+  \item \textbf{отделение начала}: получить первый терм и остаток выражения;
+  \item \textbf{отделение конца}: получить последний терм и остаток выражения;
+  \item \textbf{конкатенация двух выражений} --- основная операция при
+        построении результата правила;
+  \item \textbf{выражение из одного терма} (создание сингулярного выражения).
+\end{itemize}
+
+Эти операции вызываются на каждом шаге сопоставления и каждом шаге сборки
+результата. Например, при переборе \(e\)-переменной
+(\ref{sec:ambiguous-matching}) последовательно работают отделение начала
+и конкатенация; при возврате результата правила вида \prog{= <F s.X> <G
+e.Y>;} итоговое выражение собирается из нескольких фрагментов с помощью
+конкатенации. Поэтому выбор представления --- это, по существу, выбор
+того, какие из перечисленных операций должны быть дёшевы, а какие могут
+стать дорогими.
+
+Ниже сначала рассматриваются два классических списковых представления, в
+которых дёшевы операции на концах и конкатенация, а проблемой становится
+\emph{копирование} значений переменных. Затем разбираются массивные и
+векторно-списковые представления, в которых, наоборот, копирование дёшево, а
+\emph{конкатенация} может становиться дорогой. После этого описано
+гипотетическое представление на основе деревьев конкатенаций. В конце
+предлагается раскрученная двусторонняя очередь, амортизированно
+устраняющая обе проблемы.
+
+\subsection{Классическое (плоское двусвязное) представление}
+\label{sec:flat-list}
+
+Этот способ представления использовался в большинстве реализаций Рефала
+вплоть до 1980-х годов и часто называется \textbf{классическим}~\cite{skorobogatov_repr}
+или \textbf{плоским двусвязным}~\cite{abramov_romanenko_1988}. Объектное
+выражение хранится как двусвязный список звеньев, где каждое звено
+соответствует либо атомарному символу, либо одной из двух структурных
+скобок. У звена-скобки есть дополнительное поле, указывающее на парную
+скобку. Контейнер выражения хранит указатели на первое и последнее звенья.
+
+Стоимость основных операций при таком представлении:
+
+\begin{itemize}
+  \item отделение начала или конца --- \(O(1)\): сдвинуть указатель; если
+        крайнее звено --- открывающая скобка, можно прыгнуть через поле
+        парной скобки на закрывающую и получить скобочный терм целиком;
+  \item конкатенация двух выражений --- \(O(1)\): достаточно перенастроить
+        четыре указателя на стыке;
+  \item копирование выражения --- \(O(N)\), где \(N\) --- число
+        звеньев в записи (включая все вложенные скобки): необходимо
+        физически создать новый список звеньев.
+\end{itemize}
+
+Дешёвая конкатенация делает классическое представление удобным для
+построения результата, однако дорогое копирование порождает классическую
+\textbf{проблему копирования}: если переменная встречается в правой части
+предложения большее число раз, чем в левой, каждое \enq{лишнее} вхождение
+требует полной копии её значения. Стандартная иллюстрация --- функция
+подстановки из препринта Абрамова и Романенко~\cite{abramov_romanenko_1988}:
+для каждого символа выражения по таблице ищется его замена.
+
+\begin{lstlisting}[language=Refal,caption={Подстановка по таблице (пример проблемы копирования)},label={lst:subst}]
+Subst {
+  (e.Tab)            = ;
+  (e.Tab) s.X e.Rest = <Lookup (e.Tab) s.X> <Subst (e.Tab) e.Rest>;
+}
+\end{lstlisting}
+
+Переменная \prog{e.Tab} в левой части появляется один раз, а в правой ---
+дважды (передаётся в \prog{Lookup} и в рекурсивный вызов \prog{Subst}).
+При классическом представлении это означает, что на каждом шаге рекурсии
+таблица копируется целиком. Если длина исходного выражения и длина
+таблицы оба порядка \(n\), общая стоимость становится \(O(n^2)\), и
+попытка программировать в функциональном стиле упирается в эту
+квадратичную асимптоту. Распространённый \enq{инженерный} обход --- так
+называемый \enq{сквозной просмотр выражения} с двумя стеками, переводящий
+\prog{Subst} в императивный по духу вариант без многократного
+использования \prog{e.Tab}; такое решение позволяет избежать копирований,
+но затемняет код и препятствует распараллеливанию~\cite{abramov_romanenko_1988}.
+
+\subsection{Компромиссное представление с подвешенными скобками}
+\label{sec:hanging-list}
+
+Чтобы смягчить проблему копирования, не отказываясь от списковой основы,
+было предложено \textbf{компромиссное представление}~\cite{skorobogatov_repr}.
+Оно используется в реализации Рефала-6 и ряде учебных проектов, а также
+обсуждается в документации Рефала-05~\cite{refal05_site}.
+
+В этом представлении звено списка соответствует не отдельному знаку
+записи, а одному \textbf{терму верхнего уровня}. Скобочный терм хранится
+особым образом: вместо двух парных звеньев (открывающей и закрывающей
+скобок) звено содержит ссылку на отдельный кольцевой список, представляющий
+вложенное выражение. У головы кольца хранится \textbf{счётчик ссылок}.
+
+Стоимость операций по сравнению с плоским списком:
+
+\begin{itemize}
+  \item отделение начала и конца --- \(O(1)\), как и раньше;
+  \item конкатенация --- \(O(1)\);
+  \item копирование верхнего уровня --- \(O(N_{\text{верх}})\),
+        где \(N_{\text{верх}}\) --- число термов верхнего уровня;
+        вложенные выражения при копировании \emph{не дублируются}, у их
+        кольцевых списков лишь увеличивается счётчик ссылок.
+\end{itemize}
+
+Применительно к функции \prog{Subst} это даёт ощутимый выигрыш в
+типичных сценариях: если таблица состоит из пар \prog{(s.Key e.Value)},
+то при копировании \prog{e.Tab} физически дублируются только звенья
+верхнего уровня, а вложенные пары остаются разделёнными между копиями.
+
+Платой становится более сложное управление памятью: необходимо
+поддерживать счётчики ссылок при разрушении и сборке выражений и аккуратно
+обрабатывать ситуации, когда переменная связана со \emph{внутренностью}
+скобочного терма, который оказался расшарен (тогда модификация одной
+\enq{копии} могла бы повредить другие). Кроме того, наличие циклических
+связей у голов колец усложняет автоматическую сборку мусора.
+
+\subsection{Массивное представление}
+\label{sec:array-repr}
+
+Альтернативный путь, предложенный в работе Абрамова и
+Романенко~\cite{abramov_romanenko_1988}, состоит в том, чтобы хранить
+объектное выражение в \textbf{непрерывном участке памяти} (массиве
+тегированных ячеек). Каждая ячейка содержит либо атомарный символ, либо
+открывающую или закрывающую структурную скобку. Скобочный терм при таком
+хранении не требует отдельного указателя: он занимает диапазон ячеек от
+открывающей до закрывающей скобки.
+
+Главное преимущество массивного представления --- \textbf{дешёвое копирование
+переменной}. Значение \(e\)-переменной \prog{e.X} представляется парой
+индексов \((l, r)\) внутри массива; копирование переменной --- это просто
+копирование пары чисел, то есть \(O(1)\). Это превращает функциональный
+стиль программирования в Рефале из \enq{дорогого} в \enq{нормальный}: даже
+многократное использование одной и той же переменной в правой части не
+приводит к физическому дублированию данных. На функции \prog{Subst} из
+\ref{sec:flat-list} массивное представление даёт линейную асимптотику без
+каких-либо ухищрений с императивным переписыванием.
+
+Стоимость основных операций:
+
+\begin{itemize}
+  \item отделение начала и конца --- \(O(1)\): сдвинуть один из индексов;
+  \item копирование переменной --- \(O(1)\);
+  \item конкатенация двух выражений длины \(|X|\) и \(|Y|\) ---
+        \(O(|X| + |Y|)\): требуется выделить новый массив подходящей
+        длины и физически скопировать в него содержимое обоих фрагментов.
+\end{itemize}
+
+Так возникает \textbf{проблема конкатенации}, симметричная проблеме
+копирования. Если результат правила собирается в цикле, как в типовой
+функции отображения
+
+\Needspace{10\baselineskip}
+\begin{lstlisting}[language=Refal,caption={Построение результата через рекурсивную конкатенацию},label={lst:map}]
+Map {
+   = ;
+  s.X e.Rest = <F s.X> <Map e.Rest>;
+}
+\end{lstlisting}
+
+то на \(n\) шагах рекурсии возникают \(n\) конкатенаций. При наивной
+массивной реализации каждая из них копирует уже накопленный префикс, и
+суммарная стоимость становится \(O(n^2)\).
+
+В препринте~\cite{abramov_romanenko_1988} предлагается смягчение --- так
+называемые \textbf{дырки} (запас свободного места) по краям массива. Если
+к выражению с дыркой справа дописывается короткий фрагмент длины \(k\),
+то вместо создания нового массива достаточно скопировать только эти \(k\)
+ячеек в свободную область. На сериях коротких приписываний это даёт
+амортизированно линейное общее время. Однако если дырка исчерпывается,
+приходится снова выделять новый массив и переносить всё содержимое;
+гарантию \(O(1)\) на произвольных последовательностях операций дырки не
+дают. Дополнительно в~\cite{abramov_romanenko_1988} обсуждаются меры по
+снижению затрат на конкатенацию --- распознавание частных случаев,
+функции с несколькими входами и выходами, использование скобок для
+структуризации данных.
+
+\subsection{Векторно-списковое представление}
+\label{sec:vector-list}
+
+Векторно-списковое представление, предложенное
+Скоробогатовым~\cite{skorobogatov_repr}, нацелено на то, чтобы сохранить
+дешёвое копирование переменных от массивного представления и одновременно
+избежать линейной конкатенации.
+
+Идея состоит в том, чтобы изменить интерфейс между функциями. Аргументы
+функций передаются как \textbf{векторы} (массивы тегированных ячеек), но
+\textbf{результат} функция возвращает не как один сплошной вектор, а как
+\textbf{список ссылок на фрагменты векторов}. Конкатенация фрагментов
+откладывается: пока вычисление не дошло до точки, где результат должен
+стать пассивным аргументом другой функции (в частности, попасть внутрь
+скобочного терма), фрагменты остаются отдельными звеньями.
+
+Применительно к функции \prog{Map} это означает следующее. На каждом шаге
+рекурсии вместо физического присоединения \prog{<F s.X>} к результату
+\prog{<Map e.Rest>} формируется лёгкое звено \enq{сначала такой-то
+фрагмент, потом такой-то}. Когда вычисление функции завершено и её
+результат должен стать пассивным выражением, накопленный список
+фрагментов собирается в единый вектор за один проход, что даёт линейное
+общее время вместо квадратичного.
+
+Платой становится более сложный интерфейс языка сборки и более
+ответственное управление временем жизни фрагментов: пока на фрагмент есть
+ссылки в незавершённых вычислениях, исходный вектор нельзя освободить или
+переиспользовать. Подробное описание представления и связанной системы
+команд абстрактной Рефал-машины приведено в~\cite{skorobogatov_repr}.
+
+\subsection{Гипотетическое представление: дерево конкатенаций}
+\label{sec:rope-repr}
+
+Среди представлений, не получивших распространения в реализациях Рефала,
+интерес представляет \textbf{дерево конкатенаций} (rope). В этом
+представлении объектное выражение хранится в виде двоичного дерева, где
+листья --- небольшие фрагменты массива, а внутренние узлы соответствуют
+операциям конкатенации поддеревьев.
+
+Преимущество rope в том, что конкатенация двух выражений сводится к
+созданию одного нового внутреннего узла, что даёт \(O(1)\) с периодической
+перебалансировкой за \(O(\log n)\). Копирование переменной также \(O(1)\)
+--- это ссылка на корень поддерева. Слабая сторона --- \textbf{операции на
+концах}: чтобы получить первый или последний терм, нужно спуститься по
+дереву к крайнему листу, что стоит \(O(\log n)\) и зависит от баланса.
+Для Рефала это особенно неудобно, потому что \(e\)-переменные требуют как
+раз многократного отделения термов с краёв.
+
+В литературе по реализациям Рефала rope обсуждается лишь как теоретическая
+возможность~\cite{refal05_site}.
+
+\subsection{Предлагаемое представление: раскрученная двусторонняя очередь}
+\label{sec:bootstrapped-deque}
+
+Все рассмотренные выше представления имеют выраженное \enq{слабое место}:
+плоский список --- проблему копирования; компромиссный --- неполное её
+устранение и сложное управление памятью; массивное --- проблему
+конкатенации; векторно-списковое --- сложный интерфейс и привязку к
+определённой модели вычисления; rope --- дорогие операции на концах. В
+данной работе предлагается использовать \textbf{раскрученную двустороннюю
+очередь}, описанную в монографии
+Окасаки~\cite{okasaki_pfds}, как структуру, амортизированно решающую обе
+ключевые проблемы одновременно.
+
+Идея структуры опирается на два уровня вложенности.
+
+\begin{itemize}
+  \item \textbf{Мелкий уровень} (\(Shallow\)) --- буфер фиксированной
+        ёмкости \(B\), организованный как циклический массив. Локальные
+        операции на концах при наличии места выполняются как сдвиг
+        индексов, без выделения памяти.
+  \item \textbf{Глубокий уровень} (\(Deep\)) --- тройка \(\langle
+        front,\, mid,\, back\rangle\), где крайние компоненты
+        (\(front\), \(back\)) --- мелкие буферы, а средний (\(mid\)) ---
+        двусторонняя
+        очередь мелких буферов. Структура определена рекурсивно: средняя
+        очередь сама может быть как мелкой, так и глубокой.
+\end{itemize}
+
+Ключевой инвариант: внутренние буферы средней очереди заполнены не менее
+чем наполовину. Этот инвариант предотвращает вырождение глубокой
+структуры в длинную цепочку почти пустых буферов и обеспечивает, что
+глубина рекурсивного представления растёт логарифмически от длины
+выражения.
+
+Стоимость основных операций:
+
+\begin{itemize}
+  \item отделение начала или конца --- \(O(1)\) амортизированно;
+  \item конкатенация двух выражений --- \(O(1)\) амортизированно (за счёт
+        перетекания крайних буферов в среднюю очередь);
+  \item использование переменной несколько раз --- \(O(1)\), благодаря
+        структурному разделению: новая версия выражения
+        ссылается на те же неизменяемые буферы и узлы, что и старая.
+\end{itemize}
+
+Структурное разделение в данном случае --- инженерная техника, а не
+свойство языка: в самой модели Рефала-5 нет изменяемых ячеек памяти, и
+вычисление концептуально строит новые выражения, а задача реализации в
+том, чтобы за этой моделью не стояло физическое копирование.
+
+\subsubsection{Структура мелкого и глубокого уровней}
+
+Рисунок~\ref{fig:shallow_ring} показывает идею мелкого буфера: элементы
+размещены циклически, концы задаются индексами \enq{head} и
+\enq{tail}; в общем случае head может находиться правее tail, и
+разрыв \enq{обходится} по модулю ёмкости \(B\).
+
+\begin{figure}[!htb]
+\centering
+\begin{tikzpicture}[
+    cell/.style={rectangle, draw, minimum width=0.9cm, minimum height=0.55cm, font=\footnotesize, align=center},
+    lab/.style={font=\footnotesize},
+]
+  \node[cell] (c0) { };
+  \node[cell, right=0cm of c0] (c1) { };
+  \node[cell, right=0cm of c1] (c2) {x};
+  \node[cell, right=0cm of c2] (c3) {y};
+  \node[cell, right=0cm of c3] (c4) {z};
+  \node[cell, right=0cm of c4] (c5) { };
+  \node[cell, right=0cm of c5] (c6) { };
+  \node[cell, right=0cm of c6] (c7) { };
+  \node[cell, right=0cm of c7] (c8) { };
+  \node[lab, below=0.25cm of c2] {head};
+  \node[lab, below=0.25cm of c4] {tail};
+\end{tikzpicture}
+\caption{Идея мелкого буфера: элементы размещены циклически, концы задаются индексами}
+\label{fig:shallow_ring}
+\end{figure}
+
+Глубокий уровень состоит из двух мелких буферов и средней очереди, которая
+сама хранит мелкие буферы (рисунок~\ref{fig:deep_deque}). Рекурсивность
+означает, что средняя очередь при необходимости тоже становится глубокой,
+и мы получаем структуру с логарифмической по основанию \(B/2\) глубиной.
+
+\begin{figure}[!htb]
+\centering
+\begin{tikzpicture}[
+    box/.style={rectangle, draw, rounded corners, minimum width=3.2cm, minimum height=0.85cm, align=center, font=\small},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick}
+]
+    \node[box] (front) {front\\(shallow buffer)};
+    \node[box, right=1.2cm of front] (mid) {mid\\(deque of buffers)};
+    \node[box, right=1.2cm of mid] (back) {back\\(shallow buffer)};
+    \draw[arrow] (front) -- (mid);
+    \draw[arrow] (mid) -- (back);
+\end{tikzpicture}
+\caption{Глубокий уровень раскрученной двусторонней очереди: два мелких буфера и средняя очередь буферов}
+\label{fig:deep_deque}
+\end{figure}
+
+\subsubsection{Краткое обоснование амортизированных оценок}
+
+Большинство операций затрагивает только крайние буферы \(front\) и
+\(back\): пока в них есть свободное место, добавление и удаление
+сводятся к сдвигу индексов в циклическом массиве и являются строго
+\(O(1)\). Перетекание буфера в среднюю очередь происходит только при
+достижении границ заполненности и требует \(O(B)\). Если каждой такой
+дорогой операции приписать стоимость, накопленную на предшествующих
+локальных операциях, то средняя стоимость шага остаётся около константы;
+это и есть классический амортизированный аргумент~\cite{okasaki_pfds}.
+
+Интуитивно редкие глубокие переносы можно сравнить с цепочкой переносов
+при прибавлении единицы в позиционной системе счисления: вероятность
+цепочки длины \(k\) убывает геометрически, и вклад в \emph{среднюю}
+стоимость образует сходящийся ряд. Для основания \(q \ge 2\) ожидаемое
+число переносов
+\[
+  \mathbb{E}[K] = \sum_{k\ge 1} \frac{k(q-1)}{q^{k+1}} = \frac{1}{q-1}.
+\]
+Это иллюстрация, а не строгое доказательство для конкретной реализации.
+Полные техники амортизированного анализа функциональных структур данных
+(включая раскрутку и ленивые вычисления) систематически изложены у
+Окасаки~\cite{okasaki_pfds}.
+
+\subsubsection{Сводное сравнение представлений}
+
+Сравнение рассмотренных представлений приведено в
+таблице~\ref{tab:repr-comparison}. Зафиксирована стоимость трёх ключевых
+операций, через которые выражается основная вычислительная нагрузка
+интерпретатора: отделение терма с конца, конкатенация двух выражений и
+использование одного значения переменной несколько раз.
+
+\begin{table}[!htb]
+\caption{\centering Сравнение представлений объектных выражений по стоимости основных операций}
+\label{tab:repr-comparison}
+\small
+\centering
+\begin{tabular}{@{}p{4.2cm}p{2.4cm}p{3.0cm}p{3.4cm}@{}}
+\toprule
+\textbf{Представление} & \textbf{Концы} & \textbf{Конкатенация} & \textbf{Копирование переменной} \\
+\midrule
+Классическое (плоское двусвязное) & \(O(1)\) & \(O(1)\) & \(O(N)\) (вся запись) \\
+Компромиссное (подвешенные скобки) & \(O(1)\) & \(O(1)\) & \(O(N_{\text{верх}})\) \\
+Массивное (с дырками) & \(O(1)\) & \(O(|X|+|Y|)\), линейная амортизация при последовательных приписываниях & \(O(1)\) \\
+Векторно-списковое & \(O(1)\) & откладывается, \(O(1)\) на сборке & \(O(1)\) \\
+Дерево конкатенаций (rope) & \(O(\log n)\) & \(O(1)\), перебалансировка \(O(\log n)\) & \(O(1)\) \\
+Раскрученная двусторонняя очередь & \(O(1)\) аморт. & \(O(1)\) аморт. & \(O(1)\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Область применимости и ограничения}
+
+Раскрученная двусторонняя очередь оправдана прежде всего тогда, когда
+выражения достаточно длинные, а в правилах активно используются
+\(e\)-переменные, порождающие многократные разбиения и сборки. На
+коротких выражениях и в программах, где почти каждое правило связано с
+одним-двумя термами, выигрыш от сложной структуры может уступить простым
+спискам или массивам из-за более высокого постоянного множителя.
+
+Целевой реализацией в данной работе является среда JVM. Это естественно
+сочетается с неизменяемыми объектами и структурным разделением, но
+накладные расходы на работу сборщика мусора нужно учитывать при выборе
+ёмкости \(B\) мелкого буфера: слишком малое \(B\) приводит к большому
+числу мелких объектов, слишком большое --- ухудшает локальность
+модификаций функционального стиля.
+
+\subsection{Выводы по разделу}
+
+Требования к представлению объектных выражений базисного подмножества
+Рефала-5 сводятся к следующему: дёшевые операции на концах, дешёвая
+конкатенация при построении результата и отсутствие физического
+копирования при многократном использовании одной переменной. Существующие
+представления закрывают часть этих требований: классическое и
+компромиссное списковые --- быстрые на концах и при конкатенации, но
+дорогие на копировании; массивное и векторно-списковое --- быстрые на
+копировании, но имеют ограничения по конкатенации или по интерфейсу
+языка сборки; rope --- быстрая конкатенация и копирование, но дорогие
+операции на концах. Раскрученная двусторонняя очередь покрывает все три
+требования амортизированно за \(O(1)\) и поэтому выбрана в качестве
+представления объектных выражений в проектируемой системе.
+
+\section{Проектирование программной системы}
+\label{sec:design}
+
+В третьем разделе фиксируется архитектура программной системы: состав модулей, интерфейсы и данные,
+которые они обрабатывают. Проектирование опирается на выбранное представление выражений (раскрученная двусторонняя очередь)
+и на грамматику базисного подмножества.
+
+\subsection{Функциональные требования}
+
+К системе предъявляются требования:
+\begin{itemize}
+  \item приём исходного текста на подмножестве Рефала-5;
+  \item выдача сообщений об ошибках с привязкой к позиции во входном тексте;
+  \item выполнение программы в модели \enq{выбор первого применимого правила} для функций;
+  \item сокращённая библиотека встроенных функций (только необходимый минимум по постановке).
+\end{itemize}
+
+\subsection{Архитектура и потоки данных}
+
+Система включает цепочку этапов: подготовка входа (при необходимости), лексический анализ, синтаксический анализ,
+семантический анализ и выполнение правил. Представление объектных выражений едино для этапов выполнения и используется
+при сопоставлении и сборке результата.
+
+На практике удобно разрешить внешний \enq{рассахариватель}, который переводит исходный текст полного Рефала-5 к синтаксису
+базисного подмножества (условия, блоки и др.), чтобы не расширять грамматику минимальной системы. Такой шаг не меняет
+семантику рассматриваемых программ при условии корректности рассахаривания, но выносит сложные конструкции из ядра
+транслятора.
+
+\begin{figure}[!htb]
+\centering
+\begin{tikzpicture}[
+    node distance=0.55cm and 0.55cm,
+    box/.style={rectangle, draw, rounded corners, minimum width=2.35cm, minimum height=0.78cm, align=center, font=\footnotesize},
+    data/.style={rectangle, draw, dashed, minimum width=2.15cm, minimum height=0.62cm, align=center, font=\scriptsize},
+    arrow/.style={-{Stealth[length=2.2mm]}, thick}
+]
+    \node[box] (prep) {Подготовка\\входа};
+    \node[box, right=of prep] (lexer) {Лексический\\анализ};
+    \node[box, right=of lexer] (parser) {Синтаксический\\анализ};
+    \node[box, right=of parser] (sem) {Семантический\\анализ};
+    \node[box, right=of sem] (exec) {Исполнение\\правил};
+
+    \node[data, below=0.55cm of prep] (srcfull) {Исходный текст};
+    \node[data, below=0.55cm of lexer] (srcbasis) {Базисный текст};
+    \node[data, below=0.55cm of parser] (toks) {Токены};
+    \node[data, below=0.55cm of sem] (ast) {Дерево программы};
+    \node[data, below=0.55cm of exec] (expr) {Выражения};
+
+    \draw[arrow] (srcfull) -- (prep);
+    \draw[arrow] (prep) -- (srcbasis);
+    \draw[arrow] (srcbasis) -- (lexer);
+    \draw[arrow] (lexer) -- (toks);
+    \draw[arrow] (toks) -- (parser);
+    \draw[arrow] (parser) -- (ast);
+    \draw[arrow] (ast) -- (sem);
+    \draw[arrow] (sem) -- (exec);
+    \draw[arrow] (exec) -- (expr);
+\end{tikzpicture}
+\caption{Этапы обработки программы и основные данные}
+\label{fig:arch}
+\end{figure}
+
+Целевая реализация рассматривается в экосистеме JVM (например, Java): это естественно сочетается с представлением
+программы и выражений как ссылочных структур и со сборкой мусора, но накладные расходы GC должны учитываться при выборе
+гранулярности объектов (термы, буферы раскрученной двусторонней очереди, узлы дерева программы).
+
+\subsection{Внутренние представления данных}
+
+В проектировании фиксируются следующие структуры:
+\begin{itemize}
+  \item \textbf{токены} с координатами (строка/столбец) для точной диагностики;
+  \item \textbf{дерево программы} как набор функций и правил сопоставления;
+  \item \textbf{объектные выражения} как двусторонняя очередь термов.
+\end{itemize}
+
+\subsection{Интерфейс контейнера выражений}
+
+Для независимости модулей удобно выделить интерфейс контейнера выражения, содержащий операции:
+проверку пустоты, отделение терма с начала/конца, добавление/удаление на концах, итерацию и конкатенацию.
+Конкретная реализация (мелкий и глубокий уровни раскрученной двусторонней очереди) скрыта за этим
+интерфейсом и может заменяться без изменения логики сопоставления.
+
+\subsection{Декомпозиция на модули}
+
+С практической точки зрения систему удобно декомпозировать на набор модулей со строго определёнными ответственностями:
+\begin{itemize}
+  \item \textbf{модуль ввода} --- чтение текста программы, выбор кодировки, единый входной поток символов;
+  \item \textbf{подготовка входа} (опционально) --- запуск внешнего рассахаривателя и получение текста базисного подмножества;
+  \item \textbf{лексический анализатор} --- преобразование потока символов в поток токенов с координатами;
+  \item \textbf{синтаксический анализатор} --- построение дерева программы (функции, предложения, выражения);
+  \item \textbf{семантический анализатор} --- проверки, которые удобнее выполнить до исполнения (например, определённость функций и согласованность переменных);
+  \item \textbf{контейнер выражений} --- представление объектных выражений и операции над ним;
+  \item \textbf{механизм сопоставления} --- сопоставление образца и выражения, вычисление подстановки;
+  \item \textbf{исполнитель правил} --- выбор первого применимого предложения и построение результата;
+  \item \textbf{таблица встроенных функций} --- набор примитивов и диспетчеризация вызовов.
+\end{itemize}
+
+Такая декомпозиция снижает связанность: развитие входного языка (например, уточнение синтаксиса) не затрагивает слой контейнера выражений,
+а оптимизация представления выражений не затрагивает логику синтаксического анализа.
+
+\subsection{Модель выполнения и точки расширения}
+
+Модель выполнения фиксируется как \enq{вызов функции \(\rightarrow\) просмотр предложений сверху вниз \(\rightarrow\) первое успешное сопоставление}.
+Отдельные точки расширения в проектировании:
+\begin{itemize}
+  \item добавление новых классов термов (при необходимости расширить подмножество);
+  \item расширение механизма сопоставления (например, введение дополнительных ограничений или условий);
+  \item расширение библиотеки встроенных функций без изменения ядра сопоставления;
+  \item возможное добавление оптимизаций (индексация предложений по первым термам, мемоизация вызовов).
+\end{itemize}
+
+Даже если оптимизации не входят в круг основных задач данного этапа, их перечисление как точек расширения полезно, поскольку показывает,
+что выбранный интерфейс контейнера выражений не препятствует дальнейшему развитию системы.
+
+\subsection{Нефункциональные требования}
+
+Помимо функциональности, для системы важны следующие свойства:
+\begin{itemize}
+  \item \textbf{предсказуемость потребления памяти}: представление выражений должно использовать структурное разделение и избегать полного копирования;
+  \item \textbf{диагностика}: сообщения об ошибках должны указывать координаты во входном тексте и причину ошибки;
+  \item \textbf{расширяемость}: состав встроенных функций допускается сокращать/расширять без изменения ядра сопоставления;
+  \item \textbf{переносимость}: предпочтителен язык реализации со сборкой мусора и поддержкой обобщённых типов
+        (в том числе варианты на JVM).
+\end{itemize}
+
+\subsection{Обработка ошибок и форматы сообщений}
+
+Ошибки целесообразно разделять на классы: лексические (неожиданный символ, незакрытый строковый литерал), синтаксические (неожиданная конструкция,
+нарушение структуры определения функции) и ошибки выполнения (отсутствие применимого правила). Для повышения качества диагностики
+в проектировании закладывается единый формат сообщения: координата (строка, столбец), тип ошибки и краткое описание.
+
+\subsection{Выбор и сокращение встроенной библиотеки}
+
+Сокращённая библиотека встроенных функций проектируется как отдельный слой среды выполнения: каждая встроенная функция имеет строго определённый
+интерфейс, а таблица примитивов отделена от механизма сопоставления. Такой дизайн позволяет исключать функции, не нужные для рассматриваемого
+подмножества, не затрагивая ядро выполнения.
+
+\subsection{Представление термов и вложенность}
+
+В выбранном подмножестве термы образуют минимально необходимый набор для выражения большинства \enq{структурных} преобразований:
+атомарные термы (символы-слова, числа, строковые литералы) и скобочные термы. Скобочный терм содержит вложенное выражение, что фактически вводит
+деревоподобную структуру данных поверх линейной последовательности. С точки зрения проектирования это означает, что контейнер выражения
+должен хранить не только атомы, но и ссылки на вложенные выражения, причём вложенность может быть произвольной.
+
+Здесь важно различать две роли контейнера:
+\begin{itemize}
+  \item на \textbf{верхнем уровне} контейнер обслуживает операции над последовательностью термов (концы, конкатенация, разбиение);
+  \item на \textbf{уровне скобок} контейнер используется рекурсивно, так как содержимое скобок является самостоятельным выражением.
+\end{itemize}
+Таким образом, выбранная структура данных применяется единообразно на всех уровнях вложенности, что упрощает архитектуру и повышает
+предсказуемость поведения системы.
+
+\subsection{Окружение сопоставления и представление подстановок}
+
+Результатом сопоставления образца и выражения является окружение (подстановка), связывающая переменные образца со значениями.
+В проектировании выделяются три класса связываний:
+\begin{itemize}
+  \item \(s\)-переменная связывается с атомарным термом (число, символ-слово или строковый литерал);
+  \item \(t\)-переменная связывается с термом (включая скобочный);
+  \item \(e\)-переменная связывается с выражением (цепочкой термов).
+\end{itemize}
+
+С практической точки зрения удобно хранить подстановку в виде отображения \enq{имя переменной \(\rightarrow\) значение}, где значение
+для \(e\)-переменных является контейнером выражения. Это позволяет строить результат без распаковки цепочек в списки/массивы:
+результат собирается из фрагментов через операции конкатенации и добавления на концах, опираясь на интерфейс контейнера.
+
+\subsection{Контракт механизма сопоставления}
+
+Чтобы разделить \enq{логику сопоставления} и \enq{операции над данными}, проектирование фиксирует контракт модуля сопоставления:
+\begin{itemize}
+  \item вход: образец (последовательность термов с переменными) и выражение-аргумент;
+  \item выход: либо \enq{неуспех}, либо подстановка, корректная относительно ограничений типов переменных;
+  \item свойство: если сопоставление успешно, то подстановка совместима со всеми повторными вхождениями переменных (одно имя --- одно значение).
+\end{itemize}
+
+Такой контракт позволяет в дальнейшем заменять стратегию перебора границ \(e\)-переменных (например, на более эффективную),
+не меняя остальную архитектуру. При этом контейнер выражения должен обеспечивать операции, которые нужны сопоставлению: проверку равенства
+фрагментов, получение префикса/суффикса и сборку новых выражений с разделением структуры.
+
+\subsection{Сценарии использования системы}
+
+Проектирование исходит из основного сценария --- \textbf{пакетный запуск}: чтение программы из файла, запуск входной функции
+с заданным выражением и вывод результата. Такой сценарий опирается на единый формат представления выражений и единый механизм диагностики
+и соответствует типичному применению инструмента как отдельной программы.
+
+\textbf{Интерактивный режим} (последовательные запуски с разными входными выражениями без повторной загрузки программы) в рамках
+данного проектирования не фиксируется; его можно рассматривать как возможную доработку или расширение --- например, для отладки
+и исследования поведения правил.
+
+\anonsection{ЗАКЛЮЧЕНИЕ}
+
+В НИР сформулирована мотивация использования раскрученных двусторонних очередей для представления
+объектных выражений в реализации базисного подмножества Рефала-5. Описана структура shallow/deep,
+инварианты заполненности и причины, по которым достигаются хорошие амортизированные оценки на концах.
+Выполнено проектирование программной системы и исследовательское обоснование выбора структуры данных
+для представления объектных выражений.
+
+Проведённое исследование показывает, что выбор контейнера для объектных выражений нельзя рассматривать как второстепенную деталь:
+в языке переписывания стоимость вычисления во многом определяется тем, насколько эффективно выполняются разбиения и сборки выражений.
+Подход с раскруткой даёт возможность совместить эффективное версионирование выражений через структурное разделение и хорошие оценки операций на концах,
+а также создаёт основу для эффективной конкатенации в сценариях интенсивного построения результата.
+
+Сформулированные в работе требования и проектные решения задают основу для дальнейшей доработки реализации: отдельной задачей
+останется по мере необходимости расширять поддерживаемый синтаксис и библиотеку встроенных функций в соответствии
+с уточняемыми требованиями к системе и согласованными тестовыми сценариями.
+
+\clearpage
+\printbibliography[heading=bibintoc,title={СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}]
+
+\end{document}
+

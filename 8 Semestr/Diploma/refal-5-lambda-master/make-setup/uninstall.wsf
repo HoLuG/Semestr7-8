@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<job id="installer">
+  <script language="VBScript" src="constants.vbs"/>
+  <script language="VBScript">
+<![CDATA[
+Option Explicit
+Dim WshShell, WshEnvUser, WshNamedArgs
+Dim InstallDir, FSO, BinDir, LibDir
+
+Const CUninstallKey = _
+  "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\Refal-5-lambda"
+
+Private Function Decorate(Text)
+  Decorate = ";" & Text & ";"
+End Function
+
+Private Sub Init
+  Set WshShell = CreateObject("WScript.Shell")
+  Set WshEnvUser = WshShell.Environment("USER")
+  Set WshNamedArgs = WScript.Arguments.Named
+  Set FSO = CreateObject("Scripting.FileSystemObject")
+
+  InstallDir = FSO.GetParentFolderName(WScript.ScriptFullName)
+  BinDir = InstallDir & "\bin"
+  LibDir = InstallDir & "\lib"
+End Sub
+
+Private Sub AddDirToPath(Env, Dir)
+  Dim Path, DecoratedPath, DecoratedDir
+  Path = WshEnvUser(Env)
+  DecoratedPath = Decorate(Path)
+  DecoratedDir = Decorate(Dir)
+
+  If Path = "" Then
+    WshEnvUser(Env) = Dir
+  ElseIf Not InStr(1, DecoratedPath, DecoratedDir, vbTextCompare) > 0 Then
+    WshEnvUser(Env) = Path & ";" & BinDir
+  End If
+End Sub
+
+Private Sub Install
+  AddDirToPath "PATH", BinDir
+  AddDirToPath "RL_MODULE_PATH", LibDir
+
+  WshShell.RegWrite CUninstallKey & "\DisplayIcon", _
+    InstallDir & "\icon.ico", "REG_SZ"
+  WshShell.RegWrite CUninstallKey & "\DisplayName", _
+    "Refal-5-lambda", "REG_SZ"
+  WshShell.RegWrite CUninstallKey & "\DisplayVersion", CVersion, "REG_SZ"
+  WshShell.RegWrite CUninstallKey & "\EstimatedSize", _
+    CByteSize \ 1024, "REG_DWORD"
+  WshShell.RegWrite CUninstallKey & "\Publisher", "BMSTU IU-9", "REG_SZ"
+  WshShell.RegWrite CUninstallKey & "\UninstallString", _
+    """%SystemRoot%\system32\wscript.exe"" " & _
+    """" & InstallDir & "\uninstall.wsf""", "REG_EXPAND_SZ"
+
+  WScript.Echo("Successfully installed")
+End Sub
+
+Private Function UnDecorate(Text)
+  If Len(Text) >= 2 Then
+    Text = Left(Text, Len(Text) - 1)      'Skip right ";"
+    Text = Right(Text, Len(Text) - 1)     'Skip left ";"
+  ElseIf Text = ";" Then
+    Text = ""
+  End If
+  UnDecorate = Text
+End Function
+
+Private Sub RemoveDirFromPath(Env, Dir)
+  Dim Path, DecoratedDir
+  DecoratedDir = Decorate(Dir)
+  Path = WshEnvUser(Env)
+  Path = Decorate(Path)
+  Path = Replace(Path, DecoratedDir, ";", 1, -1, vbTextCompare)
+  Path = UnDecorate(Path)
+  If Path <> "" Then
+    WshEnvUser(Env) = Path
+  Else
+    WshEnvUser.Remove(Env)
+  End If
+End Sub
+
+Private Sub UnInstall
+  RemoveDirFromPath "PATH", BinDir
+  RemoveDirFromPath "RL_MODULE_PATH", LibDir
+
+  WshShell.CurrentDirectory = InstallDir & "\.."
+  FSO.DeleteFolder InstallDir, True
+  FSO.DeleteFolder WshShell.SpecialFolders.Item("Programs") & "\Refal-5-lambda", True
+
+  WshShell.RegDelete CUninstallKey & "\"
+
+  WScript.Echo("Successfully uninstalled")
+End Sub
+
+
+Init
+
+If WshNamedArgs.Exists("install") Then
+  Install
+Else
+  UnInstall
+End If
+]]>
+  </script>
+</job>

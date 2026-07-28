@@ -1,0 +1,10 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+java\PYG{+w}{ }\PYGZhy{}jar\PYG{+w}{ }target/refal5q.jar\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }tests/desugar/desugar\PYGZus{}desugared.ref+\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }tests/desugar/LibraryEx\PYGZus{}desugared.ref+\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }tests/desugar/R5FW\PYGZhy{}Parser\PYGZus{}desugared.ref+\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }tests/desugar/R5FW\PYGZhy{}Plainer\PYGZus{}desugared.ref+\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }tests/desugar/R5FW\PYGZhy{}Transformer\PYGZus{}desugared.ref\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }\PYGZhy{}\PYGZhy{}entry\PYG{+w}{ }Go\PYG{+w}{ }tests/multifile/extended.ref
+\PYG{c+c1}{\PYGZsh{} Результат в tests/multifile/extended\PYGZhy{}out.ref}
+\end{MintedVerbatim}

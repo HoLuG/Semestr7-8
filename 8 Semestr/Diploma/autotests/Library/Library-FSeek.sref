@@ -1,0 +1,24 @@
+//FROM Library
+$EXTERN Open-Auto, Get, FSeek, Close;
+
+$ENTRY Go {
+  = <Test-FSeek <Open-Auto 'r' '2lines-no-eol.txt'>>;
+}
+
+Eq { (e.X) e.X = ; }
+
+Test-FSeek {
+  s.FH =
+    <Eq ('Hello') <Get s.FH>>
+    <Eq () <FSeek s.FH #BEGIN '+' 0>>
+    <Eq ('Hello') <Get s.FH>>
+    <Eq () <FSeek s.FH #BEGIN '+' 3>>
+    <Eq ('lo') <Get s.FH>>
+    <Eq () <FSeek s.FH #CURRENT '+' 2>>
+    <Eq ('rld' 0) <Get s.FH>>
+    <Eq () <FSeek s.FH #CURRENT '-' 5>>
+    <Eq ('World' 0) <Get s.FH>>
+    <Eq () <FSeek s.FH #END '-' 4>>
+    <Eq ('orld' 0) <Get s.FH>>
+    <Close s.FH>;
+}

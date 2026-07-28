@@ -1,0 +1,279 @@
+const IMG_SIZE = 150
+const CANVAS_REF = 120.0  
+
+
+
+const BASE_GENE_COUNT = 16
+
+const COLOR_GENE_COUNT = 3
+const GENE_COUNT = BASE_GENE_COUNT + COLOR_GENE_COUNT
+
+"""Нормализация направления dir к 0..7 (как в JS: ((dir % 8) + 8) % 8)."""
+mod8(dir::Int) = mod(dir, 8)
+
+function calculate_stems(g::AbstractVector{Int})
+    g1, g2, g3, g4, g5, g6, g7 = g[1], g[2], g[3], g[4], g[5], g[6], g[7]
+    return [
+        (0, g1),
+        (g2, g3),
+        (g4, 0),
+        (g5, -g6),
+        (0, -g7),
+        (-g5, -g6),
+        (-g4, 0),
+        (-g2, g3),
+    ]
+end
+
+function render_creature!(segments, L::Int, stems, dir::Int, ox::Float64, oy::Float64)
+    L < 1 && return segments
+    d = mod8(dir)
+    sx, sy = stems[d + 1]
+    nx = ox + L * sx
+    ny = oy + L * sy
+    push!(segments, (ox, oy, nx, ny))
+    if L > 1
+        render_creature!(segments, L - 1, stems, dir + 1, nx, ny)
+        render_creature!(segments, L - 1, stems, dir - 1, nx, ny)
+    end
+    return segments
+end
+
+function segment_bounds(segments)
+    minx = miny = Inf
+    maxx = maxy = -Inf
+    for (x0, y0, x1, y1) in segments
+        for (x, y) in ((x0, y0), (x1, y1))
+            minx = min(minx, x); maxx = max(maxx, x)
+            miny = min(miny, y); maxy = max(maxy, y)
+        end
+    end
+    if isempty(segments)
+        return (0.0, 0.0, 0.0, 0.0)
+    end
+    return (minx, maxx, miny, maxy)
+end
+
+"""Брезенхем: рисуем отрезок в матрице img[y, x], координаты пикселей 1..size."""
+function draw_line!(img::AbstractMatrix{<:Real}, x0::Int, y0::Int, x1::Int, y1::Int, val)
+    dx = abs(x1 - x0); dy = -abs(y1 - y0)
+    sx = x0 < x1 ? 1 : -1
+    sy = y0 < y1 ? 1 : -1
+    err = dx + dy
+    x, y = x0, y0
+    h, w = size(img)
+    while true
+        if 1 <= x <= w && 1 <= y <= h
+            img[y, x] = val
+        end
+        (x == x1 && y == y1) && break
+        e2 = 2err
+        if e2 >= dy
+            err += dy
+            x += sx
+        end
+        if e2 <= dx
+            err += dx
+            y += sy
+        end
+    end
+    return img
+end
+
+"""Расширить нарисованные пиксели (имитация толщины линии рядом с залитым эталоном)."""
+function dilate_binary_max!(img::Matrix{Float64}, passes::Int)
+    passes <= 0 && return img
+    h, w = size(img)
+    for _ in 1:passes
+        snap = copy(img)
+        fill!(img, 0.0)
+        for j in 1:h, i in 1:w
+            snap[j, i] < 0.5 && continue
+            for dj in (-1):1, di in (-1):1
+                jj, ii = j + dj, i + di
+                if 1 <= jj <= h && 1 <= ii <= w
+                    img[jj, ii] = 1.0
+                end
+            end
+        end
+    end
+    return img
+end
+
+"""ЧБ-растр: фон 0, линии 1. `line_half_width` — число проходов расширения (0 = тонкий каркас)."""
+function biomorph_raster(
+    genes::Vector{Int};
+    size::Int = IMG_SIZE,
+    canvas::Float64 = CANVAS_REF,
+    line_half_width::Int = 0,
+)
+    @assert length(genes) == GENE_COUNT
+    Lrec = genes[16]
+    stems = Tuple{Int,Int}[(Int(sx), Int(sy)) for (sx, sy) in calculate_stems(genes)]
+    segs = Tuple{Float64,Float64,Float64,Float64}[]
+    render_creature!(segs, Lrec, stems, 0, 0.0, 0.0)
+    minx, maxx, miny, maxy = segment_bounds(segs)
+    halfw = max(abs(minx), abs(maxx), 1e-6)
+    halfh = max(abs(miny), abs(maxy), 1e-6)
+    factor = canvas / (2 * max(halfw, halfh))
+    img = zeros(Float64, size, size)
+    cx = (size + 1) / 2
+    cy = (size + 1) / 2
+    for (x0, y0, x1, y1) in segs
+        px0 = round(Int, cx + factor * x0)
+        py0 = round(Int, cy - factor * y0)
+        px1 = round(Int, cx + factor * x1)
+        py1 = round(Int, cy - factor * y1)
+        draw_line!(img, px0, py0, px1, py1, 1.0)
+    end
+    dilate_binary_max!(img, line_half_width)
+    return img
+end
+
+function biomorph_segments(genes::Vector{Int})
+    @assert length(genes) == GENE_COUNT
+    Lrec = genes[16]
+    stems = Tuple{Int,Int}[(Int(sx), Int(sy)) for (sx, sy) in calculate_stems(genes)]
+    segs = Tuple{Float64,Float64,Float64,Float64}[]
+    render_creature!(segs, Lrec, stems, 0, 0.0, 0.0)
+    return segs
+end
+
+function biomorph_segment_count(genes::Vector{Int})
+    return length(biomorph_segments(genes))
+end
+
+function biomorph_extent(segs)
+    isempty(segs) && return (0.0, 0.0)
+    minx, maxx, miny, maxy = segment_bounds(segs)
+    return (maxx - minx, maxy - miny)
+end
+
+function biomorph_pixel_count(genes::Vector{Int}; lw::Int = 0)
+    img = biomorph_raster(genes; line_half_width = lw)
+    return sum(img)
+end
+
+function biomorph_color(genes::AbstractVector{Int})
+    @assert length(genes) == GENE_COUNT
+    if COLOR_GENE_COUNT == 1
+        h = genes[BASE_GENE_COUNT + 1] / 10
+        return RGB(HSV(h, 0.9, 0.9))
+    else
+        r = genes[BASE_GENE_COUNT + 1] / 9
+        g = genes[BASE_GENE_COUNT + 2] / 9
+        b = genes[BASE_GENE_COUNT + 3] / 9
+        return RGB(r, g, b)
+    end
+end
+
+function force_color(genes::Vector{Int}, rgb::NTuple{3,Int})
+    g = copy(genes)
+    r, gg, b = rgb
+    g[BASE_GENE_COUNT + 1] = clamp(r, 0, 9)
+    g[BASE_GENE_COUNT + 2] = clamp(gg, 0, 9)
+    g[BASE_GENE_COUNT + 3] = clamp(b, 0, 9)
+    return g
+end
+
+"""Цветное изображение биоморфа: белый фон, цветные линии."""
+function biomorph_image(
+    genes::Vector{Int};
+    size::Int = IMG_SIZE,
+    canvas::Float64 = CANVAS_REF,
+    line_half_width::Int = 0,
+)
+    mask = biomorph_raster(genes; size, canvas, line_half_width)
+    line = biomorph_color(genes)
+    bg = RGB(1.0, 1.0, 1.0)
+    img = fill(bg, size, size)
+    @inbounds for j in 1:size, i in 1:size
+        if mask[j, i] > 0.5
+            img[j, i] = line
+        end
+    end
+    return img
+end
+
+"""Только первые `k` отрезков (порядок как в `render_creature!`); масштаб как у полной фигуры."""
+function biomorph_raster_partial(
+    genes::Vector{Int},
+    k::Int;
+    size::Int = IMG_SIZE,
+    canvas::Float64 = CANVAS_REF,
+    line_half_width::Int = 0,
+)
+    @assert length(genes) == GENE_COUNT
+    Lrec = genes[16]
+    stems = Tuple{Int,Int}[(Int(sx), Int(sy)) for (sx, sy) in calculate_stems(genes)]
+    segs_full = Tuple{Float64,Float64,Float64,Float64}[]
+    render_creature!(segs_full, Lrec, stems, 0, 0.0, 0.0)
+    isempty(segs_full) && return zeros(Float64, size, size)
+    minx, maxx, miny, maxy = segment_bounds(segs_full)
+    halfw = max(abs(minx), abs(maxx), 1e-6)
+    halfh = max(abs(miny), abs(maxy), 1e-6)
+    factor = canvas / (2 * max(halfw, halfh))
+    img = zeros(Float64, size, size)
+    cx = (size + 1) / 2
+    cy = (size + 1) / 2
+    n = min(max(k, 0), length(segs_full))
+    for i in 1:n
+        x0, y0, x1, y1 = segs_full[i]
+        px0 = round(Int, cx + factor * x0)
+        py0 = round(Int, cy - factor * y0)
+        px1 = round(Int, cx + factor * x1)
+        py1 = round(Int, cy - factor * y1)
+        draw_line!(img, px0, py0, px1, py1, 1.0)
+    end
+    dilate_binary_max!(img, line_half_width)
+    return img
+end
+
+function random_genotype(rng::AbstractRNG = Random.default_rng())
+    g = Vector{Int}(undef, GENE_COUNT)
+    for i in 1:15
+        g[i] = rand(rng, -9:9)
+    end
+    g[16] = rand(rng, 2:12)
+    for i in (BASE_GENE_COUNT + 1):GENE_COUNT
+        g[i] = rand(rng, 0:9)
+    end
+    return g
+end
+
+function clamp_gene!(g::Vector{Int}, i::Int)
+    if i <= 15
+        g[i] = clamp(g[i], -9, 9)
+    elseif i == 16
+        g[16] = clamp(g[16], 2, 12)
+    else
+        g[i] = clamp(g[i], 0, 9)
+    end
+    return g
+end
+
+"""Одна мутация ФОРМЫ: случайный базовый ген (±1).
+
+Важно: цветовые гены не должны участвовать в отборе по форме,
+иначе часть мутаций не меняет фенотип и эволюция заметно ухудшается.
+"""
+function mutate_one(g::Vector{Int}, rng::AbstractRNG = Random.default_rng())
+    child = copy(g)
+    i = rand(rng, 1:BASE_GENE_COUNT)
+    child[i] += rand(rng, (-1, 1))
+    clamp_gene!(child, i)
+    return child
+end
+
+"""Мутация цвета: меняем 1 случайный цвет-ген на ±1 с вероятностью `p`.
+
+Используем clamp(0..9), а не mod 10 — тогда цвет сходится к цели ПОСТЕПЕННО,
+а не прыгает (например 9 -> 0 за один шаг).
+"""
+function mutate_color!(g::Vector{Int}, rng::AbstractRNG = Random.default_rng(); p::Float64 = 0.7)
+    COLOR_GENE_COUNT <= 0 && return g
+    rand(rng) > p && return g
+    i = rand(rng, (BASE_GENE_COUNT + 1):GENE_COUNT)
+    g[i] = clamp(g[i] + rand(rng, (-1, 1)), 0, 9)
+    return g
+end

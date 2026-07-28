@@ -1,0 +1,14 @@
+$ENTRY Go {
+  = <Sum <RangeUp 1 2000>>;
+}
+Sum {
+  = 0;
+  s.X e.Rest = <Add s.X <Sum e.Rest>>;
+}
+RangeUp {
+  s.From s.To = <ConsBy <Compare s.From s.To> s.From s.To>;
+}
+ConsBy {
+  '+' s.From s.To = ;
+  s.Op  s.From s.To = s.From <RangeUp <Add s.From 1> s.To>;
+}

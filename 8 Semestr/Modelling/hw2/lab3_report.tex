@@ -1,0 +1,508 @@
+\documentclass[a4paper, 14pt]{extarticle}
+
+% Поля
+%--------------------------------------
+\usepackage{geometry}
+\geometry{a4paper,tmargin=2cm,bmargin=2cm,lmargin=3cm,rmargin=1cm}
+%--------------------------------------
+
+
+%Russian-specific packages
+%--------------------------------------
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, main=russian]{babel}
+
+%--------------------------------------
+
+\usepackage{textcomp}
+
+% Красная строка
+%--------------------------------------
+\usepackage{indentfirst}               
+%--------------------------------------             
+
+
+%Graphics
+%--------------------------------------
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+\usepackage{float}%"Плавающие" картинки
+%--------------------------------------
+
+% Полуторный интервал
+%--------------------------------------
+\linespread{1.3}                    
+%--------------------------------------
+
+% Уменьшение расстояний между плавающими объектами
+%--------------------------------------
+\setlength{\floatsep}{10pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{15pt plus 2pt minus 4pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+%--------------------------------------
+
+%Выравнивание и переносы
+%--------------------------------------
+% Избавляемся от переполнений
+\sloppy
+% Запрещаем разрыв страницы после первой строки абзаца
+\clubpenalty=10000
+% Запрещаем разрыв страницы после последней строки абзаца
+\widowpenalty=10000
+%--------------------------------------
+
+%Списки
+\usepackage{enumitem}
+
+\usepackage{minted}
+%Подписи
+\usepackage{caption} 
+
+%Гиперссылки
+% \usepackage{hyperref}
+
+\usepackage[colorlinks, urlcolor = blue, filecolor = blue, citecolor = blue, linkcolor = black]{hyperref}
+
+
+\hypersetup {
+unicode=true
+}
+
+%Рисунки
+%--------------------------------------
+\DeclareCaptionLabelSeparator*{emdash}{~--- }
+\captionsetup[figure]{labelsep=emdash,font=onehalfspacing,position=bottom}
+%--------------------------------------
+
+\usepackage{tempora}
+
+%Листинги
+%--------------------------------------
+%Листинги
+%--------------------------------------
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize, 
+  %basicstyle=\footnotesize\AnkaCoder,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks shoulbd only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=t,                    % sets the caption-position to bottom
+  inputencoding=utf8,
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\bf,       % keyword style
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  xleftmargin=25pt,
+  xrightmargin=25pt,
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  tabsize=2,                       % sets default tabsize to 8 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+%--------------------------------------
+
+%%% Математические пакеты %%%
+%--------------------------------------
+\usepackage{amsthm,amsfonts,amsmath,amssymb,amscd}  % Математические дополнения от AMS
+\usepackage{mathtools}                              % Добавляет окружение multlined
+\usepackage[perpage]{footmisc}
+
+
+% графики
+\usepackage{booktabs}        % Пакет для улучшенных таблиц
+\usepackage{pgfplots}        % Пакет для построения графиков
+\pgfplotsset{compat=1.17}    % Установка совместимости
+\usepackage{tikz}            % Пакет для создания схем
+\usetikzlibrary{positioning, arrows.meta}  % Библиотеки для TikZ
+
+% Литература 
+
+% переименовываем  список литературы в "список используемой литературы"
+\addto\captionsrussian{\def\refname{Список литературы}}
+
+
+
+\captionsetup[figure]{name=Рисунок, labelsep=space}
+
+
+%--------------------------------------
+
+%--------------------------------------
+%			НАЧАЛО ДОКУМЕНТА
+%--------------------------------------
+
+\begin{document}
+
+%--------------------------------------
+%			ТИТУЛЬНЫЙ ЛИСТ
+%--------------------------------------
+\begin{titlepage}
+\thispagestyle{empty}
+\newpage
+
+
+%Шапка титульного листа
+%--------------------------------------
+\vspace*{-60pt}
+\hspace{-65pt}
+\begin{minipage}{0.3\textwidth}
+\hspace*{-20pt}\centering
+\includegraphics[width=\textwidth]{emblem}
+\end{minipage}
+\begin{minipage}{0.67\textwidth}\small \textbf{
+\vspace*{-0.7ex}
+\hspace*{-6pt}\centerline{Министерство науки и высшего образования Российской Федерации}
+\vspace*{-0.7ex}
+\centerline{Федеральное государственное автономное образовательное учреждение }
+\vspace*{-0.7ex}
+\centerline{высшего образования}
+\vspace*{-0.7ex}
+\centerline{<<Московский государственный технический университет}
+\vspace*{-0.7ex}
+\centerline{имени Н.Э. Баумана}
+\vspace*{-0.7ex}
+\centerline{(национальный исследовательский университет)>>}
+\vspace*{-0.7ex}
+\centerline{(МГТУ им. Н.Э. Баумана)}}
+\end{minipage}
+%--------------------------------------
+
+%Полосы
+%--------------------------------------
+\vspace{-25pt}
+\hspace{-35pt}\rule{\textwidth}{2.3pt}
+
+\vspace*{-20.3pt}
+\hspace{-35pt}\rule{\textwidth}{0.4pt}
+%--------------------------------------
+
+\vspace{1.5ex}
+\hspace{-35pt} \noindent \small ФАКУЛЬТЕТ\hspace{80pt} <<Информатика и системы управления>>
+
+\vspace*{-16pt}
+\hspace{47pt}\rule{0.83\textwidth}{0.4pt}
+
+\vspace{0.5ex}
+\hspace{-35pt} \noindent \small КАФЕДРА\hspace{50pt} <<Теоретическая информатика и компьютерные технологии>>
+
+\vspace*{-16pt}
+\hspace{30pt}\rule{0.866\textwidth}{0.4pt}
+
+\vspace{11em}
+
+\begin{center}
+\Large {\bf Лабораторная работа №3} \\ 
+\large <<Построение стохастическое модели в заданной предметной области>> \\
+\large {по курсу <<Моделирование>>} \\
+
+\end{center}\normalsize
+
+\vspace{8em}
+
+\vbox{%
+\hfill%
+\vbox{%
+\hbox{Студент: Аринин М.А.}%
+\hbox{Группа: ИУ9-82Б}%
+\hbox{Преподаватель: Домрачева А.Б.}%
+}%
+} 
+
+\bigskip
+
+\vfill
+
+
+\begin{center}
+\textsl{Москва 2026}
+\end{center}
+\end{titlepage}
+%--------------------------------------
+%		КОНЕЦ ТИТУЛЬНОГО ЛИСТА
+%--------------------------------------
+
+
+\renewcommand{\ttdefault}{pcr}
+
+\setlength{\tabcolsep}{3pt}
+
+\newpage
+\setcounter{page}{2}
+
+\section{Постановка задачи}
+Цель работы --- построить вычислительную модель, позволяющую по набору входных показателей относить объект к одному из двух классов. Наличие контрольного признака \texttt{Outcome} позволяет дополнительно проверить качество полученного разбиения, однако при построении модели этот признак не используется.
+
+\textbf{Входные данные:}
+\begin{itemize}
+  \item файл \texttt{diabetes.csv} (\texttt{https://disk.yandex.ru/i/M35XVBrxn09\_iQ});
+  \item числовые признаки объекта: \texttt{Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age}.
+\end{itemize}
+
+\textbf{Выходные данные:}
+\begin{itemize}
+  \item разбиение объектов на 2 класса (метка класса для каждого объекта);
+  \item координаты центров классов в пространстве сниженной размерности;
+  \item таблицы и графики для обоснования и интерпретации результатов.
+\end{itemize}
+
+\section{Построение математической модели}\label{sec:build_model}
+\textbf{Тип модели.} Задача относится к методам многомерного статистического анализа. Рассматривается стохастическая модель, поскольку входные данные представлены выборкой случайных векторов (наборов показателей), а решение формируется на основе статистических оценок и эвристических критериев качества.
+
+\subsection{Формализация задачи}
+Пусть задана выборка объектов $X=\{x^{(1)},\dots,x^{(n)}\}$, где каждый объект $x^{(k)}$ описывается $p$ числовыми показателями. Требуется построить модель, которая сопоставляет каждому объекту метку класса $c^{(k)}\in\{1,2\}$ так, чтобы внутри класса объекты были близки по выбранной метрике, а между классами --- отличались.
+\subsection{Бинаризация показателей}
+Для каждого признака $x_i$ вводится событие
+\[
+A_i:\; x_i \le t_i,
+\]
+где $t_i$ --- порог бинаризации. В практической реализации используется порог по медиане $t_i=\mathrm{median}(x_i)$ как устойчивый к выбросам вариант, формирующий близкие по размеру подгруппы.
+
+\subsection{Коэффициенты взаимосвязи}
+После бинаризации для каждой пары признаков $(i,j)$ рассматриваются события $A_i:\;x_i\le t_i$ и $B_j:\;x_j\le t_j$.
+Пусть для этой пары построена таблица сопряжённости 2$\times$2 со счётчиками
+\[
+\begin{aligned}
+a&=n(A_i\cap B_j),\quad b=n(A_i\cap \overline{B_j}),\\
+c&=n(\overline{A_i}\cap B_j),\quad d=n(\overline{A_i}\cap \overline{B_j}),\\
+n&=a+b+c+d.
+\end{aligned}
+\]
+
+В работе вычисляются несколько формальных коэффициентов взаимосвязи (без опоры на смысловую интерпретацию признаков):
+\begin{itemize}
+  \item коэффициент коллигации (lift)
+  \[
+  K_{ij}=\frac{P(A_i\mid B_j)}{P(A_i)},\qquad P(A_i)=\frac{a+b}{n},\qquad P(A_i\mid B_j)=\frac{a}{a+c};
+  \]
+  \item коэффициент контингенции Пирсона \(\varphi\) для 2$\times$2-таблицы
+  \[
+  \varphi_{ij}=\frac{ad-bc}{\sqrt{(a+b)(c+d)(a+c)(b+d)}};
+  \]
+  \item коэффициент ассоциации Юла \(Q\)
+  \[
+  Q_{ij}=\frac{ad-bc}{ad+bc};
+  \]
+  \item коэффициент коллигации Юла \(Y\)
+  \[
+  Y_{ij}=\frac{\sqrt{ad}-\sqrt{bc}}{\sqrt{ad}+\sqrt{bc}}.
+  \]
+\end{itemize}
+
+Для дальнейшего сокращения размерности требуется «мера близости» признаков. Для симметричных коэффициентов (\(|\varphi|,|Q|,|Y|\)) она задаётся модулем. Для lift используется симметризация:
+\[
+S_{ij}=\max(K_{ij},K_{ji}).
+\]
+
+\subsection{Схема модели}
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+    node distance=1.6cm,
+    box/.style={rectangle, draw, fill=#1!15, minimum width=3.8cm, minimum height=1cm, text centered, font=\footnotesize, text width=3.6cm},
+    arrow/.style={->, >=stealth, thick}
+  ]
+    \node[box=blue] (data) {Исходные данные\\$\{x^{(k)}\}_{k=1}^n$};
+    \node[box=green, below=of data] (bin) {Бинаризация\\$A_i: x_i \le t_i$};
+    \node[box=yellow, below=of bin] (sim) {Оценка взаимосвязей\\$K_{ij},\ |\varphi_{ij}|,\ |Q_{ij}|,\ |Y_{ij}|$};
+    \node[box=orange, below=of sim] (sel) {Выбор меры и порога\\перебор (grid search)\\по метрикам качества};
+    \node[box=orange, below=of sel] (red) {Сокращение размерности\\группы зависимых\\признаков $\to$\\композитные $G_1..G_m$};
+    \node[box=purple, below=of red] (km) {Кластеризация $k$-means\\($k=2$, евклидова метрика)};
+    \node[box=gray, below=of km] (res) {Результат: метки классов\\и центры классов};
+
+    \draw[arrow] (data) -- (bin);
+    \draw[arrow] (bin) -- (sim);
+    \draw[arrow] (sim) -- (sel);
+    \draw[arrow] (sel) -- (red);
+    \draw[arrow] (red) -- (km);
+    \draw[arrow] (km) -- (res);
+  \end{tikzpicture}
+  \caption{Схема вычислительной модели классификации}
+  \label{fig:model_scheme}
+\end{figure}
+
+\subsection{Сокращение размерности}
+Сокращение размерности выполняется без жёсткого отбрасывания признаков. По выбранной мере взаимосвязи \(S_{ij}\) и порогу \(S_{\text{thr}}\) строится граф: вершины --- признаки, ребро \((i,j)\) проводится при \(S_{ij}\ge S_{\text{thr}}\). Далее выделяются компоненты связности (группы зависимых признаков), и каждая группа заменяется композитным показателем как среднее от стандартизованных признаков группы. После построения композитных признаков выполняется стандартизация:
+\[
+z=\frac{x-\mu}{\sigma}.
+\]
+
+\section{Решение вычислительных задач}
+\subsection{Вычисление коэффициентов взаимосвязи}
+Для каждой пары признаков $(i,j)$ после бинаризации строится таблица сопряжённости 2$\times$2 с элементами $(a,b,c,d)$. По ней вычисляются коэффициенты \(K_{ij}\), \(\varphi_{ij}\), \(Q_{ij}\), \(Y_{ij}\) (формулы приведены в разделе \ref{sec:build_model}). Ниже приведены визуализации матриц для используемых коэффициентов.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{colligation_K_heatmap.png}
+  \caption{Матрица lift-коэффициента коллигации \(K_{ij}=\frac{P(A_i\mid B_j)}{P(A_i)}\)}
+  \label{fig:kheat}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{phi_heatmap.png}
+  \caption{Матрица коэффициента контингенции Пирсона \(\varphi\) (\(r_B\)).}
+  \label{fig:phiheat}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{yule_Q_heatmap.png}
+  \caption{Матрица коэффициента Юла \(Q\)}
+  \label{fig:yuleqheat}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{yule_Y_heatmap.png}
+  \caption{Матрица коэффициента Юла \(Y\)}
+  \label{fig:yuleyheat}
+\end{figure}
+
+\subsection{Порог и построение групп зависимых признаков}
+По выбранным мере и порогу строятся группы зависимых признаков. Пример полученных групп приведён в табл.~\ref{tab:groups}.
+
+\medskip
+\textbf{Пояснение к агрегированному критерию выбора.}
+Чтобы автоматически выбрать меру взаимосвязи и порог сокращения размерности (без подбора по \texttt{Outcome}), используется скаляризация многокритериальной задачи через эвристический score~\cite{podinovskiy2013}:
+\[
+\mathrm{score}=\mathrm{sil}-0.15\cdot\ln(1+\mathrm{DB})+0.02\cdot\ln(1+\mathrm{CH})-0.03\cdot m+0.10\cdot \mathrm{balance}.
+\]
+Здесь \(\mathrm{sil}\) (silhouette) и \(\mathrm{CH}\) (Calinski--Harabasz) должны расти, а \(\mathrm{DB}\) (Davies--Bouldin) --- уменьшаться~\cite{sklearn2026}; \(m\) штрафует избыточную сложность (число композитных признаков), \(\mathrm{balance}=\min(n_1,n_2)/\max(n_1,n_2)\) поощряет невырожденное разбиение по размерам кластеров. Логарифмирование \(\ln(1+x)\) применяется, чтобы привести метрики разного масштаба к сопоставимому влиянию на сумму (например, \(\mathrm{CH}\) может быть на порядки больше \(\mathrm{sil}\)). Весовые коэффициенты являются эвристическими и задают компромисс между качеством кластеризации, устойчивостью и простотой модели.
+
+\medskip
+\textbf{Замечание о мультиколлинеарности.}
+В мультиколлинеарных пространствах (сильно коррелированные признаки) при построении композитных показателей меняется геометрия данных и масштабы расстояний; поэтому оптимизация внутренних метрик и простоты модели может давать предпочтение меньшему \(m\). Важно, что \textbf{score оптимизирует другое} — внутреннюю геометрию кластеров и простоту (через штраф за размерность), поэтому он может не совпасть с внешним критерием по \texttt{Outcome}.
+
+\begin{table}[H]
+\centering
+\input{tables/reduction_groups.tex}
+\caption{Группы признаков после сокращения размерности}
+\label{tab:groups}
+\end{table}
+
+\subsection{Кластеризация методом $k$-means}
+Кластеризация выполняется в пространстве композитных признаков $(G_1,\dots,G_m)$ по евклидовой метрике. Начальные центры выбираются как первая точка и наиболее удалённая от неё, затем итеративно выполняются шаги:
+\begin{enumerate}
+  \item назначить каждой точке ближайший центр;
+  \item пересчитать центры как среднее по точкам кластера;
+  \item повторять до стабилизации центров.
+\end{enumerate}
+
+Размеры кластеров:
+\begin{table}[H]
+\centering
+\input{tables/cluster_sizes.tex}
+\caption{Количество объектов в кластерах}
+\end{table}
+
+Центры кластеров (в композитных стандартизированных координатах):
+\begin{table}[H]
+\centering
+\input{tables/cluster_centers.tex}
+\caption{Центры кластеров в сниженной размерности}
+\end{table}
+
+\section{Практическая реализация}
+\newenvironment{longlisting}{\captionsetup{type=listing}}{}
+\begin{longlisting}
+\caption{Листинг программной реализации (сокращённая версия для отчёта).}
+\inputminted[frame=single,fontsize=\footnotesize,linenos,xleftmargin=1.5em,breaklines=true]{python}{modeling_process_lab3_report_clean.py}
+\end{longlisting}
+
+\section{Результаты}
+Получено разбиение объектов на 2 класса. Ниже приведены результаты вычисления матриц взаимосвязей, выбора меры/порога для сокращения размерности и визуализация кластеризации.
+
+\subsection{Выбор меры взаимосвязи и порога}
+Мера взаимосвязи и порог для построения групп зависимых признаков выбираются автоматически перебором кандидатов: \(S_{ij}\in\{\max(K_{ij},K_{ji}),\ |\varphi_{ij}|,\ |Q_{ij}|,\ |Y_{ij}|\}\) и \(S_{\text{thr}}\) из заданной сетки. Каждый кандидат оценивается по внутренним метрикам качества кластеризации и балансу кластеров; при этом рассматриваются варианты размерности от \(m=2\) до \(m=p\) (где \(p\) --- число исходных признаков).
+
+\textbf{Замечание о выборе.} Внутренние метрики (silhouette, Davies--Bouldin, Calinski--Harabasz) оценивают геометрию кластеров без учителя, поэтому «лучший» по ним вариант может не совпадать с разбиением, наиболее согласованным с контрольной меткой \texttt{Outcome}. Так как классы \texttt{Outcome} несбалансированы, метрика \(\mathrm{accuracy}\) может быть обманчивой; поэтому для внешней контрольной оценки используются \(\mathrm{balanced\ accuracy}\) и \(\mathrm{F1}\) (macro-F1). При расчёте внешних метрик выбирается лучшее сопоставление меток кластеров и \texttt{Outcome}.
+
+\textbf{Выбранный вариант для итогового результата (по максимуму macro-F1):} \(S_{ij}=|Y_{ij}|\), \(S_{\text{thr}}=0.25\), итоговая размерность \(m=4\), \(\mathrm{F1_{macro}}=0.7261\), \(\mathrm{BalAcc}=0.7298\).
+
+\textbf{Сравнение с вариантом, выбранным по score:} при \(S_{ij}=|Y_{ij}|\), \(S_{\text{thr}}=0.20\), \(m=2\) получаем \(\mathrm{F1_{macro}}=0.5842\), \(\mathrm{BalAcc}=0.5831\).
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\resizebox{\textwidth}{!}{\input{tables/threshold_search.tex}}
+\caption{Сравнение мер взаимосвязи и порогов по метрикам качества кластеризации и внешним контрольным метрикам (Acc, BalAcc, F1-macro)}
+\end{table}
+
+\begin{table}[H]
+\centering
+\input{tables/accuracy_by_m.tex}
+\caption{Лучшие внешние метрики по \texttt{Outcome} в зависимости от числа композитных признаков \(m\)}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{kmeans_best_score_2d.png}
+  \caption{Разбиение $k$-means в 2D-проекции (вариант, выбранный по внутреннему score)}
+  \label{fig:kmeans_best_score_2d}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{kmeans_best_macro_f1_2d.png}
+  \caption{Разбиение $k$-means в 2D-проекции (вариант, выбранный по максимуму macro-F1 по \texttt{Outcome})}
+  \label{fig:kmeans_best_macro_f1_2d}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{kmeans_best_macro_f1_3d.png}
+  \caption{Разбиение $k$-means в 3D-проекции (вариант, выбранный по максимуму macro-F1; G1, G2, G3)}
+  \label{fig:kmeans_best_macro_f1_3d}
+\end{figure}
+
+\section{Анализ моделей и проверка качества}
+Качество кластеризации оценивается как внутренними метриками, так и внешней проверкой (без использования \texttt{Outcome} при построении модели).
+
+\subsection{Внутренние метрики качества}
+Для выбранного разбиения вычисляются стандартные внутренние метрики:
+\begin{itemize}
+  \item средний коэффициент силуэта (silhouette) --- чем больше, тем лучше;
+  \item индекс Дэвиса--Болдина (Davies--Bouldin) --- чем меньше, тем лучше;
+  \item индекс Калински--Харабаса (Calinski--Harabasz) --- чем больше, тем лучше.
+\end{itemize}
+
+\medskip
+Согласно теории кластерного анализа, решение является принципиально неоднозначным: не существует единственного «наилучшего» критерия качества кластеризации, результат зависит от выбранной метрики расстояния и стандартизации признаков, а число кластеров часто задаётся исследователем. Поэтому в работе используются как внутренние метрики качества, так и внешняя контрольная оценка по \texttt{Outcome} (только для проверки результата, без участия в построении модели).
+
+\subsection{Внешняя проверка по Outcome}
+Столбец \texttt{Outcome} не использовался при построении модели и кластеризации. Однако его можно применить для внешней проверки согласованности разбиения: сравнивается распределение значений \texttt{Outcome} в полученных классах и вычисляются внешние контрольные метрики. Так как классы \texttt{Outcome} несбалансированы, для контроля используются \(\mathrm{BalAcc}\) и \(\mathrm{F1}\) (macro-F1).
+
+\begin{table}[H]
+\centering
+\input{tables/accuracy.tex}
+\caption{Внешние контрольные метрики по \texttt{Outcome} (лучшее сопоставление меток кластеров и \texttt{Outcome})}
+\end{table}
+
+\section{Выводы}
+В ходе работы построена стохастическая вычислительная модель отнесения объектов к двум классам по входным данным из \texttt{diabetes.csv}. Получена полная цепочка вычислительных процедур:
+\begin{itemize}
+  \item выполнена бинаризация каждого числового признака по устойчивому порогу \(t_i=\mathrm{median}(x_i)\), что обеспечивает формирование сопоставимых по объёму подвыборок и снижает влияние выбросов;
+  \item рассчитаны матрицы взаимосвязи признаков по нескольким формальным коэффициентам (\(K_{ij}\), \(\varphi\), Юла \(Q\), Юла \(Y\)), что позволяет не фиксировать заранее единственную меру зависимости;
+  \item реализован алгоритм выбора меры взаимосвязи и порога сокращения размерности: перебираются кандидаты, строятся группы зависимых признаков и композитные показатели \(G_1,\dots,G_m\), после чего вариант оценивается по внутренним метрикам качества кластеризации и балансу кластеров для размерностей от \(m=2\) до \(m=p\) (где \(p\) --- число исходных признаков);
+  \item выполнена кластеризация методом \(k\)-means в пространстве композитных признаков с получением центров кластеров и меток классов;
+  \item проведена формальная интерпретация полученных классов через сравнение статистик исходных признаков внутри каждого класса.
+\end{itemize}
+
+Для контроля качества использована внешняя проверка по признаку \texttt{Outcome}. Из-за дисбаланса классов основная контрольная метрика --- macro-F1 (и balanced accuracy). При снятии ограничения на \(m\) оказалось, что вариант, оптимальный по внутреннему score, даёт меньшие внешние метрики (например, при \(m=2\) \(\mathrm{F1_{macro}}\approx 0.584\)), тогда как при \(m=4\) достигаются существенно лучшие значения (\(\mathrm{F1_{macro}}\approx 0.726\)). Поэтому в итоговых результатах выбран вариант, максимизирующий macro-F1, а внутренние метрики приведены как характеристика структуры кластеров.
+
+\begin{thebibliography}{9}
+\bibitem{podinovskiy2013}
+Подиновский В.\,В., Потапов М.\,А. Метод взвешенной суммы критериев в анализе многокритериальных решений: \textit{pro et contra} // \textit{Бизнес-информатика}. 2013.
+
+\bibitem{sklearn2026}
+\textit{scikit-learn: руководство пользователя (русский перевод)}. Раздел «Кластеризация» и метрики качества (silhouette, Davies--Bouldin, Calinski--Harabasz). Дата обращения: 31.03.2026. 
+URL: \url{https://scikit-learn.ru/stable/modules/clustering.html}.
+\end{thebibliography}
+
+\end{document}
+

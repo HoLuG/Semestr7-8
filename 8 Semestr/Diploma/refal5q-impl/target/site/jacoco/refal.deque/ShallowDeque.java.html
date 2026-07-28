@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShallowDeque.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.deque</a> &gt; <span class="el_source">ShallowDeque.java</span></div><h1>ShallowDeque.java</h1><pre class="source lang-java linenums">package refal.deque;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+// Двусторонняя очередь на циклическом массиве фиксированной длины CAPACITY.
+public final class ShallowDeque&lt;T&gt; implements Expr&lt;T&gt; {
+
+    public static final int CAPACITY = 9;
+
+    // Минимальная заполненность после расщепления.
+    public static final int MIN_FILL = (CAPACITY + 1) / 2;
+
+<span class="fc" id="L14">    private static final ShallowDeque&lt;Object&gt; EMPTY =</span>
+            new ShallowDeque&lt;&gt;(new Object[CAPACITY], 0, 0);
+
+    private final Object[] buf;
+    private final int head;
+    private final int sz;
+
+<span class="fc" id="L21">    private ShallowDeque(Object[] buf, int head, int sz) {</span>
+<span class="fc" id="L22">        this.buf = buf;</span>
+<span class="fc" id="L23">        this.head = head;</span>
+<span class="fc" id="L24">        this.sz = sz;</span>
+<span class="fc" id="L25">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T&gt; ShallowDeque&lt;T&gt; empty() {
+<span class="fc" id="L29">        return (ShallowDeque&lt;T&gt;) EMPTY;</span>
+    }
+
+    @Override
+    public boolean isEmpty() {
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        return sz == 0;</span>
+    }
+
+    @Override
+    public int size() {
+<span class="fc" id="L39">        return sz;</span>
+    }
+
+    public boolean isFull() {
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        return sz == CAPACITY;</span>
+    }
+
+    private int idx(int i) {
+<span class="fc" id="L47">        return Math.floorMod(head + i, CAPACITY);</span>
+    }
+
+    // Получить элемент по индексу 0..size-1.
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public T get(int i) {
+<span class="pc bpc" id="L53" title="2 of 4 branches missed.">        if (i &lt; 0 || i &gt;= sz) {</span>
+<span class="nc" id="L54">            throw new IndexOutOfBoundsException(&quot;ShallowDeque.get(&quot; + i + &quot;), size=&quot; + sz);</span>
+        }
+<span class="fc" id="L56">        return (T) buf[idx(i)];</span>
+    }
+
+    @Override
+    public Expr&lt;T&gt; pushFront(T x) {
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (isFull()) {</span>
+<span class="fc" id="L62">            var split = DeepDeque.splitForPushFront(this, x);</span>
+<span class="fc" id="L63">            return DeepDeque.mkDeep(</span>
+<span class="fc" id="L64">                    split.head(), Expr.empty(), split.tail(), CAPACITY + 1);</span>
+        }
+<span class="fc" id="L66">        return pushFrontTight(x);</span>
+    }
+
+    @Override
+    public Expr&lt;T&gt; pushBack(T x) {
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (isFull()) {</span>
+<span class="fc" id="L72">            var split = DeepDeque.splitForPushBack(this, x);</span>
+<span class="fc" id="L73">            return DeepDeque.mkDeep(</span>
+<span class="fc" id="L74">                    split.head(), Expr.empty(), split.tail(), CAPACITY + 1);</span>
+        }
+<span class="fc" id="L76">        return pushBackTight(x);</span>
+    }
+
+    // Версия pushFront, гарантированно возвращающая ShallowDeque (не DeepDeque).
+    ShallowDeque&lt;T&gt; pushFrontTight(T x) {
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (isFull()) {</span>
+<span class="fc" id="L82">            throw new IllegalStateException(</span>
+                    &quot;ShallowDeque overflow on pushFrontTight&quot;);
+        }
+<span class="fc" id="L85">        Object[] nb = buf.clone();</span>
+<span class="fc" id="L86">        int newHead = Math.floorMod(head - 1, CAPACITY);</span>
+<span class="fc" id="L87">        nb[newHead] = x;</span>
+<span class="fc" id="L88">        return new ShallowDeque&lt;&gt;(nb, newHead, sz + 1);</span>
+    }
+
+    /** Аналог pushFrontTight для конца буфера. */
+    ShallowDeque&lt;T&gt; pushBackTight(T x) {
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (isFull()) {</span>
+<span class="fc" id="L94">            throw new IllegalStateException(</span>
+                    &quot;ShallowDeque overflow on pushBackTight&quot;);
+        }
+<span class="fc" id="L97">        Object[] nb = buf.clone();</span>
+<span class="fc" id="L98">        nb[idx(sz)] = x;</span>
+<span class="fc" id="L99">        return new ShallowDeque&lt;&gt;(nb, head, sz + 1);</span>
+    }
+
+    @Override
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public PeekResult&lt;T&gt; separateFront() {
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if (sz == 0) {</span>
+<span class="fc" id="L106">            throw new IllegalStateException(&quot;separateFront from empty deque&quot;);</span>
+        }
+<span class="fc" id="L108">        T x = (T) buf[head];</span>
+<span class="fc" id="L109">        Object[] nb = buf.clone();</span>
+<span class="fc" id="L110">        nb[head] = null;</span>
+<span class="fc" id="L111">        int newHead = Math.floorMod(head + 1, CAPACITY);</span>
+<span class="fc" id="L112">        return new PeekResult&lt;&gt;(x, new ShallowDeque&lt;&gt;(nb, newHead, sz - 1));</span>
+    }
+
+    @Override
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public PeekResult&lt;T&gt; separateBack() {
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if (sz == 0) {</span>
+<span class="fc" id="L119">            throw new IllegalStateException(&quot;separateBack from empty deque&quot;);</span>
+        }
+<span class="fc" id="L121">        int last = idx(sz - 1);</span>
+<span class="fc" id="L122">        T x = (T) buf[last];</span>
+<span class="fc" id="L123">        Object[] nb = buf.clone();</span>
+<span class="fc" id="L124">        nb[last] = null;</span>
+<span class="fc" id="L125">        return new PeekResult&lt;&gt;(x, new ShallowDeque&lt;&gt;(nb, head, sz - 1));</span>
+    }
+
+    @Override
+    public Iterator&lt;T&gt; iterator() {
+<span class="fc" id="L130">        return new Iterator&lt;&gt;() {</span>
+            private int i;
+
+            @Override
+            public boolean hasNext() {
+<span class="fc bfc" id="L135" title="All 2 branches covered.">                return i &lt; sz;</span>
+            }
+
+            @Override
+            @SuppressWarnings(&quot;unchecked&quot;)
+            public T next() {
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">                if (i &gt;= sz) {</span>
+<span class="nc" id="L142">                    throw new NoSuchElementException();</span>
+                }
+<span class="fc" id="L144">                return (T) buf[idx(i++)];</span>
+            }
+        };
+    }
+
+    // Создать буфер из среза массива.
+    static &lt;T&gt; ShallowDeque&lt;T&gt; ofArray(Object[] elements, int from, int len) {
+<span class="pc bpc" id="L151" title="2 of 4 branches missed.">        if (len &lt; 0 || len &gt; CAPACITY) {</span>
+<span class="nc" id="L152">            throw new IllegalArgumentException(</span>
+                    &quot;ofArray: bad length &quot; + len + &quot; (CAPACITY=&quot; + CAPACITY + &quot;)&quot;);
+        }
+<span class="fc" id="L155">        Object[] nb = new Object[CAPACITY];</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        for (int i = 0; i &lt; len; i++) {</span>
+<span class="fc" id="L157">            nb[i] = elements[from + i];</span>
+        }
+<span class="fc" id="L159">        return new ShallowDeque&lt;&gt;(nb, 0, len);</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        if (this == o) {</span>
+<span class="nc" id="L165">            return true;</span>
+        }
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">        if (!(o instanceof ShallowDeque&lt;?&gt; that)) {</span>
+<span class="nc" id="L168">            return false;</span>
+        }
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        if (sz != that.sz) {</span>
+<span class="fc" id="L171">            return false;</span>
+        }
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        for (int i = 0; i &lt; sz; i++) {</span>
+<span class="fc" id="L174">            Object a = buf[idx(i)];</span>
+<span class="fc" id="L175">            Object b = that.buf[that.idx(i)];</span>
+<span class="pc bpc" id="L176" title="4 of 6 branches missed.">            if (a == null ? b != null : !a.equals(b)) {</span>
+<span class="nc" id="L177">                return false;</span>
+            }
+        }
+<span class="fc" id="L180">        return true;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L185">        int h = 1;</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        for (int i = 0; i &lt; sz; i++) {</span>
+<span class="nc" id="L187">            Object x = buf[idx(i)];</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">            h = 31 * h + (x == null ? 0 : x.hashCode());</span>
+        }
+<span class="nc" id="L190">        return h;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L195">        StringBuilder sb = new StringBuilder(&quot;Shallow[&quot;);</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        for (int i = 0; i &lt; sz; i++) {</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">            if (i &gt; 0) {</span>
+<span class="fc" id="L198">                sb.append(&quot;, &quot;);</span>
+            }
+<span class="fc" id="L200">            sb.append(buf[idx(i)]);</span>
+        }
+<span class="fc" id="L202">        sb.append(']');</span>
+<span class="fc" id="L203">        return sb.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

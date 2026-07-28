@@ -1,0 +1,29 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{                }\PYG{n}{BuiltinFn}\PYG{+w}{ }\PYG{n}{b}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{builtins}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{fn}\PYG{p}{);}
+\PYG{+w}{                }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{b}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                     }\PYG{c+c1}{// (20)}
+\PYG{+w}{                    }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{result}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{apply}\PYG{p}{(}\PYG{k}{this}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{argsExpr}\PYG{p}{);}
+\PYG{+w}{                    }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{ViewTerm}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{tmp}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}
+\PYG{+w}{                    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{t}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{result}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{flattenInto}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{tmp}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (21)}
+\PYG{+w}{                    }\PYG{c+c1}{// кладём результат на правый стек в правильном порядке}
+\PYG{+w}{                    }\PYG{n}{java}\PYG{p}{.}\PYG{n+na}{util}\PYG{p}{.}\PYG{n+na}{Iterator}\PYG{o}{\PYGZlt{}}\PYG{n}{ViewTerm}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{it}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{tmp}\PYG{p}{.}\PYG{n+na}{descendingIterator}\PYG{p}{();}
+\PYG{+w}{                    }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{it}\PYG{p}{.}\PYG{n+na}{hasNext}\PYG{p}{())}\PYG{+w}{ }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{addFirst}\PYG{p}{(}\PYG{n}{it}\PYG{p}{.}\PYG{n+na}{next}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// (22)}
+\PYG{+w}{                }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{else}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                             }\PYG{c+c1}{// (23)}
+\PYG{+w}{                    }\PYG{n}{Optional}\PYG{o}{\PYGZlt{}}\PYG{n}{Func}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{f}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{program}\PYG{p}{.}\PYG{n+na}{getFunc}\PYG{p}{(}\PYG{n}{fn}\PYG{p}{);}
+\PYG{+w}{                    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{f}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}
+\PYG{+w}{                        }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{RefalException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Unknown function: \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{fn}\PYG{p}{);}
+\PYG{+w}{                    }\PYG{k+kt}{boolean}\PYG{+w}{ }\PYG{n}{matched}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kc}{false}\PYG{p}{;}
+\PYG{+w}{                    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Rule}\PYG{+w}{ }\PYG{n}{rule}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{f}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{().}\PYG{n+na}{rules}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{c+c1}{// (24)}
+\PYG{+w}{                        }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{bindings}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Matcher}\PYG{p}{.}\PYG{n+na}{match}\PYG{p}{(}\PYG{n}{rule}\PYG{p}{.}\PYG{n+na}{pattern}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{argsExpr}\PYG{p}{);}
+\PYG{+w}{                        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{bindings}\PYG{p}{.}\PYG{n+na}{isPresent}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{c+c1}{// (25)}
+\PYG{+w}{                            }\PYG{n}{pushResultToStack}\PYG{p}{(}\PYG{n}{rule}\PYG{p}{.}\PYG{n+na}{result}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{bindings}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{right}\PYG{p}{);}
+\PYG{+w}{                            }\PYG{n}{matched}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kc}{true}\PYG{p}{;}
+\PYG{+w}{                            }\PYG{k}{break}\PYG{p}{;}
+\PYG{+w}{                        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{                    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{                    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{matched}\PYG{p}{)}
+\PYG{+w}{                        }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{RefalException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}No matching rule for \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{fn}\PYG{p}{);}
+\PYG{+w}{                }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{            }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

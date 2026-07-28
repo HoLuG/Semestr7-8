@@ -1,0 +1,58 @@
+* Этот тест — компиляция тестов из репозиториев Рефала-05 и Рефала-5λ,
+* адаптированных для тестирования Рефала-5J
+
+$ENTRY Go {
+  /* пусто */
+    , <ListOfBuiltin> : e.11 (s.12 First regular) e.13
+    , <ListOfBuiltin> : e.21 (s.22 Last regular) e.23
+    , <ListOfBuiltin> : e.31 (s.32 Lenw regular) e.33
+    = <Go-Refal-5-lambda>
+      <GO-Refal-05-First-Last>
+      <GO-Refal-05-Lenw>
+
+      <Eq (('Hello') /* пусто */) <First 4000000000 'Hello'>>
+      <Eq ((/* пусто */) 'Hello') <Last 4000000000 'Hello'>>;
+}
+
+Go-Refal-5-lambda {
+  /* пусто */
+    = <Eq (('Hello') ', World!') <First 5 'Hello, World!'>>
+      <Eq (('Hell') /* empty */) <First 5 'Hell'>>
+      <Eq ((() () ()) () ()) <First 3 () () () () ()>>
+      <Eq (('Hello, ') 'World!') <Last 6 'Hello, World!'>>
+      <Eq ((/* empty */) 'Hell') <Last 6 'Hell'>>
+      <Eq ((() () ()) () ()) <Last 2 () () () () ()>>
+      <Eq (13 'Hello, World!') <Lenw 'Hello, World!'>>
+      <Eq (5 () () () () ()) <Lenw () () () () ()>>
+      <Eq (6 'Hello' ('World')) <Lenw 'Hello' ('World')>>
+      <Eq (0 /* empty */) <Lenw /* empty */>>
+}
+
+GO-Refal-05-First-Last {
+  /* пусто */
+    = <Eq (('ABC'      ) 'DEF'      ) <First 3 'ABCDEF'>>
+      <Eq ((/* пусто */) /* пусто */) <First 3 /* пусто */>>
+      <Eq (('ABC'      ) /* пусто */) <First 10 'ABC'>>
+      <Eq (('ABCDE'    ) /* пусто */) <First 5 'ABCDE'>>
+      <Eq ((/* пусто */) 'ABCDE'    ) <First 0 'ABCDE'>>
+      <Eq ((/* пусто */) /* пусто */) <First 0 /* пусто */>>
+      <Eq ((() '*' ()  ) '*' ()     ) <First 3 () '*' () '*' ()>>
+
+      <Eq (('ABC'      ) 'DEF'      ) <Last 3 'ABCDEF'>>
+      <Eq ((/* пусто */) /* пусто */) <Last 3 /* пусто */>>
+      <Eq ((/* пусто */) 'ABC'      ) <Last 10 'ABC'>>
+      <Eq ((/* пусто */) 'ABCDE'    ) <Last 5 'ABCDE'>>
+      <Eq (('ABCDE'    ) /* пусто */) <Last 0 'ABCDE'>>
+      <Eq ((/* пусто */) /* пусто */) <Last 0 /* пусто */>>
+      <Eq ((() '*'     ) ()'*' ()   ) <Last 3 () '*' () '*' ()>>
+}
+
+GO-Refal-05-Lenw {
+  /* пусто */
+    = <Eq (5 'ABCDE')         <Lenw 'ABCDE'>>
+      <Eq (0 /* пусто */)     <Lenw /* пусто */>>
+      <Eq (5 () () () () ())  <Lenw () () () () ()>>
+      <Eq (4 (A) (B) (3) (4)) <Lenw (A) (B) (3) (4)>>
+}
+
+Eq { (e.Eq) e.Eq = }

@@ -1,0 +1,14 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{parseEntry}\PYG{p}{(}\PYG{n}{Program}\PYG{p}{.}\PYG{n+na}{Builder}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Token}\PYG{+w}{ }\PYG{n}{kw}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{expect}\PYG{p}{(}\PYG{n}{ENTRY}\PYG{p}{);}\PYG{+w}{              }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{n}{Token}\PYG{+w}{ }\PYG{n}{name}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{expect}\PYG{p}{(}\PYG{n}{IDENT}\PYG{p}{);}\PYG{+w}{            }\PYG{c+c1}{// (2)}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{peek}\PYG{p}{().}\PYG{n+na}{type}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{n}{LBRACE}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{        }\PYG{c+c1}{// (3)}
+\PYG{+w}{        }\PYG{n}{Func}\PYG{+w}{ }\PYG{n}{f}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{parseFuncBody}\PYG{p}{(}\PYG{n}{name}\PYG{p}{.}\PYG{n+na}{value}\PYG{p}{());}
+\PYG{+w}{        }\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{addFunc}\PYG{p}{(}\PYG{n}{f}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{entry}\PYG{p}{(}\PYG{n}{name}\PYG{p}{.}\PYG{n+na}{value}\PYG{p}{());}\PYG{+w}{            }\PYG{c+c1}{// (4)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{else}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{expect}\PYG{p}{(}\PYG{n}{SEMI}\PYG{p}{);}\PYG{+w}{                     }\PYG{c+c1}{// (5)}
+\PYG{+w}{        }\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{entry}\PYG{p}{(}\PYG{n}{name}\PYG{p}{.}\PYG{n+na}{value}\PYG{p}{());}\PYG{+w}{            }\PYG{c+c1}{// (6)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

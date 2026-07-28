@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(head -50)",
+      "PowerShell(\\(ls \"d:\\\\Programming\\\\Projects\\\\8 Semestr\\\\Diploma\\\\autotests\" -Directory\\).Count)",
+      "Bash(grep -E \"\\\\.\\(xml|md|txt|gradle|properties\\)$\")",
+      "Bash(cd /d)",
+      "Bash(find \"d:/Programming/Projects/8 Semestr/Diploma/refal5q-impl/docs\" -name \"*.md\" -o -name \"*.txt\")",
+      "Bash(Get-ChildItem -Path \"d:\\\\Programming\\\\Projects\\\\8 Semestr\\\\Diploma\\\\refal5q-impl\\\\src\\\\main\\\\java\\\\refal\\\\ast\\\\\" | Select-Object -ExpandProperty Name)",
+      "Bash(awk '{print $NF}')",
+      "Bash(mvn -q -DskipTests compile)",
+      "Bash(mvn -DskipTests compile)",
+      "Bash(mvn clean *)",
+      "Bash(mvn test *)",
+      "Bash(java -jar \"target/refal5j.jar\" \"bench/reverse.ref\")"
+    ]
+  }
+}

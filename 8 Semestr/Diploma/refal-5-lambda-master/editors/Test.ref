@@ -1,0 +1,66 @@
+* Однострочный комментарий
+
+/*
+  Многострочный комментарий
+*/
+
+* синонимы слова $EXTERN:
+$EXTERN Print;
+$EXTRN Prout;
+$EXTERNAL Card;
+
+$BADKEYWORD /* битое ключевое слово */
+
+$INCLUDE "LibraryEx";
+
+/**
+  Документирующий комментарий
+*/
+
+* ниже — псевдокомментарий
+*$FROM Library
+$EXTERN Add;
+
+$ENUM enum;
+$EENUM entry-enum;
+$SWAP swap;
+$ESWAP entry-swap;
+
+$DRIVE Drive;
+$INLINE Inline;
+$SPEC FuncName e.STATIC (e.dynamic);
+
+%%
+void f() {
+  // Вставка кода на C++
+  for (int i = 0; i < 100; ++i)
+    printf("%i = 0x%x\n", i);
+
+  bool x = 1 < 2 && 3 > 1;
+}
+%%
+
+$ENTRY Go {
+  CompoundSymbol = "escapes: \x42\n\t\r\'\"\<\>\(\)";
+  Chars = 'escapes: \x42\n\t\r\\\'\"\<\>\(\)';
+  BadEscape = '\q';
+  unclosed_quote = 'abc;
+  unclosed_compound = "abc;
+  bad_escaped_character = \q;
+
+  SpecialSymbols
+    , \x42 \n \r \t \' \" \< \> \( \) \\
+    : '\x42\n\r\t\'\"\<\>\(\)'
+    = <Go 1>;
+
+  local_function = <__FindMuPtr $SCOPEID enum>;
+
+  e.Other = e.Other;
+}
+
+$ENTRY NativeFunction {
+%%
+  // Нативные вставки могут быть внутри функций
+  return refalrts::cRecognitionImpossible;
+%%
+}

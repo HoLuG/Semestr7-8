@@ -1,0 +1,18 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{// Bindings: immutable map variable \PYGZhy{}\PYGZgt{} Expr\PYGZlt{}Term\PYGZgt{}}
+\PYG{k+kd}{class} \PYG{n+nc}{Bindings}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// Keys: \PYGZdq{}s.X\PYGZdq{}, \PYGZdq{}t.Y\PYGZdq{}, \PYGZdq{}e.Z\PYGZdq{} (full form including kind prefix)}
+\PYG{+w}{    }\PYG{n}{Bindings}\PYG{+w}{ }\PYG{n+nf}{with}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{key}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{val}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{c+cm}{/* copy\PYGZhy{}on\PYGZhy{}write */}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{k+kt}{boolean}\PYG{+w}{ }\PYG{n+nf}{contains}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{key}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{p}{...}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{get}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{key}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{p}{...}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+c1}{// Substitutor: replaces variables in rule result}
+\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{substitute}\PYG{p}{(}\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{result}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Bindings}\PYG{+w}{ }\PYG{n}{env}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// For each term in result:}
+\PYG{+w}{    }\PYG{c+c1}{// Var \PYGZhy{}\PYGZgt{} Expr.concat(output, env.get(key))     \PYGZhy{}\PYGZhy{} O(1) amortized}
+\PYG{+w}{    }\PYG{c+c1}{// Br  \PYGZhy{}\PYGZgt{} recursively substitute, wrap in new Br(...)}
+\PYG{+w}{    }\PYG{c+c1}{// Call \PYGZhy{}\PYGZgt{} recursively substitute args, new Call(fn, newArgs)}
+\PYG{+w}{    }\PYG{c+c1}{// Sym/Num/Str \PYGZhy{}\PYGZgt{} append directly}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

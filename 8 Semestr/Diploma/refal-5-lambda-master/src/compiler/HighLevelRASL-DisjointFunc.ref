@@ -1,0 +1,50 @@
+$INCLUDE "LibraryEx";
+
+*$FROM HighLevelRASL-Common
+$EXTERN GenResult, GenPattern;
+
+
+$ENTRY HighLevelRASL-Function-Disjoint {
+  s.FnGenSubst s.FnGenResult
+  s.ScopeClass (e.Name) e.Sentences
+
+    = <Map
+        {
+          ((e.Pattern) e.Conditions (e.Result))
+            = (
+                <GenResult
+                  s.FnGenResult (e.Conditions) (e.Result)
+                  <GenPattern s.FnGenSubst (e.Name) e.Pattern>
+                >
+              );
+        }
+        e.Sentences
+      >
+    : e.Sentences^ ((CmdIssueMemory s.LastMemory) e.LastSentence)
+
+    = <MapAccum
+        {
+          s.MaxMemory ((CmdIssueMemory s.Memory) e.Sentence) =
+            <Max s.MaxMemory s.Memory>
+            (CmdSentence e.Sentence);
+        }
+        s.LastMemory
+        e.Sentences
+      >
+    : s.MaxMemory e.Sentences^
+
+    = (Function
+        s.ScopeClass (e.Name)
+        (CmdIssueMemory s.MaxMemory)
+        e.Sentences
+        <Fetch
+          e.LastSentence
+          {
+            e.Commands (CmdOpenELoop e.OpenELoop) =
+              e.Commands (CmdOpenELoop e.OpenELoop) (CmdFail);
+
+            e.LastSentence^ = e.LastSentence;
+          }
+        >
+      );
+}

@@ -1,0 +1,86 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+START TIME           END TIME  BLOCKS  FACILITIES  STORAGES
+     0.000              6.000    46        0          0
+
+NAME                       VALUE
+ATTEMPT\PYGZus{}1                  24.000
+ATTEMPT\PYGZus{}2                  25.000
+ATTEMPT\PYGZus{}3                  26.000
+BAD\PYGZus{}ATTEMPT                23.000
+CHECK\PYGZus{}ATT\PYGZus{}3                21.000
+CURDAY                  10005.000
+DAYCAP                     20.000
+DAYUSED                 10004.000
+DAY\PYGZus{}START                  41.000
+END\PYGZus{}SIM                    45.000
+ENTER\PYGZus{}EXAM                 15.000
+FAILED\PYGZus{}1                   29.000
+FAILED\PYGZus{}2                   34.000
+FINAL\PYGZus{}FAIL                 39.000
+FIRST\PYGZus{}ATT                  17.000
+INIT                        1.000
+MAXDAY                      6.000
+NEW\PYGZus{}ALL                     6.000
+NOT\PYGZus{}FIRST                  19.000
+NO\PYGZus{}RETRY\PYGZus{}2                 33.000
+NO\PYGZus{}RETRY\PYGZus{}3                 38.000
+NSTUD                      60.000
+PASSED                  10003.000
+PASSED\PYGZus{}OK                  27.000
+TIME\PYGZus{}OVER                  40.000
+WAIT\PYGZus{}NEXT                  13.000
+WAIT\PYGZus{}SLOT                  10.000
+
+LABEL              LOC  BLOCK TYPE     ENTRY COUNT CURRENT COUNT RETRY
+INIT                1    GENERATE             1             0       0
+                    2    SAVEVALUE            1             0       0
+                    3    SAVEVALUE            1             0       0
+                    4    SAVEVALUE            1             0       0
+                    5    TERMINATE            1             0       0
+NEW\PYGZus{}ALL             6    GENERATE            60             0       0
+                    7    ASSIGN              60             0       0
+                    8    ASSIGN              60             0       0
+                    9    TRANSFER            60             0       0
+WAIT\PYGZus{}SLOT          10    TEST              8098             0       0
+                   11    TEST              8098             0       0
+                   12    TRANSFER            98             0       0
+WAIT\PYGZus{}NEXT          13    ADVANCE           8000             0       0
+                   14    TRANSFER          8000             0       0
+ENTER\PYGZus{}EXAM         15    SAVEVALUE           98             0       0
+                   16    TEST                98             0       0
+FIRST\PYGZus{}ATT          17    ASSIGN              60             0       0
+                   18    TRANSFER            60             0       0
+NOT\PYGZus{}FIRST          19    TEST                38             0       0
+                   20    TRANSFER            20             0       0
+CHECK\PYGZus{}ATT\PYGZus{}3        21    TEST                18             0       0
+                   22    TRANSFER            18             0       0
+BAD\PYGZus{}ATTEMPT        23    TERMINATE            0             0       0
+ATTEMPT\PYGZus{}1          24    TRANSFER            60             0       0
+ATTEMPT\PYGZus{}2          25    TRANSFER            20             0       0
+ATTEMPT\PYGZus{}3          26    TRANSFER            18             0       0
+PASSED\PYGZus{}OK          27    SAVEVALUE           43             0       0
+                   28    TERMINATE           43             0       0
+FAILED\PYGZus{}1           29    TEST                20             0       0
+                   30    ASSIGN              20             0       0
+                   31    ADVANCE             20             0       0
+                   32    TRANSFER            20             0       0
+NO\PYGZus{}RETRY\PYGZus{}2         33    TERMINATE            0             0       0
+FAILED\PYGZus{}2           34    TEST                18             0       0
+                   35    ASSIGN              18             0       0
+                   36    ADVANCE             18             0       0
+                   37    TRANSFER            18             0       0
+NO\PYGZus{}RETRY\PYGZus{}3         38    TERMINATE            0             0       0
+FINAL\PYGZus{}FAIL         39    TERMINATE           17             0       0
+TIME\PYGZus{}OVER          40    TERMINATE            0             0       0
+DAY\PYGZus{}START          41    GENERATE             5             0       0
+                   42    SAVEVALUE            5             0       0
+                   43    SAVEVALUE            5             0       0
+                   44    TERMINATE            5             0       0
+END\PYGZus{}SIM            45    GENERATE             1             0       0
+                   46    TERMINATE            1             0       0
+
+SAVEVALUE               RETRY       VALUE
+ PASSED                   0         43.000
+ DAYUSED                  0              0
+ CURDAY                   0          6.000
+\end{MintedVerbatim}

@@ -1,0 +1,116 @@
+﻿1-Prout.OK : OK
+Add-Numb-Symb.OK : FAIL (121212
+java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Num[value=4]]], Num[value=5]]
+At line:19)
+Arg.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Str[value=H], Str[value=e], Str[value=l], Str[va)
+Br-Cp-Dg-Dgall-Rp-bug.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+Br-Cp-Dg-Dgall-Rp.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+Card.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Str[value=Y]]], Num[value=0]]
+At line:19 char:13)
+Chr-Lower-Ord-Upper.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Str[value=H], Str[value=e], Br[items=[Br[items=[)
+classic-extended.OK : OK
+Close.OK : FAIL (Two
+
+
+
+
+
+
+
+java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Num[value=31]]], Num[value=32])
+Compare.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Str[value=<], Str[value=-]]
+At line:19 char:13
++   $stdou)
+conditions.OK : FAIL (1
+2
+3
+java.exe : [ERROR] runtime: No matching rule for Eq on args=[Num[value=13], Num[value=14]]
+At line:19 char:13)
+Div-Numb-Symb.OK : FAIL (5
+java.exe : [ERROR] runtime: Div: expected two integers, got ('-' 28) 5
+At line:19 char:13
++   $stdout = & java -jar)
+Divmod-Numb-Symb.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Br[items=[Num[value=5]]], Num[value=3]]], Br[ite)
+escapes.OK : OK
+ExistFile.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+Explode.OK : FAIL (Hello
+Hello, World
+
+Hello
+Hello, World
+
+java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Num)
+fact.OK : FAIL (java.exe : [ERROR] runtime: Mul: expected two integers, got (1) 1
+At line:19 char:13
++   $stdout = & java -jar $jar --)
+First-Last-Lenw.OK : FAIL (('H' 'e' 'l' 'l' 'o'), World!
+('H' 'e' 'l' 'l')
+(() () ())()()
+('H' 'e' 'l' 'l' 'o' ',' ' ')World!
+()Hell
+(() () ())
+Get-0-stdin.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Str[value=Y]]], Num[value=0]]
+At line:19 char:13)
+Get-autoopen.OK : FAIL (java.exe : [ERROR] runtime: Get: channel 10 is not open for reading
+At line:19 char:13
++   $stdout = & java -jar $jar )
+Get-Open.OK : FAIL (java.exe : [ERROR] runtime: Open: I/O error: 2lines.txt
+At line:19 char:13
++   $stdout = & java -jar $jar --step-limit)
+GetCurrentDirectory.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+GetEnv.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+GetPID-GetPPID.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+Go-GO.OK : OK
+GO.OK : OK
+Implode-Implode_Ext.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Str[value=Abc$def-ghi_jkl]]], Sym[name=Abc], Str)
+ListOfBuiltin.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Num[value=1], Num[value=2]]
+At line:19 char:13
++   $stdou)
+math-sign.OK : FAIL (java.exe : [ERROR] runtime: Add: expected two integers, got '+' 10 20
+At line:19 char:13
++   $stdout = & java -jar $ja)
+Mod-Numb-Symb.OK : FAIL (3
+java.exe : [ERROR] runtime: Mod: expected two integers, got ('-' 28) '-' 5
+At line:19 char:13
++   $stdout = & java )
+Mu-Residue.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+Mul-Numb-Symb.OK : FAIL (1
+java.exe : [ERROR] runtime: Mul: expected two integers, got 1 '-' 1
+At line:19 char:13
++   $stdout = & java -jar $j)
+Numb-Symb.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Str[value=1], Str[value=0], Str[value=0]]], Sym[)
+Print.OK : FAIL ((Hello 1 'H' 'e' 'l' 'l' 'o')('W' 'o' 'r' 'l' 'd' 2 '$$123')
+java.exe : [ERROR] runtime: No matching rule for Eq on arg)
+Put-Putout-files.OK : FAIL (Hello
+Hello
+World
+
+
+Hello,
+
+java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Num[value=16]])
+Put-Putout-stderr.OK : FAIL (java.exe : Hello1(2)3
+At line:19 char:13
++   $stdout = & java -jar $jar --step-limit 5000000 $dest 2>&1
++            )
+Random.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+RandomDigit.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+RemoveFile.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+SizeOf.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+Step.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Num[value=1]]], Num[value=2]]
+At line:19 char:13)
+Sub.OK : FAIL (101010
+java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Num[value=4]]], Num[value=5]]
+At line:19)
+Sysfun.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+System-1-echo.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+System-2-Exit-retcode.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+tab.OK : OK
+Time.OK : SKIP (java.exe : [ERROR] d:\Programming\Projects\8 Semestr\Diploma\refal-5-framework-m)
+TimeElapsed.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Check on args=[Str[value=0.01]]
+At line:19 char:13
++   $stdout = & ja)
+Type.OK : FAIL (java.exe : [ERROR] runtime: No matching rule for Eq on args=[Br[items=[Str[value=L], Str[value=u], Str[value=A]]], Str[)
+Write.OK : FAIL (java.exe : Hello, World![ERROR] runtime: Open: expected mode, channel, filename
+At line:19 char:13
++   $stdout = & jav)

@@ -1,0 +1,16 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{sealed}\PYG{+w}{ }\PYG{k+kd}{interface} \PYG{n+nc}{Var}\PYG{+w}{ }\PYG{k+kd}{extends}\PYG{+w}{ }\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{permits}\PYG{+w}{ }\PYG{n}{SVar}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{TVar}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{EVar}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kt}{char}\PYG{+w}{ }\PYG{n+nf}{kind}\PYG{p}{();}\PYG{+w}{    }\PYG{c+c1}{// \PYGZsq{}s\PYGZsq{}, \PYGZsq{}t\PYGZsq{}, или \PYGZsq{}e\PYGZsq{}}
+\PYG{+w}{    }\PYG{n}{String}\PYG{+w}{ }\PYG{n+nf}{name}\PYG{p}{();}\PYG{+w}{  }\PYG{c+c1}{// имя без префикса}
+\PYG{+w}{    }\PYG{k}{default}\PYG{+w}{ }\PYG{n}{String}\PYG{+w}{ }\PYG{n+nf}{key}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{kind}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}.\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{name}\PYG{p}{();}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{record} \PYG{n+nc}{SVar}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{name}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Var}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kt}{char}\PYG{+w}{ }\PYG{n+nf}{kind}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{k}{return}\PYG{+w}{ }\PYG{l+s+sc}{\PYGZsq{}s\PYGZsq{}}\PYG{p}{;}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{record} \PYG{n+nc}{TVar}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{name}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Var}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kt}{char}\PYG{+w}{ }\PYG{n+nf}{kind}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{k}{return}\PYG{+w}{ }\PYG{l+s+sc}{\PYGZsq{}t\PYGZsq{}}\PYG{p}{;}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{record} \PYG{n+nc}{EVar}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{name}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Var}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kt}{char}\PYG{+w}{ }\PYG{n+nf}{kind}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{k}{return}\PYG{+w}{ }\PYG{l+s+sc}{\PYGZsq{}e\PYGZsq{}}\PYG{p}{;}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

@@ -1,0 +1,16 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{c+c1}{// Шаг 4: проверяем каждую функцию, каждое правило}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Func}\PYG{+w}{ }\PYG{n}{f}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{funcEnv}\PYG{p}{.}\PYG{n+na}{values}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{ruleIdx}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Rule}\PYG{+w}{ }\PYG{n}{r}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{f}\PYG{p}{.}\PYG{n+na}{rules}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{checkNoCallInPattern}\PYG{p}{(}\PYG{n}{f}\PYG{p}{.}\PYG{n+na}{name}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{ruleIdx}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{r}\PYG{p}{.}\PYG{n+na}{pattern}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// (6)}
+
+\PYG{+w}{            }\PYG{n}{Map}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Character}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{patternVars}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{HashMap}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}
+\PYG{+w}{            }\PYG{n}{collectPatternVarKinds}\PYG{p}{(}\PYG{n}{r}\PYG{p}{.}\PYG{n+na}{pattern}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{patternVars}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{...);}\PYG{+w}{ }\PYG{c+c1}{// (7)}
+
+\PYG{+w}{            }\PYG{n}{checkResultVars}\PYG{p}{(}\PYG{n}{r}\PYG{p}{.}\PYG{n+na}{result}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{patternVars}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{...);}\PYG{+w}{          }\PYG{c+c1}{// (8)}
+\PYG{+w}{            }\PYG{n}{checkCalls}\PYG{p}{(}\PYG{n}{r}\PYG{p}{.}\PYG{n+na}{result}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{callable}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{...);}\PYG{+w}{                  }\PYG{c+c1}{// (9)}
+\PYG{+w}{            }\PYG{n}{ruleIdx}\PYG{o}{++}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

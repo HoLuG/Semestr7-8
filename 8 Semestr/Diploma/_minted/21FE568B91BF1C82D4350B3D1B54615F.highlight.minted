@@ -1,0 +1,14 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{c+c1}{// Шаг 5: разрешение точки входа}
+\PYG{+w}{    }\PYG{n}{Optional}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{effectiveEntry}\PYG{+w}{ }\PYG{o}{=}
+\PYG{+w}{        }\PYG{n}{overrideEntry}\PYG{p}{.}\PYG{n+na}{or}\PYG{p}{(}\PYG{n}{prog}\PYG{p}{::}\PYG{n}{entry}\PYG{p}{);}\PYG{+w}{                 }\PYG{c+c1}{// (10)}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{effectiveEntry}\PYG{p}{.}\PYG{n+na}{isPresent}\PYG{p}{()}
+\PYG{+w}{            }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }\PYG{o}{!}\PYG{n}{funcEnv}\PYG{p}{.}\PYG{n+na}{containsKey}\PYG{p}{(}\PYG{n}{effectiveEntry}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{()))}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{c+c1}{// (11)}
+\PYG{+w}{        }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{SemanticException}\PYG{p}{(}
+\PYG{+w}{            }\PYG{n}{Kind}\PYG{p}{.}\PYG{n+na}{UNDEFINED\PYGZus{}ENTRY}\PYG{p}{,}
+\PYG{+w}{            }\PYG{l+s}{\PYGZdq{}Entry \PYGZsq{}\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{effectiveEntry}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}\PYGZsq{} is not defined\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{...);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{SemanticInfo}\PYG{p}{(}\PYG{n}{funcEnv}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Set}\PYG{p}{.}\PYG{n+na}{copyOf}\PYG{p}{(}\PYG{n}{prog}\PYG{p}{.}\PYG{n+na}{externs}\PYG{p}{()),}
+\PYG{+w}{                            }\PYG{n}{effectiveEntry}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{bins}\PYG{p}{);}\PYG{+w}{     }\PYG{c+c1}{// (12)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

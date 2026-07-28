@@ -1,0 +1,5 @@
+$ENTRY Main;
+
+* A function must contain at least one rule.
+Main {
+}

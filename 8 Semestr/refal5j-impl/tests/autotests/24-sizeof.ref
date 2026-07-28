@@ -1,0 +1,16 @@
+* Функция SizeOf используется в crefal’е
+
+$ENTRY Go {
+  /* пусто */
+    , <SizeOf 'c'> : 1
+    = <TestSizeOf 'csilp'>;
+}
+
+TestSizeOf {
+  s.CharType e.Types
+    , <Type <SizeOf s.CharType>> : 'N' s.0 s.Size
+    = <Prout '<SizeOf ' s.CharType '> == ' <Symb s.Size>>
+      <TestSizeOf e.Types>;
+
+  /* пусто */ = /* пусто */;
+}

@@ -1,0 +1,3 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+java\PYG{+w}{ }\PYGZhy{}jar\PYG{+w}{ }target/refal5q.jar\PYG{+w}{ }\PYGZhy{}\PYGZhy{}entry\PYG{+w}{ }Go\PYG{+w}{ }hello.ref
+\end{MintedVerbatim}

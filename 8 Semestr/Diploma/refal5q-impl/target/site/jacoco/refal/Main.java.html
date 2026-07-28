@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Main.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal</a> &gt; <span class="el_source">Main.java</span></div><h1>Main.java</h1><pre class="source lang-java linenums">package refal;
+
+import refal.ast.AstFormatter;
+import refal.ast.Br;
+import refal.ast.Call;
+import refal.ast.Func;
+import refal.ast.Program;
+import refal.ast.Rule;
+import refal.ast.Sym;
+import refal.ast.Term;
+import refal.lexer.LexException;
+import refal.parser.ParseException;
+import refal.parser.Parser;
+import refal.runtime.Builtins;
+import refal.runtime.RefalException;
+import refal.runtime.Runtime;
+import refal.semantic.SemanticChecker;
+import refal.semantic.SemanticException;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * CLI-обёртка интерпретатора Рефала-5.
+ *
+ * java -jar refal5q.jar &amp;lt;file.ref&amp;gt; [--entry Name] [--step-limit N] [--expr &quot;...arguments...&quot;]
+ */
+public final class Main {
+
+    private Main() {
+    }
+
+    public static void main(String[] args) {
+<span class="nc" id="L38">        int code = run(args, System.out, System.err);</span>
+<span class="nc" id="L39">        System.exit(code);</span>
+<span class="nc" id="L40">    }</span>
+
+    /** Чистая версия CLI — для интеграционного тестирования без System.exit. */
+    public static int run(String[] args, java.io.PrintStream out, java.io.PrintStream err) {
+        Args parsed;
+        try {
+<span class="fc" id="L46">            parsed = Args.parse(args);</span>
+<span class="nc" id="L47">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L48">            err.println(&quot;[ERROR] &quot; + e.getMessage());</span>
+<span class="nc" id="L49">            err.println(USAGE);</span>
+<span class="nc" id="L50">            return 1;</span>
+<span class="fc" id="L51">        }</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if (parsed == null) {</span>
+<span class="fc" id="L53">            out.println(USAGE);</span>
+<span class="fc" id="L54">            return 0;</span>
+        }
+
+        // Поддержка нескольких файлов через '+': main.ref+lib1.ref+lib2.ref
+        // Каждый файл парсится отдельно, затем программы сливаются.
+        // Публичные функции помечаются $ENTRY — их имена остаются стабильными
+        // и доступны из других файлов. Приватные (без $ENTRY) получают
+        // уникальный префикс по имени файла — это исключает коллизии имён
+        // между внутренними вспомогательными функциями разных модулей.
+<span class="fc" id="L63">        String[] files = parsed.file.split(&quot;\\+&quot;);</span>
+<span class="fc" id="L64">        Program program = null;</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        for (String f : files) {</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">            if (f.isEmpty()) {</span>
+<span class="nc" id="L67">                continue;</span>
+            }
+            String src;
+            try {
+<span class="fc" id="L71">                src = Files.readString(Path.of(f), StandardCharsets.UTF_8);</span>
+<span class="fc" id="L72">            } catch (IOException e) {</span>
+<span class="fc" id="L73">                err.println(&quot;[ERROR] cannot read &quot; + f + &quot;: &quot; + e.getMessage());</span>
+<span class="fc" id="L74">                return 1;</span>
+<span class="fc" id="L75">            }</span>
+            Program part;
+            try {
+<span class="fc" id="L78">                part = Parser.parse(src);</span>
+<span class="fc" id="L79">            } catch (LexException | ParseException e) {</span>
+<span class="fc" id="L80">                err.println(&quot;[ERROR] &quot; + f + &quot;:&quot; + e.getMessage());</span>
+<span class="fc" id="L81">                return 1;</span>
+<span class="fc" id="L82">            }</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">            if (files.length &gt; 1) {</span>
+<span class="fc" id="L84">                part = mangleModule(part, modulePrefix(f), src);</span>
+            }
+<span class="fc bfc" id="L86" title="All 2 branches covered.">            program = (program == null) ? part : mergePrograms(program, part);</span>
+        }
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if (program == null) {</span>
+<span class="nc" id="L89">            err.println(&quot;[ERROR] no source files specified&quot;);</span>
+<span class="nc" id="L90">            return 1;</span>
+        }
+
+        List&lt;Term&gt; initial;
+        try {
+<span class="fc bfc" id="L95" title="All 2 branches covered.">            initial = parsed.expr.isEmpty()</span>
+<span class="fc" id="L96">                    ? List.of()</span>
+<span class="fc" id="L97">                    : Parser.parseTerms(parsed.expr);</span>
+<span class="nc" id="L98">        } catch (LexException | ParseException e) {</span>
+<span class="nc" id="L99">            err.println(&quot;[ERROR] --expr: &quot; + e.getMessage());</span>
+<span class="nc" id="L100">            return 1;</span>
+<span class="fc" id="L101">        }</span>
+
+<span class="fc" id="L103">        Runtime rt = new Runtime(program, Builtins.defaultBuiltins(), parsed.stepLimit);</span>
+        // По соглашению Рефала-5 &lt;Arg 0&gt; — это «имя программы», поэтому
+        // пользовательские аргументы доступны начиная с &lt;Arg 1&gt;.
+<span class="fc" id="L106">        String[] argv = new String[parsed.programArgs.length + 1];</span>
+<span class="fc" id="L107">        argv[0] = &quot;refal5q&quot;;</span>
+<span class="fc" id="L108">        System.arraycopy(parsed.programArgs, 0, argv, 1, parsed.programArgs.length);</span>
+<span class="fc" id="L109">        rt.setProgramArgs(argv);</span>
+
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        Optional&lt;String&gt; overrideEntry = parsed.entry == null</span>
+<span class="fc" id="L112">                ? Optional.empty()</span>
+<span class="fc" id="L113">                : Optional.of(parsed.entry);</span>
+        try {
+<span class="fc" id="L115">            SemanticChecker.check(program, overrideEntry, rt.builtinNames());</span>
+<span class="fc" id="L116">        } catch (SemanticException e) {</span>
+<span class="fc" id="L117">            err.println(&quot;[ERROR] &quot; + parsed.file + &quot;: &quot; + e.getMessage());</span>
+<span class="fc" id="L118">            return 1;</span>
+<span class="fc" id="L119">        }</span>
+
+<span class="fc" id="L121">        final Program prog = program;</span>
+<span class="fc" id="L122">        String entry = overrideEntry.orElseGet(() -&gt; prog.entry().orElse(null));</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        if (entry == null) {</span>
+<span class="nc" id="L124">            err.println(&quot;[ERROR] &quot; + parsed.file</span>
+                    + &quot;: no $ENTRY in program and no --entry specified&quot;);
+<span class="nc" id="L126">            return 1;</span>
+        }
+
+        try {
+<span class="fc" id="L130">            List&lt;Term&gt; result = rt.run(entry, initial);</span>
+<span class="fc" id="L131">            String stdout = rt.stdout();</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">            if (!stdout.isEmpty()) {</span>
+<span class="fc" id="L133">                out.print(stdout);</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">                if (!stdout.endsWith(&quot;\n&quot;)) {</span>
+<span class="nc" id="L135">                    out.println();</span>
+                }
+            }
+<span class="fc" id="L138">            flushStderr(rt, err);</span>
+<span class="fc" id="L139">            String formatted = AstFormatter.format(result);</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">            if (!formatted.isEmpty()) {</span>
+<span class="fc" id="L141">                out.println(formatted);</span>
+            }
+<span class="fc" id="L143">            return 0;</span>
+<span class="fc" id="L144">        } catch (Builtins.ExitSignal exit) {</span>
+<span class="fc" id="L145">            String stdout = rt.stdout();</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">            if (!stdout.isEmpty()) {</span>
+<span class="nc" id="L147">                out.print(stdout);</span>
+            }
+<span class="fc" id="L149">            flushStderr(rt, err);</span>
+<span class="fc" id="L150">            return exit.code();</span>
+<span class="fc" id="L151">        } catch (RefalException e) {</span>
+<span class="fc" id="L152">            String stdout = rt.stdout();</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">            if (!stdout.isEmpty()) {</span>
+<span class="fc" id="L154">                out.print(stdout);</span>
+            }
+<span class="fc" id="L156">            flushStderr(rt, err);</span>
+<span class="fc" id="L157">            err.println(&quot;[ERROR] runtime: &quot; + e.getMessage());</span>
+<span class="fc" id="L158">            return 2;</span>
+        }
+    }
+
+    private static void flushStderr(Runtime rt, java.io.PrintStream err) {
+<span class="fc" id="L163">        String s = rt.stderr();</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        if (!s.isEmpty()) {</span>
+<span class="fc" id="L165">            err.print(s);</span>
+        }
+<span class="fc" id="L167">    }</span>
+
+    /**
+     * Сливает программу b в a: функции из b, отсутствующие в a, добавляются;
+     * совпадающие имена молча игнорируются (a — приоритетнее). $ENTRY
+     * наследуется от a, если задана; иначе берётся из b. $EXTERN объединяются.
+     */
+    private static Program mergePrograms(Program a, Program b) {
+<span class="fc" id="L175">        Program.Builder builder = Program.builder();</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        for (var e : a.funcs().entrySet()) {</span>
+<span class="fc" id="L177">            builder.addFunc(e.getValue());</span>
+<span class="fc" id="L178">        }</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        for (var e : b.funcs().entrySet()) {</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">            if (!builder.hasFunc(e.getKey())) {</span>
+<span class="fc" id="L181">                builder.addFunc(e.getValue());</span>
+            }
+<span class="fc" id="L183">        }</span>
+<span class="fc" id="L184">        builder.addExterns(new java.util.ArrayList&lt;&gt;(a.externs()));</span>
+<span class="fc" id="L185">        builder.addExterns(new java.util.ArrayList&lt;&gt;(b.externs()));</span>
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">        if (a.entry().isPresent()) {</span>
+<span class="fc" id="L187">            builder.entry(a.entry().get());</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        } else if (b.entry().isPresent()) {</span>
+<span class="nc" id="L189">            builder.entry(b.entry().get());</span>
+        }
+<span class="fc" id="L191">        return builder.build();</span>
+    }
+
+<span class="fc" id="L194">    private static final java.util.regex.Pattern ENTRY_NAME_RE =</span>
+<span class="fc" id="L195">            java.util.regex.Pattern.compile(&quot;\\$ENTRY\\s+([A-Za-z][\\w.+\\-]*)&quot;);</span>
+
+    private static String modulePrefix(String filepath) {
+<span class="fc" id="L198">        String base = filepath.replace('\\', '/');</span>
+<span class="fc" id="L199">        int slash = base.lastIndexOf('/');</span>
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">        if (slash &gt;= 0) {</span>
+<span class="fc" id="L201">            base = base.substring(slash + 1);</span>
+        }
+<span class="fc" id="L203">        int dot = base.lastIndexOf('.');</span>
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">        if (dot &gt;= 0) {</span>
+<span class="fc" id="L205">            base = base.substring(0, dot);</span>
+        }
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">        if (base.endsWith(&quot;_desugared&quot;)) {</span>
+<span class="nc" id="L208">            base = base.substring(0, base.length() - &quot;_desugared&quot;.length());</span>
+        }
+<span class="fc" id="L210">        return base.toLowerCase() + &quot;_&quot;;</span>
+    }
+
+    // Переименовывает приватные (не-$ENTRY) функции модуля с заданным префиксом,
+    // чтобы избежать коллизий при слиянии нескольких файлов. Публичные функции
+    // ($ENTRY) остаются с прежними именами и доступны из других модулей.
+    private static Program mangleModule(Program p, String prefix, String source) {
+<span class="fc" id="L217">        java.util.Set&lt;String&gt; entries = new java.util.HashSet&lt;&gt;();</span>
+<span class="fc" id="L218">        var m = ENTRY_NAME_RE.matcher(source);</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        while (m.find()) {</span>
+<span class="fc" id="L220">            entries.add(m.group(1));</span>
+        }
+<span class="fc" id="L222">        java.util.Set&lt;String&gt; used = new java.util.HashSet&lt;&gt;(p.funcs().keySet());</span>
+<span class="fc" id="L223">        java.util.Map&lt;String, String&gt; rename = new java.util.HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">        for (String fname : p.funcs().keySet()) {</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">            if (entries.contains(fname)) {</span>
+<span class="fc" id="L226">                continue;</span>
+            }
+<span class="fc" id="L228">            String cand = prefix + fname;</span>
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">            while (used.contains(cand)) {</span>
+<span class="nc" id="L230">                cand = cand + &quot;_&quot;;</span>
+            }
+<span class="fc" id="L232">            rename.put(fname, cand);</span>
+<span class="fc" id="L233">            used.add(cand);</span>
+<span class="fc" id="L234">        }</span>
+
+<span class="fc" id="L236">        Program.Builder b = Program.builder();</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">        for (Func f : p.funcs().values()) {</span>
+<span class="fc" id="L238">            String newName = rename.getOrDefault(f.name(), f.name());</span>
+<span class="fc" id="L239">            java.util.List&lt;Rule&gt; newRules = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">            for (Rule r : f.rules()) {</span>
+<span class="fc" id="L241">                newRules.add(new Rule(</span>
+<span class="fc" id="L242">                        rewriteTerms(r.pattern(), rename),</span>
+<span class="fc" id="L243">                        rewriteTerms(r.result(), rename)));</span>
+<span class="fc" id="L244">            }</span>
+<span class="fc" id="L245">            b.addFunc(new Func(newName, newRules));</span>
+<span class="fc" id="L246">        }</span>
+<span class="fc" id="L247">        b.addExterns(new java.util.ArrayList&lt;&gt;(p.externs()));</span>
+<span class="fc" id="L248">        p.entry().ifPresent(b::entry);</span>
+<span class="fc" id="L249">        return b.build();</span>
+    }
+
+    private static java.util.List&lt;Term&gt; rewriteTerms(
+            java.util.List&lt;Term&gt; terms, java.util.Map&lt;String, String&gt; rename) {
+<span class="fc" id="L254">        java.util.List&lt;Term&gt; out = new java.util.ArrayList&lt;&gt;(terms.size());</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">        for (Term t : terms) {</span>
+<span class="fc" id="L256">            out.add(rewriteTerm(t, rename));</span>
+<span class="fc" id="L257">        }</span>
+<span class="fc" id="L258">        return out;</span>
+    }
+
+    private static Term rewriteTerm(Term t, java.util.Map&lt;String, String&gt; rename) {
+<span class="fc bfc" id="L262" title="All 2 branches covered.">        if (t instanceof Call c) {</span>
+<span class="fc" id="L263">            String newFn = rename.getOrDefault(c.fn(), c.fn());</span>
+<span class="fc" id="L264">            return new Call(newFn, refal.deque.Expr.fromList(rewriteTerms(c.args().toList(), rename)));</span>
+        }
+<span class="fc bfc" id="L266" title="All 2 branches covered.">        if (t instanceof Br br) {</span>
+<span class="fc" id="L267">            return new Br(refal.deque.Expr.fromList(rewriteTerms(br.items().toList(), rename)));</span>
+        }
+<span class="fc bfc" id="L269" title="All 2 branches covered.">        if (t instanceof Sym s) {</span>
+<span class="fc" id="L270">            String mapped = rename.get(s.name());</span>
+<span class="fc bfc" id="L271" title="All 2 branches covered.">            if (mapped != null) {</span>
+<span class="fc" id="L272">                return new Sym(mapped);</span>
+            }
+        }
+<span class="fc" id="L275">        return t;</span>
+    }
+
+<span class="fc" id="L278">    private static final String USAGE = String.join(&quot;\n&quot;,</span>
+            &quot;usage:&quot;,
+            &quot;  refal5q &lt;file.ref&gt;[+lib.ref...] [--entry Name] [--step-limit N] [--expr \&quot;args...\&quot;]&quot;,
+            &quot;&quot;,
+            &quot;options:&quot;,
+            &quot;  --entry Name        override $ENTRY&quot;,
+            &quot;  --step-limit N      limit normalisation steps (default 100000)&quot;,
+            &quot;  --expr \&quot;...\&quot;        pass an expression as the entry argument&quot;,
+            &quot;&quot;);
+
+    /** Простой парсер аргументов (без зависимостей). */
+<span class="fc" id="L289">    static final class Args {</span>
+        String file;
+        String entry;
+<span class="fc" id="L292">        int stepLimit = Runtime.DEFAULT_STEP_LIMIT;</span>
+<span class="fc" id="L293">        String expr = &quot;&quot;;</span>
+<span class="fc" id="L294">        String[] programArgs = new String[0];</span>
+
+        static Args parse(String[] args) {
+<span class="fc bfc" id="L297" title="All 4 branches covered.">            if (args.length == 0</span>
+<span class="pc bpc" id="L298" title="2 of 4 branches missed.">                    || (args.length == 1 &amp;&amp; (args[0].equals(&quot;-h&quot;) || args[0].equals(&quot;--help&quot;)))) {</span>
+<span class="fc" id="L299">                return null;</span>
+            }
+<span class="fc" id="L301">            Args a = new Args();</span>
+<span class="fc" id="L302">            int i = 0;</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">            while (i &lt; args.length) {</span>
+<span class="fc" id="L304">                String s = args[i];</span>
+<span class="fc bfc" id="L305" title="All 4 branches covered.">                switch (s) {</span>
+                    case &quot;--entry&quot; -&gt; {
+<span class="pc bpc" id="L307" title="1 of 2 branches missed.">                        if (++i &gt;= args.length) {</span>
+<span class="nc" id="L308">                            throw new IllegalArgumentException(&quot;--entry requires an argument&quot;);</span>
+                        }
+<span class="fc" id="L310">                        a.entry = args[i++];</span>
+<span class="fc" id="L311">                    }</span>
+                    case &quot;--step-limit&quot; -&gt; {
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">                        if (++i &gt;= args.length) {</span>
+<span class="nc" id="L314">                            throw new IllegalArgumentException(&quot;--step-limit requires an argument&quot;);</span>
+                        }
+                        try {
+<span class="fc" id="L317">                            a.stepLimit = Integer.parseInt(args[i++]);</span>
+<span class="nc" id="L318">                        } catch (NumberFormatException nfe) {</span>
+<span class="nc" id="L319">                            throw new IllegalArgumentException(&quot;--step-limit: not a number&quot;);</span>
+<span class="fc" id="L320">                        }</span>
+                    }
+                    case &quot;--expr&quot; -&gt; {
+<span class="pc bpc" id="L323" title="1 of 2 branches missed.">                        if (++i &gt;= args.length) {</span>
+<span class="nc" id="L324">                            throw new IllegalArgumentException(&quot;--expr requires an argument&quot;);</span>
+                        }
+<span class="fc" id="L326">                        a.expr = args[i++];</span>
+<span class="fc" id="L327">                    }</span>
+                    default -&gt; {
+<span class="pc bpc" id="L329" title="1 of 2 branches missed.">                        if (s.startsWith(&quot;--&quot;)) {</span>
+<span class="nc" id="L330">                            throw new IllegalArgumentException(&quot;unknown option: &quot; + s);</span>
+                        }
+<span class="pc bpc" id="L332" title="1 of 2 branches missed.">                        if (a.file == null) {</span>
+<span class="fc" id="L333">                            a.file = s;</span>
+<span class="fc" id="L334">                            i++;</span>
+                        } else {
+                            // Все позиционные после файла — аргументы программы Рефала.
+<span class="nc" id="L337">                            java.util.ArrayList&lt;String&gt; rest = new java.util.ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">                            while (i &lt; args.length) {</span>
+<span class="nc" id="L339">                                rest.add(args[i++]);</span>
+                            }
+<span class="nc" id="L341">                            a.programArgs = rest.toArray(new String[0]);</span>
+                        }
+                    }
+                }
+<span class="fc" id="L345">            }</span>
+<span class="pc bpc" id="L346" title="1 of 2 branches missed.">            if (a.file == null) {</span>
+<span class="nc" id="L347">                throw new IllegalArgumentException(&quot;missing source file&quot;);</span>
+            }
+<span class="fc" id="L349">            return a;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

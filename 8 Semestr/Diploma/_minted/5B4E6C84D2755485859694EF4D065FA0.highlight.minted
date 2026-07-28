@@ -1,0 +1,18 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@TestFactory}
+\PYG{n}{Stream}\PYG{o}{\PYGZlt{}}\PYG{n}{DynamicTest}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{refalAutotests}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// 1. Look for tests/autotests/ (fallback: ../refal\PYGZhy{}5j/autotests/)}
+\PYG{+w}{    }\PYG{c+c1}{// 2. For each .ref file \PYGZhy{}\PYGZgt{} DynamicTest}
+\PYG{+w}{    }\PYG{c+c1}{// 3. Run with 20s timeout in thread pool}
+\PYG{+w}{    }\PYG{c+c1}{// 4. Check exit code}
+\PYG{+w}{    }\PYG{c+c1}{// 5. Hard FAIL only for MUST\PYGZus{}PASS tests}
+\PYG{+w}{    }\PYG{c+c1}{// 6. Save report to bench/AUTOTEST\PYGZus{}RESULTS.md}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+c1}{// MUST\PYGZus{}PASS from refal\PYGZhy{}5j (5 tests):}
+\PYG{c+c1}{// \PYGZdq{}01\PYGZhy{}go.ref\PYGZdq{}, \PYGZdq{}02\PYGZhy{}matches.ref\PYGZdq{}, \PYGZdq{}03\PYGZhy{}concat.ref\PYGZdq{},}
+\PYG{c+c1}{// \PYGZdq{}09\PYGZhy{}1\PYGZhy{}mu\PYGZhy{}uses\PYGZhy{}all.ref\PYGZdq{}, \PYGZdq{}09\PYGZhy{}2\PYGZhy{}mu.ref\PYGZdq{}}
+
+\PYG{c+c1}{// MUST\PYGZus{}PASS from desugared (18 tests):}
+\PYG{c+c1}{// basic I/O, arithmetic, strings, recursion, type\PYGZhy{}checking}
+\end{MintedVerbatim}

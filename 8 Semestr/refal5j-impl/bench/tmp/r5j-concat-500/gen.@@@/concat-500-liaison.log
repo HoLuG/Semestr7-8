@@ -1,0 +1,58 @@
+Go :: e = e
+  e: /* empty */
+    , <Go.RangeUp e: 1 500> :: e.#1
+    , <Go.RangeUp e: 501 1000> :: e.#2
+    , <Go.Append e: (e.#1) (e.#2)> :: e.#3
+    = e: e.#3;
+    // next index: 4
+}
+
+Go.Append :: e = e
+  e: (e.X) (e.Y)
+    = e: e.X e.Y;
+    // next index: 1
+}
+
+Go.RangeUp :: e = e
+  e: s.From s.To
+    , <Compare e: s.From s.To> :: e.#1
+    , <Go.ConsBy e: e.#1 s.From s.To> :: e.#2
+    = e: e.#2;
+    // next index: 3
+}
+
+Go.ConsBy :: e = e
+  e: '+' s.From s.To
+    = e: /* empty */;
+    // next index: 1
+
+  e: s.Op s.From s.To
+    , <Add e: s.From 1> :: e.#1
+    , <Go.RangeUp e: e.#1 s.To> :: e.#2
+    = e: s.From e.#2;
+    // next index: 3
+}
+
+Go.Mu :: e = e {
+  $METATABLE:
+    Go = Go
+    Append = Go.Append
+    RangeUp = Go.RangeUp
+    ConsBy = Go.ConsBy
+    Mu = Go.Mu
+    Residue = Go.Residue
+    Up = Go.Up
+    Ev-met = Go.Ev-met
+}
+
+Go.Residue :: e = e {
+  $METATABLE => Go.Mu
+}
+
+Go.Up :: e = e {
+  $METATABLE => Go.Mu
+}
+
+Go.Ev-met :: e = e {
+  $METATABLE => Go.Mu
+}

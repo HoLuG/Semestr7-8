@@ -1,0 +1,15 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{Program}\PYG{+w}{ }\PYG{n+nf}{parseProgram}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Program}\PYG{p}{.}\PYG{n+na}{Builder}\PYG{+w}{ }\PYG{n}{b}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Program}\PYG{p}{.}\PYG{n+na}{builder}\PYG{p}{();}\PYG{+w}{       }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{peek}\PYG{p}{().}\PYG{n+na}{type}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{n}{TokenType}\PYG{p}{.}\PYG{n+na}{EOF}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{    }\PYG{c+c1}{// (2)}
+\PYG{+w}{        }\PYG{n}{Token}\PYG{+w}{ }\PYG{n}{t}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{peek}\PYG{p}{();}
+\PYG{+w}{        }\PYG{k}{switch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{t}\PYG{p}{.}\PYG{n+na}{type}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{ENTRY}\PYG{+w}{  }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{parseEntry}\PYG{p}{(}\PYG{n}{b}\PYG{p}{);}\PYG{+w}{        }\PYG{c+c1}{// (3)}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{EXTERN}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{parseExtern}\PYG{p}{(}\PYG{n}{b}\PYG{p}{);}\PYG{+w}{       }\PYG{c+c1}{// (4)}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{IDENT}\PYG{+w}{  }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{parseTopLevelFunc}\PYG{p}{(}\PYG{n}{b}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (5)}
+\PYG{+w}{            }\PYG{k}{default}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{n}{err}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Unexpected token...\PYGZdq{}}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (6)}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{build}\PYG{p}{();}\PYG{+w}{                            }\PYG{c+c1}{// (7)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

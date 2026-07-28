@@ -1,0 +1,171 @@
+$INCLUDE "LibraryEx";
+
+*$FROM Hash
+$EXTERN HashLittle2-Chars;
+
+
+/**
+  <ExtractVariables e.Sentences> == e.Variables
+
+  e.Variables ::= (s.Mode e.Index)*
+*/
+$ENTRY ExtractVariables {
+  e.Sentences = <Unique <ExtractVariables-Sentences e.Sentences>>;
+}
+
+ExtractVariables-Sentences {
+  ((e.Pattern) e.Tail) e.Sentences
+    = <ExtractVariables-Expr e.Pattern>
+      <ExtractVariables-Tail e.Tail>
+      <ExtractVariables-Sentences e.Sentences>;
+
+  /* пусто */ = /* пусто */;
+}
+
+ExtractVariables-Tail {
+  (Condition (e.ConditionName) (e.Result) (e.Pattern)) e.Tail
+    = <ExtractVariables-Expr e.Result>
+      <ExtractVariables-Expr e.Pattern>
+      <ExtractVariables-Tail e.Tail>;
+
+  (e.Result) = <ExtractVariables-Expr e.Result>;
+}
+
+$ENTRY ExtractVariables-Expr {
+  (Var s.VarType e.Index) e.Terms
+    = (s.VarType e.Index) <ExtractVariables-Expr e.Terms>;
+
+  (Brackets e.Inner) e.Terms = <ExtractVariables-Expr e.Inner e.Terms>;
+  (ADT-Brackets (e.Name) e.Inner) e.Terms
+    = <ExtractVariables-Expr e.Inner e.Terms>;
+
+  (CallBrackets e.Inner) e.Terms = <ExtractVariables-Expr e.Inner e.Terms>;
+  (ColdCallBrackets e.Inner) e.Terms = <ExtractVariables-Expr e.Inner e.Terms>;
+  (ClosureBrackets e.Inner) e.Terms = <ExtractVariables-Expr e.Inner e.Terms>;
+
+  t.Other e.Terms = <ExtractVariables-Expr e.Terms>;
+
+  /* пусто */ = /* пусто */;
+}
+
+/**
+  <NewVarName (e.Variables) e.Variable> == (e.Variables^) e.Variable^
+
+  e.Variable ::= s.Mode e.Index
+*/
+$ENTRY NewVarName {
+  (e.Vars-B (e.Variable) e.Vars-E) e.Variable
+    = <DoNewVarName ((e.Variable) e.Vars-B e.Vars-E) e.Variable>;
+
+  (e.Vars) e.Variable = ((e.Variable) e.Vars) e.Variable;
+}
+
+DoNewVarName {
+  (e.Vars) e.Variable
+    = e.Variable : s.Mode e.Index
+    = <IncName e.Index> : e.NewIndex
+    = s.Mode e.NewIndex : e.NewVar
+    , e.Vars
+    : {
+        e.Vars-B (e.NewVar) e.Vars-E
+          = <DoNewVarName ((e.NewVar) e.Vars-B e.Vars-E) e.NewVar>;
+
+        e.Vars^ = ((e.NewVar) e.Vars) e.NewVar;
+      };
+}
+
+IncName {
+  e.Name s.Digit, '0123456789' : e._B s.Digit s.Next e._E = e.Name s.Next;
+  e.Name '9' = <IncName e.Name> '0';
+  e.Name = e.Name '0';
+}
+
+
+/**
+  <CreateContext s.MarkupContext t.Variable> == t.ContextVariable*
+
+  t.ContextVariable ::=
+      (Var s.ModeTS e.Index)
+    | (Brackets (Var 'e' e.Index))
+    | (Symbol Name e.Name)
+*/
+$ENTRY CreateContext {
+  MarkupContext e.Context =
+    <Map
+      {
+        ('e' e.Index) =
+          (Symbol Identifier VAR 'e' e.Index)
+          (Brackets (Var 'e' e.Index));
+
+        (s.Mode e.Index) =
+          (Symbol Identifier VAR s.Mode e.Index)
+          (Var s.Mode e.Index);
+      }
+      e.Context
+    >;
+
+  NoMarkupContext e.Context =
+    <Map
+      {
+        ('e' e.Index) = (Brackets (Var 'e' e.Index));
+        (s.Mode e.Index) = (Var s.Mode e.Index);
+      }
+      e.Context
+    >;
+}
+
+/**
+  <CreateSpecPatternForContext t.ContextVariable*> == e.Expression
+*/
+$ENTRY CreateSpecPatternForContext {
+  e.Context
+    = <Map
+        {
+          (Symbol Identifier e.Ident) = (Symbol Identifier e.Ident);
+
+          (Var s.Mode e.Index) = (Var s.Mode 'STAT_' e.Index);
+
+          (Brackets (Var 'e' e.Index))
+            = (Brackets (Var 'eSTAT_' e.Index));
+        }
+        e.Context
+      >
+      (Var 'edyn')
+}
+
+
+/**
+  <AddSuffix e.Name (e.NewSuffix)> == e.Name
+*/
+$ENTRY AddSuffix {
+  e.Name SUF e.Suffix (e.NewSuffix) = e.Name SUF e.Suffix e.NewSuffix;
+  e.Name (e.NewSuffix) = e.Name SUF e.NewSuffix;
+}
+
+
+/**
+  <HashName e.Name s.Buckets> == s.Hash
+
+  s.Hash, s.Buckets ::= s.NUMBER
+*/
+$ENTRY HashName {
+  e.Name s.Buckets
+    = e.Name
+    : {
+        e.Base SUF e.Suffix = e.Base <HashName-Suffix e.Suffix>;
+        e.Name^ = e.Name;
+      }
+    : e.NameAsStr
+*    base64 -w 8 /dev/urandom | \
+*      awk '/^[0-9a-fA-F]*$/ { print strtonum("0x" $1) }' | \
+*      head -2 | clip.exe
+    = <HashLittle2-Chars 3161351997 4067679699 e.NameAsStr> : s.Hash1 s.Hash2
+    = <Mod s.Hash1 s.Buckets>
+}
+
+HashName-Suffix {
+  s.SufChar s.SufNo e.Suffix
+    = s.SufChar <Symb s.SufNo> <HashName-Suffix e.Suffix>;
+
+  /* empty */ = /* empty */;
+}

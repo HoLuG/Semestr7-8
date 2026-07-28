@@ -1,0 +1,17 @@
+$ENTRY Go {
+  /* пусто */
+    = <Eq ('r5j.Go_') <Arg 0>>
+      <Eq ('one') <Arg 1>>
+      <Eq ('one') <Arg 1 'xxx'>>
+      <Eq ('two') <Arg 2>>
+      <Eq ('three') <Arg 3>>
+      <Eq () <Arg 4>>
+      <Eq ('four') <Arg 4 'four'>>
+      <Eq () <Arg 5>>
+      <Eq (100500) <Arg 5 100500>>
+
+*     среди системных аргументов командной строки -Dr5jrt.macrodigitBits=10
+      <Eq (1025) <+ 1 1 0>>;
+}
+
+Eq { (e.X) e.X = }

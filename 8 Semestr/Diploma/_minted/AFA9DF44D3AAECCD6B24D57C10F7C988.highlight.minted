@@ -1,0 +1,4 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+mvn\PYG{+w}{ }\PYGZhy{}q\PYG{+w}{ }package\PYG{+w}{ }\PYGZhy{}DskipTests
+\PYG{c+c1}{\PYGZsh{} Результат: target/refal5q.jar}
+\end{MintedVerbatim}

@@ -1,0 +1,26 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@TestFactory}
+\PYG{n}{Stream}\PYG{o}{\PYGZlt{}}\PYG{n}{DynamicTest}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{refalAutotests}\PYG{p}{()}\PYG{+w}{ }\PYG{k+kd}{throws}\PYG{+w}{ }\PYG{n}{Exception}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{    }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{n}{Path}\PYG{+w}{ }\PYG{n}{dir}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{locateAutotestsDir}\PYG{p}{();}\PYG{+w}{                       }\PYG{c+c1}{// (2)}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{Files}\PYG{p}{.}\PYG{n+na}{list}\PYG{p}{(}\PYG{n}{dir}\PYG{p}{)}
+\PYG{+w}{        }\PYG{p}{.}\PYG{n+na}{filter}\PYG{p}{(}\PYG{n}{p}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{p}\PYG{p}{.}\PYG{n+na}{toString}\PYG{p}{().}\PYG{n+na}{endsWith}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}.ref\PYGZdq{}}\PYG{p}{))}
+\PYG{+w}{        }\PYG{p}{.}\PYG{n+na}{map}\PYG{p}{(}\PYG{n}{p}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{DynamicTest}\PYG{p}{.}\PYG{n+na}{dynamicTest}\PYG{p}{(}\PYG{+w}{                 }\PYG{c+c1}{// (3)}
+\PYG{+w}{            }\PYG{n}{p}\PYG{p}{.}\PYG{n+na}{getFileName}\PYG{p}{().}\PYG{n+na}{toString}\PYG{p}{(),}
+\PYG{+w}{            }\PYG{p}{()}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{runTestFile}\PYG{p}{(}\PYG{n}{p}\PYG{p}{)));}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{runTestFile}\PYG{p}{(}\PYG{n}{Path}\PYG{+w}{ }\PYG{n}{p}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{throws}\PYG{+w}{ }\PYG{n}{Exception}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// Определяем MUST\PYGZus{}PASS}
+\PYG{+w}{    }\PYG{k+kt}{boolean}\PYG{+w}{ }\PYG{n}{mustPass}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{MUST\PYGZus{}PASS}\PYG{p}{.}\PYG{n+na}{contains}\PYG{p}{(}\PYG{n}{p}\PYG{p}{.}\PYG{n+na}{getFileName}\PYG{p}{().}\PYG{n+na}{toString}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// (4)}
+\PYG{+w}{    }\PYG{k+kt}{boolean}\PYG{+w}{ }\PYG{n}{shouldSkip}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{SKIP\PYGZus{}TESTS}\PYG{p}{.}\PYG{n+na}{contains}\PYG{p}{(}\PYG{n}{p}\PYG{p}{.}\PYG{n+na}{getFileName}\PYG{p}{().}\PYG{n+na}{toString}\PYG{p}{());}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{shouldSkip}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n}{assumeTrue}\PYG{p}{(}\PYG{k+kc}{false}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}SKIP\PYGZdq{}}\PYG{p}{);}\PYG{+w}{ }\PYG{k}{return}\PYG{p}{;}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{c+c1}{// (5)}
+
+\PYG{+w}{    }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{exitCode}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{runWithTimeout}\PYG{p}{(}\PYG{n}{p}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{20\PYGZus{}000}\PYG{p}{);}\PYG{+w}{              }\PYG{c+c1}{// (6)}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{mustPass}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{assertEquals}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{exitCode}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}MUST\PYGZus{}PASS test failed: \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{p}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (7)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{else}\PYG{+w}{ }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{exitCode}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{c+c1}{// soft fail: выводим предупреждение, но не падаем}
+\PYG{+w}{        }\PYG{n}{System}\PYG{p}{.}\PYG{n+na}{out}\PYG{p}{.}\PYG{n+na}{println}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}SOFT FAIL: \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{p}\PYG{p}{.}\PYG{n+na}{getFileName}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{} exit=\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{exitCode}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

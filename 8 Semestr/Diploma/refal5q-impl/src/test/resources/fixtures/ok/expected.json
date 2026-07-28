@@ -1,0 +1,12 @@
+{
+  "hello.ref":         {"expr": "",                "result": "'Hello'"},
+  "swap.ref":          {"expr": "A B",             "result": "B A"},
+  "calls.ref":         {"expr": "",                "result": "(A B)"},
+  "brackets.ref":      {"expr": "",                "result": "((A B (C)) (A B (C)))"},
+  "vars_ste.ref":      {"expr": "A (B C) D E F",   "result": "D E F (B C) A"},
+  "strings.ref":       {"expr": "",                "result": "'count=' 42"},
+  "recursion.ref":     {"expr": "",                "result": "5 4 3 2 1"},
+  "repeated_var.ref":  {"expr": "",                "result": "(A B)"},
+  "arith.ref":         {"expr": "",                "result": "14"},
+  "extern_noop.ref":   {"expr": "",                "result": "Done"}
+}

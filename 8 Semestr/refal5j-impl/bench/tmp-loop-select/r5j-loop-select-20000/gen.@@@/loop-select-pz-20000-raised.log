@@ -1,0 +1,52 @@
+Go :: e = e
+  e: /* empty */
+    , <Go.Loop e: Left () 20000> :: e.#1
+    = e: e.#1;
+    // next index: 2
+}
+
+Go.Loop :: e = e
+  e: s.Side (e.Acc) 0
+    = e: /* empty */;
+    // next index: 1
+
+  e: s.Side (e.Acc) s.Rest
+    , <Go.Select e: s.Side (e.Acc A) (e.Acc B)> :: e.#1
+    , <Sub e: s.Rest 1> :: e.#2
+    , <Go.Loop e: e.#1 e.#2> :: e.#3
+    = e: e.#3;
+    // next index: 4
+}
+
+Go.Select :: e = e
+  e: Left t.Left t.Right
+    = e: Right t.Left;
+    // next index: 1
+
+  e: Right t.Left t.Right
+    = e: Left t.Right;
+    // next index: 1
+}
+
+Go.Mu :: e = e {
+  $METATABLE:
+    Go = Go
+    Loop = Go.Loop
+    Select = Go.Select
+    Mu = Go.Mu
+    Residue = Go.Residue
+    Up = Go.Up
+    Ev-met = Go.Ev-met
+}
+
+Go.Residue :: e = e {
+  $METATABLE => Go.Mu
+}
+
+Go.Up :: e = e {
+  $METATABLE => Go.Mu
+}
+
+Go.Ev-met :: e = e {
+  $METATABLE => Go.Mu
+}

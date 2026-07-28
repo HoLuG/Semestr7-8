@@ -1,0 +1,12 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+push\PYGZus{}back(deep, x):
+  if back not full:
+    return deep with back.push\PYGZus{}back(x)
+  else:
+    items = back.items + [x]          \PYGZsh{} B+1 элементов
+    left  = items[0:5]               \PYGZsh{} ceil(B/2)
+    right = items[5:10]
+    mid\PYGZsq{}  = mid.push\PYGZus{}back(Shallow(left))
+    back\PYGZsq{} = Shallow(right)
+    return deep(front, mid\PYGZsq{}, back\PYGZsq{})
+\end{MintedVerbatim}

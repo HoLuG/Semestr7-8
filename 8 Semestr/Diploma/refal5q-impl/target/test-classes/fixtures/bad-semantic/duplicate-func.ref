@@ -1,0 +1,10 @@
+$ENTRY Main;
+
+* Two definitions for the same function name.
+Main {
+  = A;
+}
+
+Main {
+  = B;
+}

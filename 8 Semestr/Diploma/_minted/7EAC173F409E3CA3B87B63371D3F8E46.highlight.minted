@@ -1,0 +1,13 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+Loop \PYGZob{}
+  * base case: accumulated N elements
+  s.Side (e.Acc) 0 = ;
+  * recursive: add A or B to accumulator
+  s.Side (e.Acc) s.Rest
+    = \PYGZlt{}Loop \PYGZlt{}Select s.Side (e.Acc A) (e.Acc B)\PYGZgt{} \PYGZlt{}\PYGZhy{} s.Rest 1\PYGZgt{}\PYGZgt{};
+\PYGZcb{}
+Select \PYGZob{}
+  L (e.X) (e.Y) = e.X;
+  R (e.X) (e.Y) = e.Y;
+\PYGZcb{}
+\end{MintedVerbatim}

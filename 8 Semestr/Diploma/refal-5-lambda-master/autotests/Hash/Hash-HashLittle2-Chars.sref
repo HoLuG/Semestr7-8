@@ -1,0 +1,67 @@
+%%
+#include <string.h>
+
+const char *example = "Quick brown fox jumps over lazy dog's tail";
+
+// Выбраны случайно, hexdump < /dev/urandom
+const refalrts::RefalNumber init_value_1 = 3696200979U;
+const refalrts::RefalNumber init_value_2 = 2347154069U;
+
+char assert_unsigned_int_32[sizeof(unsigned int) == 4 ? 1 : -1];
+typedef unsigned int uint32_t;
+
+extern "C"
+void hashlittle2(
+  const void *key,       /* the key to hash */
+  size_t      length,    /* length of the key */
+  uint32_t   *pc,        /* IN: primary initval, OUT: primary hash */
+  uint32_t   *pb);       /* IN: secondary initval, OUT: secondary hash */
+
+%%
+
+Example {
+%%
+  refalrts::Iter str_b = 0, str_e = 0;
+  refalrts::reset_allocator(vm);
+  refalrts::alloc_string(vm, str_b, str_e, example);
+  refalrts::splice_evar(arg_begin, str_b, str_e);
+  refalrts::splice_to_freelist(vm, arg_begin, arg_end);
+  return refalrts::cSuccess;
+%%
+}
+
+InitValues {
+%%
+  refalrts::reinit_number(arg_begin, init_value_1);
+  refalrts::reinit_number(arg_end, init_value_2);
+  refalrts::splice_to_freelist_open(vm, arg_begin, arg_end);
+  return refalrts::cSuccess;
+%%
+}
+
+CalcHashOriginal {
+%%
+  uint32_t pc = init_value_1;
+  uint32_t pb = init_value_2;
+
+  hashlittle2(example, strlen(example), &pc, &pb);
+
+  refalrts::reinit_number(arg_begin, pc);
+  refalrts::reinit_number(arg_end, pb);
+  refalrts::splice_to_freelist_open(vm, arg_begin, arg_end);
+  return refalrts::cSuccess;
+%%
+}
+
+//FROM Hash
+$EXTERN HashLittle2-Chars;
+
+CalcHashRefal {
+  = <HashLittle2-Chars <InitValues> <Example>>;
+}
+
+Equal { s.Hash1 s.Hash2 s.Hash1 s.Hash2 = ; }
+
+$ENTRY Go {
+  = <Equal <CalcHashOriginal> <CalcHashRefal>>;
+}

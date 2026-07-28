@@ -1,0 +1,21 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Token}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{tokenize}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{src}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{p}{...}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{readString}\PYG{p}{(}\PYG{k+kt}{char}\PYG{+w}{ }\PYG{n}{quote}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{startLine}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{startCol}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Token}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{out}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// Single quotes: each char \PYGZhy{}\PYGZgt{} separate STRING token}
+\PYG{+w}{    }\PYG{c+c1}{// Double quotes: whole text \PYGZhy{}\PYGZgt{} one QSYM token}
+\PYG{+w}{    }\PYG{c+c1}{// Escape sequences: \PYGZbs{}\PYGZbs{}n, \PYGZbs{}\PYGZbs{}t, \PYGZbs{}\PYGZbs{}r, \PYGZbs{}\PYGZbs{}\PYGZbs{}\PYGZbs{}, etc.}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{Token}\PYG{+w}{ }\PYG{n+nf}{readInt}\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{startLine}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{startCol}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// Read [\PYGZhy{}]digit+ and return INT token}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{Token}\PYG{+w}{ }\PYG{n+nf}{readIdentLike}\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{startLine}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{startCol}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// Identifier; \PYGZdl{}ENTRY/\PYGZdl{}EXTERN \PYGZhy{}\PYGZgt{} keyword tokens}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{skipBlockComment}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// /* ... */ \PYGZhy{}\PYGZhy{} multiline block comment, updates line/col}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

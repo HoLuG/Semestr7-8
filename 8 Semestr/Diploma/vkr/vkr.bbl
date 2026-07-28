@@ -1,0 +1,370 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{refal5_home}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{note}{Официальный сайт дистрибутива Refal-5~PZ (реализация на~C, байт-код RASL)}
+      \field{title}{REFAL-5 home page}
+      \field{urlday}{20}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb http://www.botik.ru/pub/local/scp/refal5/
+      \endverb
+      \verb{url}
+      \verb http://www.botik.ru/pub/local/scp/refal5/
+      \endverb
+    \endentry
+    \entry{maven_guide}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{Apache Maven Project: Documentation}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://maven.apache.org/guides/index.html
+      \endverb
+      \verb{url}
+      \verb https://maven.apache.org/guides/index.html
+      \endverb
+    \endentry
+    \entry{junit5_guide}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{JUnit 5 User Guide}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://junit.org/junit5/docs/current/user-guide/
+      \endverb
+      \verb{url}
+      \verb https://junit.org/junit5/docs/current/user-guide/
+      \endverb
+    \endentry
+    \entry{refal5_framework_github}{online}{}{}
+      \list{language}{1}{%
+        {russian}%
+      }
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{Refal-5-framework: набор библиотек для преобразования программ на Рефале-5}
+      \field{urlday}{15}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://github.com/Mazdaywik/refal-5-framework
+      \endverb
+      \verb{url}
+      \verb https://github.com/Mazdaywik/refal-5-framework
+      \endverb
+    \endentry
+    \entry{refal_book}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{{REFAL-5: Programming Guide \& Reference Manual}}
+      \field{urlday}{28}
+      \field{urlmonth}{3}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb http://refal.botik.ru/book/html/
+      \endverb
+      \verb{url}
+      \verb http://refal.botik.ru/book/html/
+      \endverb
+    \endentry
+    \entry{refal05_site}{online}{}{}
+      \list{language}{1}{%
+        {russian}%
+      }
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{Документация Refal-05}
+      \field{urlday}{3}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://mazdaywik.github.io/Refal-05/
+      \endverb
+      \verb{url}
+      \verb https://mazdaywik.github.io/Refal-05/
+      \endverb
+    \endentry
+    \entry{skorobogatov_repr}{unpublished}{}{}
+      \name{author}{1}{}{%
+        {{hash=cb7e85b9db3cf0eebcbc8756d986dea6}{%
+           family={Скоробогатов},
+           familyi={С\bibinitperiod},
+           given={С.\bibnamedelimi Ю.},
+           giveni={С\bibinitperiod\bibinitdelim Ю\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {russian}%
+      }
+      \strng{namehash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{fullhash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{fullhashraw}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{bibnamehash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{authorbibnamehash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{authornamehash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{authorfullhash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{authorfullhashraw}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Рукопись}
+      \field{title}{Реализация Рефал-компилятора. Представление данных и язык сборки}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2026}
+      \field{year}{2008}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://bmstu-iu9.github.io/
+      \endverb
+      \verb{url}
+      \verb https://bmstu-iu9.github.io/
+      \endverb
+    \endentry
+    \entry{abramov_romanenko_1988}{report}{}{}
+      \name{author}{2}{}{%
+        {{hash=5b9ea7e2d0f57c53e1b2800609179de2}{%
+           family={Абрамов},
+           familyi={А\bibinitperiod},
+           given={С.\bibnamedelimi М.},
+           giveni={С\bibinitperiod\bibinitdelim М\bibinitperiod}}}%
+        {{hash=42ca2fb8cf265eae1c938a4efa2949ee}{%
+           family={Романенко},
+           familyi={Р\bibinitperiod},
+           given={С.\bibnamedelimi А.},
+           giveni={С\bibinitperiod\bibinitdelim А\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {ИПМ им. М. В. Келдыша АН СССР}%
+      }
+      \list{language}{1}{%
+        {russian}%
+      }
+      \strng{namehash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{fullhash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{fullhashraw}{4eac64f707a071f812d1104a8486e30a}
+      \strng{bibnamehash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{authorbibnamehash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{authornamehash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{authorfullhash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{authorfullhashraw}{4eac64f707a071f812d1104a8486e30a}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Представление объектных выражений массивами при реализации языка Рефал}
+      \field{type}{techreport}
+      \field{year}{1988}
+      \field{number}{186}
+      \range{number}{1}
+    \endentry
+    \entry{okasaki_pfds}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=e4e76cfb2d550f0048c93839f784f76d}{%
+           family={Okasaki},
+           familyi={O\bibinitperiod},
+           given={Chris},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {english}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{fullhash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{fullhashraw}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{bibnamehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authorbibnamehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authornamehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authorfullhash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authorfullhashraw}{e4e76cfb2d550f0048c93839f784f76d}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Purely Functional Data Structures}
+      \field{year}{1998}
+    \endentry
+    \entry{java_se25_spec}{online}{useauthor=false}{}
+      \name{author}{7}{}{%
+        {{hash=2a798529b7edde2afc14297cab558b16}{%
+           family={Gosling},
+           familyi={G\bibinitperiod},
+           given={James},
+           giveni={J\bibinitperiod}}}%
+        {{hash=f09f99cecd6117983c930e722773ea8b}{%
+           family={Joy},
+           familyi={J\bibinitperiod},
+           given={Bill},
+           giveni={B\bibinitperiod}}}%
+        {{hash=951391bf247c229328c01586aca90970}{%
+           family={Steele},
+           familyi={S\bibinitperiod},
+           given={Guy},
+           giveni={G\bibinitperiod}}}%
+        {{hash=075676db46622d5a64b6ff1011b9b7d0}{%
+           family={Bracha},
+           familyi={B\bibinitperiod},
+           given={Gilad},
+           giveni={G\bibinitperiod}}}%
+        {{hash=1c34391bfa51bee4b9dacbc295281374}{%
+           family={Buckley},
+           familyi={B\bibinitperiod},
+           given={Alex},
+           giveni={A\bibinitperiod}}}%
+        {{hash=005dd718f3b829bab9e7e7714b3804a5}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={Daniel},
+           giveni={D\bibinitperiod}}}%
+        {{hash=baa3dce4b5645d600c1aa4a8ea5aea7c}{%
+           family={Bierman},
+           familyi={B\bibinitperiod},
+           given={Gavin},
+           giveni={G\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {english}%
+      }
+      \strng{authorbibnamehash}{970a2e088d89b0caf7fa87b2fc653076}
+      \strng{authornamehash}{970a2e088d89b0caf7fa87b2fc653076}
+      \strng{authorfullhash}{c3ef53b18803d0ad980afdea3a399b86}
+      \strng{authorfullhashraw}{c3ef53b18803d0ad980afdea3a399b86}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{The Java Language Specification, Java SE 25 Edition}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.oracle.com/javase/specs/jls/se25/html/index.html
+      \endverb
+      \verb{url}
+      \verb https://docs.oracle.com/javase/specs/jls/se25/html/index.html
+      \endverb
+    \endentry
+    \entry{assertj_docs}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{AssertJ -- fluent assertions for Java}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://assertj.github.io/doc/
+      \endverb
+      \verb{url}
+      \verb https://assertj.github.io/doc/
+      \endverb
+    \endentry
+    \entry{checkstyle_docs}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{Checkstyle: a development tool for checking Java source code}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://checkstyle.sourceforge.io/
+      \endverb
+      \verb{url}
+      \verb https://checkstyle.sourceforge.io/
+      \endverb
+    \endentry
+    \entry{jacoco_docs}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{JaCoCo Java Code Coverage Library}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.jacoco.org/jacoco/trunk/doc/
+      \endverb
+      \verb{url}
+      \verb https://www.jacoco.org/jacoco/trunk/doc/
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

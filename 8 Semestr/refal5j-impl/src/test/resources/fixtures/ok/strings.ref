@@ -1,0 +1,6 @@
+$ENTRY Main;
+
+* Concatenate a literal string and a number via Symb.
+Main {
+  = 'count=' <Symb 42>;
+}

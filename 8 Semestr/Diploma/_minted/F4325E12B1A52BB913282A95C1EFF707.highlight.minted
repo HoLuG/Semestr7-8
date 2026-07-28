@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{readString}\PYG{p}{(}\PYG{k+kt}{char}\PYG{+w}{ }\PYG{n}{quote}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{startLine}\PYG{p}{,}
+\PYG{+w}{                        }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{startCol}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Token}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{out}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{openLine}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{line}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{openCol}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{col}\PYG{p}{;}\PYG{+w}{ }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{n}{advance}\PYG{p}{();}\PYG{+w}{                           }\PYG{c+c1}{// (2)}
+\PYG{+w}{    }\PYG{n}{StringBuilder}\PYG{+w}{ }\PYG{n}{sb}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{StringBuilder}\PYG{p}{();}
+\PYG{+w}{    }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{int}\PYG{o}{[]\PYGZgt{}}\PYG{+w}{ }\PYG{n}{charPositions}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayList}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}\PYG{+w}{ }\PYG{c+c1}{// (3)}
+\end{MintedVerbatim}

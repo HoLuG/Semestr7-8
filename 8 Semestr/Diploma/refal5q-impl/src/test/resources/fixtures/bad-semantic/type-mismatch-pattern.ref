@@ -1,0 +1,6 @@
+$ENTRY Main;
+
+* Variable 'X' used with two different kinds within the same pattern.
+Main {
+  s.X e.X = ;
+}

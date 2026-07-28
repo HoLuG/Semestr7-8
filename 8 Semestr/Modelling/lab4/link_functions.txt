@@ -1,0 +1,103 @@
+=== Pregnancies -> Age ===
+spearman_rho: 0.604044
+alpha: 34.325034
+beta: 0.04187364
+d_raw_train: 1.000000
+d_model_train: 0.485342
+improve_train: 2.060403
+d_raw_test: 1.000000
+d_model_test: 0.512987
+improve_test: 1.949367
+d_raw_full: 1.000000
+d_model_full: 0.490885
+
+=== Age -> Pregnancies ===
+spearman_rho: 0.604044
+alpha: 2.1257084e-37
+beta: 23.88137166
+d_raw_train: 1.000000
+d_model_train: 0.485342
+improve_train: 2.060403
+d_raw_test: 1.000000
+d_model_test: 0.512987
+improve_test: 1.949367
+d_raw_full: 1.000000
+d_model_full: 0.490885
+
+=== SkinThickness -> Insulin ===
+spearman_rho: 0.547120
+alpha: 0.04468479
+beta: 1.17508679
+d_raw_train: 0.462541
+d_model_train: 0.524430
+improve_train: 0.881988
+d_raw_test: 0.415584
+d_model_test: 0.532468
+improve_test: 0.780488
+d_raw_full: 0.451823
+d_model_full: 0.513021
+
+=== Insulin -> SkinThickness ===
+spearman_rho: 0.547120
+alpha: 14.083655
+beta: 0.85100097
+d_raw_train: 0.462541
+d_model_train: 0.524430
+improve_train: 0.881988
+d_raw_test: 0.415584
+d_model_test: 0.467532
+improve_test: 0.888889
+d_raw_full: 0.451823
+d_model_full: 0.513021
+
+=== SkinThickness -> BMI ===
+spearman_rho: 0.431679
+alpha: 57.393411
+beta: 0.25305691
+d_raw_train: 0.439739
+d_model_train: 0.713355
+improve_train: 0.616438
+d_raw_test: 0.435065
+d_model_test: 0.668831
+improve_test: 0.650485
+d_raw_full: 0.437500
+d_model_full: 0.704427
+
+=== BMI -> SkinThickness ===
+spearman_rho: 0.431679
+alpha: 1.1208297e-07
+beta: 3.95168024
+d_raw_train: 0.439739
+d_model_train: 0.713355
+improve_train: 0.616438
+d_raw_test: 0.435065
+d_model_test: 0.668831
+improve_test: 0.650485
+d_raw_full: 0.437500
+d_model_full: 0.704427
+
+=== BloodPressure -> Age ===
+spearman_rho: 0.349816
+alpha: 24.921986
+beta: 0.07025702
+d_raw_train: 0.827362
+d_model_train: 0.548860
+improve_train: 1.507418
+d_raw_test: 0.818182
+d_model_test: 0.532468
+improve_test: 1.536585
+d_raw_full: 0.824219
+d_model_full: 0.545573
+
+=== Age -> BloodPressure ===
+spearman_rho: 0.349816
+alpha: 1.3237488e-20
+beta: 14.23345364
+d_raw_train: 0.827362
+d_model_train: 0.548860
+improve_train: 1.507418
+d_raw_test: 0.818182
+d_model_test: 0.532468
+improve_test: 1.536585
+d_raw_full: 0.824219
+d_model_full: 0.545573

@@ -1,0 +1,3 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+java\PYG{+w}{ }\PYGZhy{}jar\PYG{+w}{ }refal5q.jar\PYG{+w}{ }\PYGZlt{}file.ref\PYGZgt{}\PYG{o}{[}+lib.ref...\PYG{o}{]}\PYG{+w}{ }\PYG{o}{[}\PYGZhy{}\PYGZhy{}entry\PYG{+w}{ }Name\PYG{o}{]}\PYG{+w}{ }\PYG{o}{[}\PYGZhy{}\PYGZhy{}step\PYGZhy{}limit\PYG{+w}{ }N\PYG{o}{]}\PYG{+w}{ }\PYG{o}{[}\PYGZhy{}\PYGZhy{}expr\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}args...\PYGZdq{}}\PYG{o}{]}
+\end{MintedVerbatim}

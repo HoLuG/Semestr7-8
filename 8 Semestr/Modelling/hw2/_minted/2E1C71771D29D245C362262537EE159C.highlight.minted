@@ -1,0 +1,191 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{\PYGZus{}\PYGZus{}future\PYGZus{}\PYGZus{}}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{annotations}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{argparse}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{json}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{math}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{os}
+\PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{dataclasses}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{dataclass}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{numpy}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{np}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{theoretical\PYGZus{}win\PYGZus{}prob}\PYG{p}{(}\PYG{n}{N}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{K}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{:} \PYG{n+nb}{float}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{float}\PYG{p}{:}
+    \PYG{k}{if} \PYG{n}{N} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{3} \PYG{o+ow}{or} \PYG{n}{K} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{1} \PYG{o+ow}{or} \PYG{n}{K} \PYG{o}{\PYGZgt{}} \PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{2}\PYG{p}{:}
+        \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}require N\PYGZgt{}=3 and 1\PYGZlt{}=K\PYGZlt{}=N\PYGZhy{}2\PYGZsq{}}\PYG{p}{)}
+    \PYG{k}{if} \PYG{o+ow}{not} \PYG{l+m+mf}{0.0} \PYG{o}{\PYGZlt{}=} \PYG{n}{prob\PYGZus{}stay} \PYG{o}{\PYGZlt{}=} \PYG{l+m+mf}{1.0}\PYG{p}{:}
+        \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}prob\PYGZus{}stay must be in [0,1]\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{p\PYGZus{}stay} \PYG{o}{=} \PYG{l+m+mf}{1.0} \PYG{o}{/} \PYG{n}{N}
+    \PYG{n}{p\PYGZus{}switch} \PYG{o}{=} \PYG{p}{(}\PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{)} \PYG{o}{/} \PYG{p}{(}\PYG{n}{N} \PYG{o}{*} \PYG{p}{(}\PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1} \PYG{o}{\PYGZhy{}} \PYG{n}{K}\PYG{p}{))}
+    \PYG{k}{return} \PYG{n}{prob\PYGZus{}stay} \PYG{o}{*} \PYG{n}{p\PYGZus{}stay} \PYG{o}{+} \PYG{p}{(}\PYG{l+m+mf}{1.0} \PYG{o}{\PYGZhy{}} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{)} \PYG{o}{*} \PYG{n}{p\PYGZus{}switch}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{posterior\PYGZus{}choice\PYGZus{}has\PYGZus{}prize}\PYG{p}{(}\PYG{n}{N}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{K}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{float}\PYG{p}{:}
+    \PYG{k}{if} \PYG{n}{N} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{3} \PYG{o+ow}{or} \PYG{n}{K} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{1} \PYG{o+ow}{or} \PYG{n}{K} \PYG{o}{\PYGZgt{}} \PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{2}\PYG{p}{:}
+        \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}require N\PYGZgt{}=3 and 1\PYGZlt{}=K\PYGZlt{}=N\PYGZhy{}2\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{c1} \PYG{o}{=} \PYG{n}{math}\PYG{o}{.}\PYG{n}{comb}\PYG{p}{(}\PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{K}\PYG{p}{)}
+    \PYG{n}{c2} \PYG{o}{=} \PYG{n}{math}\PYG{o}{.}\PYG{n}{comb}\PYG{p}{(}\PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{K}\PYG{p}{)}
+    \PYG{n}{num} \PYG{o}{=} \PYG{l+m+mf}{1.0} \PYG{o}{/} \PYG{n}{N} \PYG{o}{*} \PYG{p}{(}\PYG{l+m+mf}{1.0} \PYG{o}{/} \PYG{n}{c1}\PYG{p}{)}
+    \PYG{n}{den} \PYG{o}{=} \PYG{n}{num} \PYG{o}{+} \PYG{p}{(}\PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{)} \PYG{o}{/} \PYG{n}{N} \PYG{o}{*} \PYG{p}{(}\PYG{l+m+mf}{1.0} \PYG{o}{/} \PYG{n}{c2}\PYG{p}{)}
+    \PYG{k}{return} \PYG{n}{num} \PYG{o}{/} \PYG{n}{den}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{theoretical\PYGZus{}win\PYGZus{}prob\PYGZus{}bayes\PYGZus{}opt}\PYG{p}{(}\PYG{n}{N}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{K}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{float}\PYG{p}{:}
+    \PYG{n}{p\PYGZus{}choice} \PYG{o}{=} \PYG{n}{posterior\PYGZus{}choice\PYGZus{}has\PYGZus{}prize}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{)}
+    \PYG{n}{p\PYGZus{}alt} \PYG{o}{=} \PYG{p}{(}\PYG{l+m+mf}{1.0} \PYG{o}{\PYGZhy{}} \PYG{n}{p\PYGZus{}choice}\PYG{p}{)} \PYG{o}{/} \PYG{p}{(}\PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1} \PYG{o}{\PYGZhy{}} \PYG{n}{K}\PYG{p}{)}
+    \PYG{k}{return} \PYG{l+m+mf}{1.0} \PYG{o}{\PYGZhy{}} \PYG{n}{p\PYGZus{}choice} \PYG{k}{if} \PYG{n}{p\PYGZus{}alt} \PYG{o}{\PYGZgt{}} \PYG{n}{p\PYGZus{}choice} \PYG{k}{else} \PYG{n}{p\PYGZus{}choice}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{run\PYGZus{}monte\PYGZus{}carlo}\PYG{p}{(}\PYG{n}{N}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{K}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{:} \PYG{n+nb}{float}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{seed}\PYG{p}{:} \PYG{n+nb}{int} \PYG{o}{|} \PYG{k+kc}{None}\PYG{o}{=}\PYG{l+m+mi}{42}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{tuple}\PYG{p}{[}\PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n+nb}{float}\PYG{p}{]:}
+    \PYG{n}{rng} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{random}\PYG{o}{.}\PYG{n}{default\PYGZus{}rng}\PYG{p}{(}\PYG{n}{seed}\PYG{p}{)}
+    \PYG{n}{prize} \PYG{o}{=} \PYG{n}{rng}\PYG{o}{.}\PYG{n}{integers}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{N}\PYG{p}{,} \PYG{n}{size}\PYG{o}{=}\PYG{n}{n\PYGZus{}trials}\PYG{p}{)}
+    \PYG{n}{choice} \PYG{o}{=} \PYG{n}{rng}\PYG{o}{.}\PYG{n}{integers}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{N}\PYG{p}{,} \PYG{n}{size}\PYG{o}{=}\PYG{n}{n\PYGZus{}trials}\PYG{p}{)}
+    \PYG{n}{stay} \PYG{o}{=} \PYG{n}{rng}\PYG{o}{.}\PYG{n}{random}\PYG{p}{(}\PYG{n}{n\PYGZus{}trials}\PYG{p}{)} \PYG{o}{\PYGZlt{}} \PYG{n}{prob\PYGZus{}stay}
+    \PYG{n}{wins} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{zeros}\PYG{p}{(}\PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n}{np}\PYG{o}{.}\PYG{n}{int8}\PYG{p}{)}
+    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{n\PYGZus{}trials}\PYG{p}{):}
+        \PYG{n}{c\PYGZus{}open} \PYG{o}{=} \PYG{p}{[}\PYG{n}{d} \PYG{k}{for} \PYG{n}{d} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{N}\PYG{p}{)} \PYG{k}{if} \PYG{n}{d} \PYG{o}{!=} \PYG{n}{choice}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o+ow}{and} \PYG{n}{d} \PYG{o}{!=} \PYG{n}{prize}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]]}
+        \PYG{n}{idx} \PYG{o}{=} \PYG{n}{rng}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{c\PYGZus{}open}\PYG{p}{),} \PYG{n}{size}\PYG{o}{=}\PYG{n}{K}\PYG{p}{,} \PYG{n}{replace}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{)}
+        \PYG{n}{opened} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{c\PYGZus{}open}\PYG{p}{[}\PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{j}\PYG{p}{)]} \PYG{k}{for} \PYG{n}{j} \PYG{o+ow}{in} \PYG{n}{idx}\PYG{p}{\PYGZcb{}}
+        \PYG{n}{closed} \PYG{o}{=} \PYG{p}{[}\PYG{n}{d} \PYG{k}{for} \PYG{n}{d} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{N}\PYG{p}{)} \PYG{k}{if} \PYG{n}{d} \PYG{o+ow}{not} \PYG{o+ow}{in} \PYG{n}{opened}\PYG{p}{]}
+        \PYG{k}{if} \PYG{n}{stay}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]:}
+            \PYG{n}{final\PYGZus{}door} \PYG{o}{=} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{choice}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])}
+        \PYG{k}{else}\PYG{p}{:}
+            \PYG{n}{alt} \PYG{o}{=} \PYG{p}{[}\PYG{n}{d} \PYG{k}{for} \PYG{n}{d} \PYG{o+ow}{in} \PYG{n}{closed} \PYG{k}{if} \PYG{n}{d} \PYG{o}{!=} \PYG{n}{choice}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]]}
+            \PYG{n}{final\PYGZus{}door} \PYG{o}{=} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{choice}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])} \PYG{k}{if} \PYG{o+ow}{not} \PYG{n}{alt} \PYG{k}{else} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{rng}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n}{alt}\PYG{p}{))}
+        \PYG{n}{wins}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{1} \PYG{k}{if} \PYG{n}{final\PYGZus{}door} \PYG{o}{==} \PYG{n}{prize}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{k}{else} \PYG{l+m+mi}{0}
+    \PYG{k}{return} \PYG{p}{(}\PYG{n}{wins}\PYG{p}{,} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{wins}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{()))}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{run\PYGZus{}monte\PYGZus{}carlo\PYGZus{}strategy}\PYG{p}{(}\PYG{n}{N}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{K}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{strategy}\PYG{p}{:} \PYG{n+nb}{str}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{:} \PYG{n+nb}{float}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{seed}\PYG{p}{:} \PYG{n+nb}{int} \PYG{o}{|} \PYG{k+kc}{None}\PYG{o}{=}\PYG{l+m+mi}{42}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{tuple}\PYG{p}{[}\PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n+nb}{float}\PYG{p}{]:}
+    \PYG{n}{strategy} \PYG{o}{=} \PYG{n}{strategy}\PYG{o}{.}\PYG{n}{lower}\PYG{p}{()}\PYG{o}{.}\PYG{n}{strip}\PYG{p}{()}
+    \PYG{k}{if} \PYG{n}{strategy} \PYG{o+ow}{not} \PYG{o+ow}{in} \PYG{p}{\PYGZob{}}\PYG{l+s+s1}{\PYGZsq{}stay\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}switch\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}mixed\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}bayes\PYGZsq{}}\PYG{p}{\PYGZcb{}:}
+        \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}strategy must be one of: stay, switch, mixed, bayes\PYGZsq{}}\PYG{p}{)}
+    \PYG{k}{if} \PYG{n}{strategy} \PYG{o}{==} \PYG{l+s+s1}{\PYGZsq{}stay\PYGZsq{}}\PYG{p}{:}
+        \PYG{k}{return} \PYG{n}{run\PYGZus{}monte\PYGZus{}carlo}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{o}{=}\PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{o}{=}\PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{seed}\PYG{p}{)}
+    \PYG{k}{if} \PYG{n}{strategy} \PYG{o}{==} \PYG{l+s+s1}{\PYGZsq{}switch\PYGZsq{}}\PYG{p}{:}
+        \PYG{k}{return} \PYG{n}{run\PYGZus{}monte\PYGZus{}carlo}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{o}{=}\PYG{l+m+mf}{0.0}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{o}{=}\PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{seed}\PYG{p}{)}
+    \PYG{k}{if} \PYG{n}{strategy} \PYG{o}{==} \PYG{l+s+s1}{\PYGZsq{}mixed\PYGZsq{}}\PYG{p}{:}
+        \PYG{k}{return} \PYG{n}{run\PYGZus{}monte\PYGZus{}carlo}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{o}{=}\PYG{n}{prob\PYGZus{}stay}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{o}{=}\PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{seed}\PYG{p}{)}
+    \PYG{n}{p\PYGZus{}choice} \PYG{o}{=} \PYG{n}{posterior\PYGZus{}choice\PYGZus{}has\PYGZus{}prize}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{)}
+    \PYG{n}{p\PYGZus{}alt} \PYG{o}{=} \PYG{p}{(}\PYG{l+m+mf}{1.0} \PYG{o}{\PYGZhy{}} \PYG{n}{p\PYGZus{}choice}\PYG{p}{)} \PYG{o}{/} \PYG{p}{(}\PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1} \PYG{o}{\PYGZhy{}} \PYG{n}{K}\PYG{p}{)}
+    \PYG{n}{do\PYGZus{}switch} \PYG{o}{=} \PYG{n}{p\PYGZus{}alt} \PYG{o}{\PYGZgt{}} \PYG{n}{p\PYGZus{}choice}
+    \PYG{k}{return} \PYG{n}{run\PYGZus{}monte\PYGZus{}carlo}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{o}{=}\PYG{l+m+mf}{0.0} \PYG{k}{if} \PYG{n}{do\PYGZus{}switch} \PYG{k}{else} \PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{o}{=}\PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{seed}\PYG{p}{)}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{cdf\PYGZus{}distance\PYGZus{}bernoulli}\PYG{p}{(}\PYG{n}{p\PYGZus{}hat}\PYG{p}{:} \PYG{n+nb}{float}\PYG{p}{,} \PYG{n}{p0}\PYG{p}{:} \PYG{n+nb}{float}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{float}\PYG{p}{:}
+    \PYG{k}{return} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{p\PYGZus{}hat} \PYG{o}{\PYGZhy{}} \PYG{n}{p0}\PYG{p}{)}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{ks\PYGZus{}critical\PYGZus{}approx}\PYG{p}{(}\PYG{n}{alpha}\PYG{p}{:} \PYG{n+nb}{float}\PYG{p}{,} \PYG{n}{n}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{float}\PYG{p}{:}
+    \PYG{n}{k\PYGZus{}table} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{l+m+mf}{0.1}\PYG{p}{:} \PYG{l+m+mf}{1.23}\PYG{p}{,} \PYG{l+m+mf}{0.05}\PYG{p}{:} \PYG{l+m+mf}{1.36}\PYG{p}{,} \PYG{l+m+mf}{0.02}\PYG{p}{:} \PYG{l+m+mf}{1.52}\PYG{p}{,} \PYG{l+m+mf}{0.01}\PYG{p}{:} \PYG{l+m+mf}{1.63}\PYG{p}{\PYGZcb{}}
+    \PYG{k}{if} \PYG{n}{alpha} \PYG{o+ow}{not} \PYG{o+ow}{in} \PYG{n}{k\PYGZus{}table}\PYG{p}{:}
+        \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s1}{\PYGZsq{}alpha must be one of }\PYG{l+s+si}{\PYGZob{}}\PYG{n+nb}{list}\PYG{p}{(}\PYG{n}{k\PYGZus{}table}\PYG{p}{)}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+    \PYG{k}{return} \PYG{n}{k\PYGZus{}table}\PYG{p}{[}\PYG{n}{alpha}\PYG{p}{]} \PYG{o}{/} \PYG{n}{math}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{n}\PYG{p}{)}
+
+\PYG{n+nd}{@dataclass}
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{AdequacyRow}\PYG{p}{:}
+    \PYG{n}{strategy}\PYG{p}{:} \PYG{n+nb}{str}
+    \PYG{n}{n}\PYG{p}{:} \PYG{n+nb}{int}
+    \PYG{n}{wins}\PYG{p}{:} \PYG{n+nb}{int}
+    \PYG{n}{p\PYGZus{}hat}\PYG{p}{:} \PYG{n+nb}{float}
+    \PYG{n}{p\PYGZus{}theory\PYGZus{}bayes}\PYG{p}{:} \PYG{n+nb}{float}
+    \PYG{n}{abs\PYGZus{}diff}\PYG{p}{:} \PYG{n+nb}{float}
+    \PYG{n}{D\PYGZus{}n}\PYG{p}{:} \PYG{n+nb}{float}
+    \PYG{n}{D\PYGZus{}crit\PYGZus{}005}\PYG{p}{:} \PYG{n+nb}{float}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{adequacy\PYGZus{}monty\PYGZus{}hall\PYGZus{}classic}\PYG{p}{(}\PYG{n}{n\PYGZus{}trials}\PYG{p}{:} \PYG{n+nb}{int}\PYG{o}{=}\PYG{l+m+mi}{200000}\PYG{p}{,} \PYG{n}{seed}\PYG{p}{:} \PYG{n+nb}{int}\PYG{o}{=}\PYG{l+m+mi}{42}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n}{AdequacyRow}\PYG{p}{]:}
+    \PYG{n}{rows}\PYG{p}{:} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n}{AdequacyRow}\PYG{p}{]} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{k}{for} \PYG{n}{name}\PYG{p}{,} \PYG{n}{s}\PYG{p}{,} \PYG{n}{p0} \PYG{o+ow}{in} \PYG{p}{[(}\PYG{l+s+s1}{\PYGZsq{}stay (s=1)\PYGZsq{}}\PYG{p}{,} \PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{n}{theoretical\PYGZus{}win\PYGZus{}prob}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mf}{1.0}\PYG{p}{)),} \PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}switch (s=0)\PYGZsq{}}\PYG{p}{,} \PYG{l+m+mf}{0.0}\PYG{p}{,} \PYG{n}{theoretical\PYGZus{}win\PYGZus{}prob}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mf}{0.0}\PYG{p}{))]:}
+        \PYG{n}{wins\PYGZus{}arr}\PYG{p}{,} \PYG{n}{\PYGZus{}} \PYG{o}{=} \PYG{n}{run\PYGZus{}monte\PYGZus{}carlo}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{s}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{seed} \PYG{o}{+} \PYG{n+nb}{hash}\PYG{p}{(}\PYG{n}{name}\PYG{p}{)} \PYG{o}{\PYGZpc{}} \PYG{l+m+mi}{10000}\PYG{p}{)}
+        \PYG{n}{k} \PYG{o}{=} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{wins\PYGZus{}arr}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{())}
+        \PYG{n}{p\PYGZus{}hat} \PYG{o}{=} \PYG{n}{k} \PYG{o}{/} \PYG{n}{n\PYGZus{}trials}
+        \PYG{n}{D\PYGZus{}n} \PYG{o}{=} \PYG{n}{cdf\PYGZus{}distance\PYGZus{}bernoulli}\PYG{p}{(}\PYG{n}{p\PYGZus{}hat}\PYG{p}{,} \PYG{n}{p0}\PYG{p}{)}
+        \PYG{n}{D\PYGZus{}cr} \PYG{o}{=} \PYG{n}{ks\PYGZus{}critical\PYGZus{}approx}\PYG{p}{(}\PYG{l+m+mf}{0.05}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{p}{)}
+        \PYG{n}{rows}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{AdequacyRow}\PYG{p}{(}\PYG{n}{strategy}\PYG{o}{=}\PYG{n}{name}\PYG{p}{,} \PYG{n}{n}\PYG{o}{=}\PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{n}{wins}\PYG{o}{=}\PYG{n}{k}\PYG{p}{,} \PYG{n}{p\PYGZus{}hat}\PYG{o}{=}\PYG{n}{p\PYGZus{}hat}\PYG{p}{,} \PYG{n}{p\PYGZus{}theory\PYGZus{}bayes}\PYG{o}{=}\PYG{n}{p0}\PYG{p}{,} \PYG{n}{abs\PYGZus{}diff}\PYG{o}{=}\PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{p\PYGZus{}hat} \PYG{o}{\PYGZhy{}} \PYG{n}{p0}\PYG{p}{),} \PYG{n}{D\PYGZus{}n}\PYG{o}{=}\PYG{n}{D\PYGZus{}n}\PYG{p}{,} \PYG{n}{D\PYGZus{}crit\PYGZus{}005}\PYG{o}{=}\PYG{n}{D\PYGZus{}cr}\PYG{p}{))}
+    \PYG{k}{return} \PYG{n}{rows}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{grid\PYGZus{}experiment}\PYG{p}{(}\PYG{n}{n\PYGZus{}trials}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{:} \PYG{n+nb}{float}\PYG{p}{,} \PYG{n}{seed}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n+nb}{dict}\PYG{p}{]:}
+    \PYG{n}{out} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{k}{for} \PYG{n}{N} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{l+m+mi}{11}\PYG{p}{):}
+        \PYG{k}{for} \PYG{n}{K} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{):}
+            \PYG{k}{if} \PYG{n}{K} \PYG{o}{\PYGZgt{}} \PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{2}\PYG{p}{:}
+                \PYG{k}{continue}
+            \PYG{n}{p\PYGZus{}th} \PYG{o}{=} \PYG{n}{theoretical\PYGZus{}win\PYGZus{}prob}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{)}
+            \PYG{n}{\PYGZus{}}\PYG{p}{,} \PYG{n}{p\PYGZus{}mc} \PYG{o}{=} \PYG{n}{run\PYGZus{}monte\PYGZus{}carlo}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{seed} \PYG{o}{+} \PYG{n}{N} \PYG{o}{*} \PYG{l+m+mi}{100} \PYG{o}{+} \PYG{n}{K}\PYG{p}{)}
+            \PYG{n}{out}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(\PYGZob{}}\PYG{l+s+s1}{\PYGZsq{}N\PYGZsq{}}\PYG{p}{:} \PYG{n}{N}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}K\PYGZsq{}}\PYG{p}{:} \PYG{n}{K}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}p\PYGZus{}theory\PYGZsq{}}\PYG{p}{:} \PYG{n}{p\PYGZus{}th}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}p\PYGZus{}mc\PYGZsq{}}\PYG{p}{:} \PYG{n}{p\PYGZus{}mc}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}abs\PYGZus{}diff\PYGZsq{}}\PYG{p}{:} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{p\PYGZus{}th} \PYG{o}{\PYGZhy{}} \PYG{n}{p\PYGZus{}mc}\PYG{p}{)\PYGZcb{})}
+    \PYG{k}{return} \PYG{n}{out}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{sweep\PYGZus{}n\PYGZus{}trials}\PYG{p}{(}\PYG{n}{N}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{K}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{:} \PYG{n+nb}{float}\PYG{p}{,} \PYG{n}{n\PYGZus{}list}\PYG{p}{:} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n+nb}{int}\PYG{p}{],} \PYG{n}{seed}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n+nb}{dict}\PYG{p}{]:}
+    \PYG{n}{p\PYGZus{}theory} \PYG{o}{=} \PYG{n}{theoretical\PYGZus{}win\PYGZus{}prob}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{)}
+    \PYG{n}{out} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n}{n\PYGZus{}list}\PYG{p}{:}
+        \PYG{n}{\PYGZus{}}\PYG{p}{,} \PYG{n}{p\PYGZus{}mc} \PYG{o}{=} \PYG{n}{run\PYGZus{}monte\PYGZus{}carlo}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{,} \PYG{n}{n}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{seed} \PYG{o}{+} \PYG{n}{n}\PYG{p}{)}
+        \PYG{n}{out}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(\PYGZob{}}\PYG{l+s+s1}{\PYGZsq{}N\PYGZsq{}}\PYG{p}{:} \PYG{n}{N}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}K\PYGZsq{}}\PYG{p}{:} \PYG{n}{K}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}prob\PYGZus{}stay\PYGZsq{}}\PYG{p}{:} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}n\PYGZus{}trials\PYGZsq{}}\PYG{p}{:} \PYG{n}{n}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}p\PYGZus{}theory\PYGZsq{}}\PYG{p}{:} \PYG{n}{p\PYGZus{}theory}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}p\PYGZus{}mc\PYGZsq{}}\PYG{p}{:} \PYG{n}{p\PYGZus{}mc}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}abs\PYGZus{}diff\PYGZsq{}}\PYG{p}{:} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{p\PYGZus{}theory} \PYG{o}{\PYGZhy{}} \PYG{n}{p\PYGZus{}mc}\PYG{p}{)\PYGZcb{})}
+    \PYG{k}{return} \PYG{n}{out}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{sweep\PYGZus{}prob\PYGZus{}stay}\PYG{p}{(}\PYG{n}{N}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{K}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{s\PYGZus{}list}\PYG{p}{:} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n+nb}{float}\PYG{p}{],} \PYG{n}{n\PYGZus{}trials}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{seed}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n+nb}{dict}\PYG{p}{]:}
+    \PYG{n}{out} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{k}{for} \PYG{n}{s} \PYG{o+ow}{in} \PYG{n}{s\PYGZus{}list}\PYG{p}{:}
+        \PYG{n}{p\PYGZus{}th} \PYG{o}{=} \PYG{n}{theoretical\PYGZus{}win\PYGZus{}prob}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{s}\PYG{p}{)}
+        \PYG{n}{\PYGZus{}}\PYG{p}{,} \PYG{n}{p\PYGZus{}mc} \PYG{o}{=} \PYG{n}{run\PYGZus{}monte\PYGZus{}carlo}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{s}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{seed} \PYG{o}{+} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{s} \PYG{o}{*} \PYG{l+m+mi}{10000}\PYG{p}{))}
+        \PYG{n}{out}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(\PYGZob{}}\PYG{l+s+s1}{\PYGZsq{}N\PYGZsq{}}\PYG{p}{:} \PYG{n}{N}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}K\PYGZsq{}}\PYG{p}{:} \PYG{n}{K}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}prob\PYGZus{}stay\PYGZsq{}}\PYG{p}{:} \PYG{n}{s}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}p\PYGZus{}theory\PYGZsq{}}\PYG{p}{:} \PYG{n}{p\PYGZus{}th}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}p\PYGZus{}mc\PYGZsq{}}\PYG{p}{:} \PYG{n}{p\PYGZus{}mc}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}abs\PYGZus{}diff\PYGZsq{}}\PYG{p}{:} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{p\PYGZus{}th} \PYG{o}{\PYGZhy{}} \PYG{n}{p\PYGZus{}mc}\PYG{p}{)\PYGZcb{})}
+    \PYG{k}{return} \PYG{n}{out}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{plot\PYGZus{}figures}\PYG{p}{(}\PYG{n}{out\PYGZus{}dir}\PYG{p}{:} \PYG{n+nb}{str}\PYG{p}{,} \PYG{n}{seed}\PYG{p}{:} \PYG{n+nb}{int}\PYG{o}{=}\PYG{l+m+mi}{42}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k+kc}{None}\PYG{p}{:}
+    \PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{matplotlib.pyplot}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{plt}
+    \PYG{n}{os}\PYG{o}{.}\PYG{n}{makedirs}\PYG{p}{(}\PYG{n}{out\PYGZus{}dir}\PYG{p}{,} \PYG{n}{exist\PYGZus{}ok}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+    \PYG{n}{N} \PYG{o}{=} \PYG{l+m+mi}{7}
+    \PYG{n}{Kmax} \PYG{o}{=} \PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{2}
+    \PYG{n}{s\PYGZus{}vals} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{101}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(}\PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{7}\PYG{p}{,} \PYG{l+m+mf}{4.5}\PYG{p}{))}
+    \PYG{k}{for} \PYG{n}{K} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{Kmax} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{):}
+        \PYG{n}{ys} \PYG{o}{=} \PYG{p}{[}\PYG{n}{theoretical\PYGZus{}win\PYGZus{}prob}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{s}\PYG{p}{))} \PYG{k}{for} \PYG{n}{s} \PYG{o+ow}{in} \PYG{n}{s\PYGZus{}vals}\PYG{p}{]}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{s\PYGZus{}vals}\PYG{p}{,} \PYG{n}{ys}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+sa}{f}\PYG{l+s+s1}{\PYGZsq{}K=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{K}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}stay probability \PYGZdl{}s\PYGZdl{}\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}\PYGZdl{}P(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s1}{mathrm}\PYG{l+s+si}{\PYGZob{}win\PYGZcb{}}\PYG{l+s+s1}{)\PYGZdl{}\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s1}{\PYGZsq{}Theory: \PYGZdl{}N=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{N}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{\PYGZdl{}, mixed strategy\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{()}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{()}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{join}\PYG{p}{(}\PYG{n}{out\PYGZus{}dir}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}hw2\PYGZus{}prob\PYGZus{}vs\PYGZus{}switch.png\PYGZsq{}}\PYG{p}{),} \PYG{n}{dpi}\PYG{o}{=}\PYG{l+m+mi}{150}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{close}\PYG{p}{()}
+    \PYG{n}{n\PYGZus{}mc} \PYG{o}{=} \PYG{l+m+mi}{80000}
+    \PYG{n}{prob\PYGZus{}stay} \PYG{o}{=} \PYG{l+m+mf}{0.5}
+    \PYG{n}{Ks} \PYG{o}{=} \PYG{n+nb}{list}\PYG{p}{(}\PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{N} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{))}
+    \PYG{n}{p\PYGZus{}th} \PYG{o}{=} \PYG{p}{[}\PYG{n}{theoretical\PYGZus{}win\PYGZus{}prob}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{)} \PYG{k}{for} \PYG{n}{K} \PYG{o+ow}{in} \PYG{n}{Ks}\PYG{p}{]}
+    \PYG{n}{p\PYGZus{}mc} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{k}{for} \PYG{n}{K} \PYG{o+ow}{in} \PYG{n}{Ks}\PYG{p}{:}
+        \PYG{n}{\PYGZus{}}\PYG{p}{,} \PYG{n}{ph} \PYG{o}{=} \PYG{n}{run\PYGZus{}monte\PYGZus{}carlo}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{K}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{p}{,} \PYG{n}{n\PYGZus{}mc}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{seed} \PYG{o}{+} \PYG{n}{K}\PYG{p}{)}
+        \PYG{n}{p\PYGZus{}mc}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{ph}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(}\PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{7}\PYG{p}{,} \PYG{l+m+mf}{4.5}\PYG{p}{))}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{Ks}\PYG{p}{,} \PYG{n}{p\PYGZus{}th}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}o\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}analytic\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{Ks}\PYG{p}{,} \PYG{n}{p\PYGZus{}mc}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}s\PYGZhy{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+sa}{f}\PYG{l+s+s1}{\PYGZsq{}Monte Carlo (\PYGZdl{}n=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{n\PYGZus{}mc}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{\PYGZdl{})\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}\PYGZdl{}K\PYGZdl{}\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}\PYGZdl{}P(}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s1}{mathrm}\PYG{l+s+si}{\PYGZob{}win\PYGZcb{}}\PYG{l+s+s1}{)\PYGZdl{}\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s1}{\PYGZsq{}\PYGZdl{}N=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{N}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{\PYGZdl{}, \PYGZdl{}s=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{prob\PYGZus{}stay}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{\PYGZdl{}\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{()}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{()}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{join}\PYG{p}{(}\PYG{n}{out\PYGZus{}dir}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}hw2\PYGZus{}theory\PYGZus{}vs\PYGZus{}mc\PYGZus{}N7.png\PYGZsq{}}\PYG{p}{),} \PYG{n}{dpi}\PYG{o}{=}\PYG{l+m+mi}{150}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{close}\PYG{p}{()}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{main}\PYG{p}{()} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k+kc}{None}\PYG{p}{:}
+    \PYG{n}{p} \PYG{o}{=} \PYG{n}{argparse}\PYG{o}{.}\PYG{n}{ArgumentParser}\PYG{p}{()}
+    \PYG{n}{p}\PYG{o}{.}\PYG{n}{add\PYGZus{}argument}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}n\PYGZhy{}trials\PYGZsq{}}\PYG{p}{,} \PYG{n+nb}{type}\PYG{o}{=}\PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{default}\PYG{o}{=}\PYG{l+m+mi}{200000}\PYG{p}{)}
+    \PYG{n}{p}\PYG{o}{.}\PYG{n}{add\PYGZus{}argument}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}seed\PYGZsq{}}\PYG{p}{,} \PYG{n+nb}{type}\PYG{o}{=}\PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{default}\PYG{o}{=}\PYG{l+m+mi}{42}\PYG{p}{)}
+    \PYG{n}{p}\PYG{o}{.}\PYG{n}{add\PYGZus{}argument}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}json\PYGZhy{}out\PYGZsq{}}\PYG{p}{,} \PYG{n+nb}{type}\PYG{o}{=}\PYG{n+nb}{str}\PYG{p}{,} \PYG{n}{default}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}hw2\PYGZus{}results.json\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{p}\PYG{o}{.}\PYG{n}{add\PYGZus{}argument}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}plots\PYGZsq{}}\PYG{p}{,} \PYG{n}{action}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}store\PYGZus{}true\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{p}\PYG{o}{.}\PYG{n}{add\PYGZus{}argument}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}strategy\PYGZsq{}}\PYG{p}{,} \PYG{n+nb}{type}\PYG{o}{=}\PYG{n+nb}{str}\PYG{p}{,} \PYG{n}{default}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}mixed\PYGZsq{}}\PYG{p}{,} \PYG{n}{help}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}stay|switch|mixed|bayes (default: mixed)\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{p}\PYG{o}{.}\PYG{n}{add\PYGZus{}argument}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}prob\PYGZhy{}stay\PYGZsq{}}\PYG{p}{,} \PYG{n+nb}{type}\PYG{o}{=}\PYG{n+nb}{float}\PYG{p}{,} \PYG{n}{default}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{help}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}used only for strategy=mixed\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{args} \PYG{o}{=} \PYG{n}{p}\PYG{o}{.}\PYG{n}{parse\PYGZus{}args}\PYG{p}{()}
+    \PYG{n}{rows} \PYG{o}{=} \PYG{n}{adequacy\PYGZus{}monty\PYGZus{}hall\PYGZus{}classic}\PYG{p}{(}\PYG{n}{n\PYGZus{}trials}\PYG{o}{=}\PYG{n}{args}\PYG{o}{.}\PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{args}\PYG{o}{.}\PYG{n}{seed}\PYG{p}{)}
+    \PYG{n}{grid\PYGZus{}n} \PYG{o}{=} \PYG{n+nb}{min}\PYG{p}{(}\PYG{n}{args}\PYG{o}{.}\PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{l+m+mi}{50000}\PYG{p}{)}
+    \PYG{n}{grid} \PYG{o}{=} \PYG{n}{grid\PYGZus{}experiment}\PYG{p}{(}\PYG{n}{n\PYGZus{}trials}\PYG{o}{=}\PYG{n}{grid\PYGZus{}n}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{o}{=}\PYG{n}{args}\PYG{o}{.}\PYG{n}{prob\PYGZus{}stay}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{args}\PYG{o}{.}\PYG{n}{seed}\PYG{p}{)}
+    \PYG{n}{n\PYGZus{}sweep\PYGZus{}list} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{l+m+mi}{100}\PYG{p}{,} \PYG{l+m+mi}{1000}\PYG{p}{,} \PYG{l+m+mi}{10000}\PYG{p}{,} \PYG{l+m+mi}{50000}\PYG{p}{,} \PYG{l+m+mi}{100000}\PYG{p}{]}
+    \PYG{n}{sweep\PYGZus{}n} \PYG{o}{=} \PYG{n}{sweep\PYGZus{}n\PYGZus{}trials}\PYG{p}{(}\PYG{n}{N}\PYG{o}{=}\PYG{l+m+mi}{7}\PYG{p}{,} \PYG{n}{K}\PYG{o}{=}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{n}{prob\PYGZus{}stay}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{n\PYGZus{}list}\PYG{o}{=}\PYG{n}{n\PYGZus{}sweep\PYGZus{}list}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{args}\PYG{o}{.}\PYG{n}{seed}\PYG{p}{)}
+    \PYG{n}{s\PYGZus{}sweep\PYGZus{}list} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mf}{0.0}\PYG{p}{,} \PYG{l+m+mf}{0.25}\PYG{p}{,} \PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{l+m+mf}{0.75}\PYG{p}{,} \PYG{l+m+mf}{1.0}\PYG{p}{]}
+    \PYG{n}{sweep\PYGZus{}s} \PYG{o}{=} \PYG{n}{sweep\PYGZus{}prob\PYGZus{}stay}\PYG{p}{(}\PYG{n}{N}\PYG{o}{=}\PYG{l+m+mi}{7}\PYG{p}{,} \PYG{n}{K}\PYG{o}{=}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{n}{s\PYGZus{}list}\PYG{o}{=}\PYG{n}{s\PYGZus{}sweep\PYGZus{}list}\PYG{p}{,} \PYG{n}{n\PYGZus{}trials}\PYG{o}{=}\PYG{l+m+mi}{50000}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{args}\PYG{o}{.}\PYG{n}{seed}\PYG{p}{)}
+    \PYG{n}{payload} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{l+s+s1}{\PYGZsq{}adequacy\PYGZus{}classic\PYGZsq{}}\PYG{p}{:} \PYG{p}{[}\PYG{n}{r}\PYG{o}{.}\PYG{n+nv+vm}{\PYGZus{}\PYGZus{}dict\PYGZus{}\PYGZus{}} \PYG{k}{for} \PYG{n}{r} \PYG{o+ow}{in} \PYG{n}{rows}\PYG{p}{],} \PYG{l+s+s1}{\PYGZsq{}grid\PYGZus{}mixed\PYGZus{}s0.5\PYGZsq{}}\PYG{p}{:} \PYG{n}{grid}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}sweep\PYGZus{}n\PYGZus{}trials\PYGZus{}N7\PYGZus{}K3\PYGZus{}s0.5\PYGZsq{}}\PYG{p}{:} \PYG{n}{sweep\PYGZus{}n}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}sweep\PYGZus{}prob\PYGZus{}stay\PYGZus{}N7\PYGZus{}K3\PYGZus{}n50000\PYGZsq{}}\PYG{p}{:} \PYG{n}{sweep\PYGZus{}s}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}posterior\PYGZus{}P\PYGZus{}A\PYGZus{}given\PYGZus{}B\PYGZus{}N3\PYGZus{}K1\PYGZsq{}}\PYG{p}{:} \PYG{n}{posterior\PYGZus{}choice\PYGZus{}has\PYGZus{}prize}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{),} \PYG{l+s+s1}{\PYGZsq{}n\PYGZus{}trials\PYGZus{}adequacy\PYGZsq{}}\PYG{p}{:} \PYG{n}{args}\PYG{o}{.}\PYG{n}{n\PYGZus{}trials}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}n\PYGZus{}trials\PYGZus{}grid\PYGZsq{}}\PYG{p}{:} \PYG{n}{grid\PYGZus{}n}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}strategy\PYGZsq{}}\PYG{p}{:} \PYG{n}{args}\PYG{o}{.}\PYG{n}{strategy}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}prob\PYGZus{}stay\PYGZsq{}}\PYG{p}{:} \PYG{n}{args}\PYG{o}{.}\PYG{n}{prob\PYGZus{}stay}\PYG{p}{\PYGZcb{}}
+    \PYG{k}{with} \PYG{n+nb}{open}\PYG{p}{(}\PYG{n}{args}\PYG{o}{.}\PYG{n}{json\PYGZus{}out}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}w\PYGZsq{}}\PYG{p}{,} \PYG{n}{encoding}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}utf\PYGZhy{}8\PYGZsq{}}\PYG{p}{)} \PYG{k}{as} \PYG{n}{f}\PYG{p}{:}
+        \PYG{n}{json}\PYG{o}{.}\PYG{n}{dump}\PYG{p}{(}\PYG{n}{payload}\PYG{p}{,} \PYG{n}{f}\PYG{p}{,} \PYG{n}{ensure\PYGZus{}ascii}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{indent}\PYG{o}{=}\PYG{l+m+mi}{2}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}=== Adequacy (N=3, K=1), Bayes\PYGZhy{}theory vs MC ===\PYGZsq{}}\PYG{p}{)}
+    \PYG{k}{for} \PYG{n}{r} \PYG{o+ow}{in} \PYG{n}{rows}\PYG{p}{:}
+        \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{r}\PYG{o}{.}\PYG{n}{strategy}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{: wins=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{r}\PYG{o}{.}\PYG{n}{wins}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{/}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{r}\PYG{o}{.}\PYG{n}{n}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{, p\PYGZus{}hat=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{r}\PYG{o}{.}\PYG{n}{p\PYGZus{}hat}\PYG{l+s+si}{:}\PYG{l+s+s1}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{, p\PYGZus{}theory=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{r}\PYG{o}{.}\PYG{n}{p\PYGZus{}theory\PYGZus{}bayes}\PYG{l+s+si}{:}\PYG{l+s+s1}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{, |diff|=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{r}\PYG{o}{.}\PYG{n}{abs\PYGZus{}diff}\PYG{l+s+si}{:}\PYG{l+s+s1}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{, D\PYGZus{}n=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{r}\PYG{o}{.}\PYG{n}{D\PYGZus{}n}\PYG{l+s+si}{:}\PYG{l+s+s1}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{, D\PYGZus{}cr(0.05)\PYGZti{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{r}\PYG{o}{.}\PYG{n}{D\PYGZus{}crit\PYGZus{}005}\PYG{l+s+si}{:}\PYG{l+s+s1}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+    \PYG{k}{if} \PYG{n}{args}\PYG{o}{.}\PYG{n}{plots}\PYG{p}{:}
+        \PYG{n}{plot\PYGZus{}figures}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}images\PYGZsq{}}\PYG{p}{,} \PYG{n}{seed}\PYG{o}{=}\PYG{n}{args}\PYG{o}{.}\PYG{n}{seed}\PYG{p}{)}
+        \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Plots saved to images/\PYGZsq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s1}{JSON: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{args}\PYG{o}{.}\PYG{n}{json\PYGZus{}out}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{k}{if} \PYG{n+nv+vm}{\PYGZus{}\PYGZus{}name\PYGZus{}\PYGZus{}} \PYG{o}{==} \PYG{l+s+s1}{\PYGZsq{}\PYGZus{}\PYGZus{}main\PYGZus{}\PYGZus{}\PYGZsq{}}\PYG{p}{:}
+    \PYG{n}{main}\PYG{p}{()}
+\end{MintedVerbatim}

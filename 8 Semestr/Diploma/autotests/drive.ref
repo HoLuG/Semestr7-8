@@ -1,0 +1,7 @@
+* TREE
+
+$ENTRY Go { = ; }
+
+Bar { =; }
+
+$DRIVE Bar;

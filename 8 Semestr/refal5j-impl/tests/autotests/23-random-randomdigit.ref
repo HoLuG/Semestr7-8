@@ -1,0 +1,84 @@
+* Функции Random и RandomDigit используются, соответственно, в MSCP-A и crefal
+
+$ENTRY Go {
+  /* пусто */
+    = <TestRandom 10 3000>
+      <TestRandom 100 3000>
+      <TestRandom 1000 3000>
+      <ShowRandom 5>
+      <ShowRandom 10>
+
+      <TestRandomDigit 100 30000>
+      <TestRandomDigit 100500 30000>
+      <TestRandomDigit
+        999999999999999999999999999999999999999999999999999999999999999
+        10000
+      >
+      <ShowRandomDigit 100500>
+      <ShowRandomDigit
+        999999999999999999999999999999999999999999999999999999999999999
+      >;
+}
+
+TestRandom {
+  s.Length 0 = /* всё */;
+
+  s.Length s.Count
+    , <CheckRandom s.Length <Random s.Length>> : Ok
+    , <CheckRandom s.Length <Random '+' s.Length>> : Ok
+    = <TestRandom s.Length <- s.Count 1>>;
+}
+
+CheckRandom {
+  s.Length e.Digits
+    , e.Digits : s.1 e.2
+    , <Lenw e.Digits> : s.ReturnedLength e.3
+    , <Compare s.ReturnedLength s.Length> ('-0') : s.Cmp (e.4 s.Cmp e.5)
+    , <CheckMacrodigits e.Digits> : Ok
+    = Ok;
+}
+
+CheckMacrodigits {
+  s.Digit e.Digits
+    /*
+      Для Рефала-5 эта проверка выглядит абсурдно, но не для Рефала-5J
+    */
+    , <Compare s.Digit 1 0>
+    : {
+        '-' = <CheckMacrodigits e.Digits>;
+        s.Other = Error;
+      };
+
+  /* пусто */ = Ok;
+}
+
+ShowRandom {
+  s.Length
+    = <Prout '<Random ' <Symb s.Length> '>'>
+      <Prout <Random s.Length>>
+      <Prout <Random s.Length>>
+      <Prout <Random s.Length>>
+}
+
+TestRandomDigit {
+  s.MaxValue 0 = /* всё */;
+
+  s.MaxValue s.Count
+    , <CheckRandomDigit s.MaxValue <RandomDigit s.MaxValue>> : Ok
+    , <CheckRandomDigit s.MaxValue <RandomDigit '+' s.MaxValue>> : Ok
+    = <TestRandomDigit s.MaxValue <- s.Count 1>>;
+}
+
+CheckRandomDigit {
+  s.MaxValue s.Random
+    , <Compare s.Random s.MaxValue> ('-0') : s.Cmp (e.1 s.Cmp e.2)
+    = Ok;
+}
+
+ShowRandomDigit {
+  s.MaxValue
+    = <Prout '<RandomDigit ' <Symb s.MaxValue> '>'>
+      <Prout '             ' <RandomDigit s.MaxValue>>
+      <Prout '             ' <RandomDigit s.MaxValue>>
+      <Prout '             ' <RandomDigit s.MaxValue>>;
+}

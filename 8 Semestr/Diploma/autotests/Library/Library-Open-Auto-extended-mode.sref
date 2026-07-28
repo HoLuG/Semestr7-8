@@ -1,0 +1,19 @@
+//FROM Library
+$EXTERN Open-Auto, Putout, Close;
+
+$ENTRY Go {
+  = <SaveFile <Open-Auto 'w' '__written_file.txt'> ('Ehllo') ('World')>
+  : /* empty */
+  = <Open-Auto ('r+') '__written_file.txt'> : s.FileHandle
+  = <Putout s.FileHandle 'Hello'>
+    <Close s.FileHandle>;
+}
+
+SaveFile {
+  s.FileHandle (e.Line) e.Lines =
+    <Putout s.FileHandle e.Line>
+    <SaveFile s.FileHandle e.Lines>;
+
+  s.FileHandle /* кончились строчки */ =
+    <Close s.FileHandle>;
+}

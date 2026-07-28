@@ -1,0 +1,31 @@
+$ENTRY Main;
+
+* Reverse: классическая программа для сравнения. На раскрученной очереди
+* ожидается заметно лучшее поведение, чем у спискового представления, за
+* счёт быстрого pushBack и concat.
+*
+* Чтобы исключить накладные расходы (загрузка JVM, парсинг исходника),
+* замеряем время до и после самого вычисления через <TimeElapsed>.
+
+Main {
+  = <Putout 't_before=' <TimeElapsed>>
+    <PostBench (<Reverse <RangeUp 1 10>>)>;
+}
+
+PostBench {
+  (e.Result) = <Putout ' t_after=' <TimeElapsed> ' result='> e.Result;
+}
+
+Reverse {
+  = ;
+  s.X e.Rest = <Reverse e.Rest> s.X;
+}
+
+RangeUp {
+  s.From s.To = <ConsBy <Compare s.From s.To> s.From s.To>;
+}
+
+ConsBy {
+  '>' s.From s.To = ;
+  s.Op  s.From s.To = s.From <RangeUp <Add s.From 1> s.To>;
+}

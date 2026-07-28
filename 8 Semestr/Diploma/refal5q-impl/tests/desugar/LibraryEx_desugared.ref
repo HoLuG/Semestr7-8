@@ -1,0 +1,474 @@
+$ENTRY Apply {
+  s.Fn e.Argument = <Mu s.Fn e.Argument>;
+
+  (t.Closure e.Bounded) e.Argument = <Apply t.Closure e.Bounded e.Argument>;
+}
+
+$ENTRY Map {
+  t.Fn t.Next e.Tail = <Apply t.Fn t.Next> <Map t.Fn e.Tail>;
+
+  t.Fn = ;
+}
+
+$ENTRY Reduce {
+  t.Fn t.Acc t.Next e.Tail = <Reduce t.Fn <Apply t.Fn t.Acc t.Next> e.Tail>;
+
+  t.Fn t.Acc = t.Acc;
+}
+
+$ENTRY MapAccum {
+  t.Fn t.Acc e.Tail = <DoMapAccum t.Fn t.Acc () e.Tail>;
+}
+
+DoMapAccum {
+  t.Fn t.Acc (e.Scanned) t.Next e.Tail
+    = <DoMapAccum
+        t.Fn <MapAccum-AddScanned <Apply t.Fn t.Acc t.Next> (e.Scanned)> e.Tail
+      >;
+
+  t.Fn t.Acc (e.Scanned) = t.Acc e.Scanned;
+}
+
+MapAccum-AddScanned {
+  t.Acc e.StepScanned (e.Scanned) = t.Acc (e.Scanned e.StepScanned);
+}
+
+$ENTRY DelAccumulator {
+  t.Acc e.Tail = e.Tail;
+}
+
+LOAD-SAVE-HANDLE {
+   = 39;
+}
+
+$ENTRY LoadFile {
+  e.FileName
+    = <Open 'r' <LOAD-SAVE-HANDLE> e.FileName>
+      <DoLoadFile <Get <LOAD-SAVE-HANDLE>>> <Close <LOAD-SAVE-HANDLE>>;
+}
+
+DoLoadFile {
+  0 = ;
+
+  e.Line 0 = (e.Line);
+
+  e.Line = (e.Line) <DoLoadFile <Get <LOAD-SAVE-HANDLE>>>;
+}
+
+$ENTRY SaveFile {
+  (e.FileName) e.Lines
+    = <Open 'w' <LOAD-SAVE-HANDLE> e.FileName>
+      <Map SaveFile-WriteBracketLine e.Lines> <Close <LOAD-SAVE-HANDLE>>;
+}
+
+SaveFile-WriteBracketLine {
+  (e.Line) = <Putout <LOAD-SAVE-HANDLE> e.Line>;
+}
+
+$ENTRY Inc {
+  e.Num = <Add 1 e.Num>;
+}
+
+$ENTRY Dec {
+  s.Num = <Sub s.Num 1>;
+
+  e.Num = <Sub (e.Num) 1>;
+}
+
+$ENTRY ArgList {
+   = <DoArgList 0>;
+}
+
+DoArgList {
+  s.Next = <SwDoArgList <Inc s.Next> <Arg s.Next>>;
+}
+
+SwDoArgList {
+  s.Next = ;
+
+  s.Next e.Arg = (e.Arg) <DoArgList s.Next>;
+}
+
+$ENTRY Trim {
+  e.Line = <Trim-L <Trim-R e.Line>>;
+}
+
+$ENTRY Trim-L {
+  ' ' e.Line = <Trim-L e.Line>;
+
+  '\t' e.Line = <Trim-L e.Line>;
+
+  '\r' e.Line = <Trim-L e.Line>;
+
+  '\n' e.Line = <Trim-L e.Line>;
+
+  e.Line = e.Line;
+}
+
+$ENTRY Trim-R {
+  e.Line ' ' = <Trim-R e.Line>;
+
+  e.Line '\t' = <Trim-R e.Line>;
+
+  e.Line '\r' = <Trim-R e.Line>;
+
+  e.Line '\n' = <Trim-R e.Line>;
+
+  e.Line = e.Line;
+}
+
+$ENTRY OneOf {
+  t.Sample e.Items-B t.Sample e.Items-E = True;
+
+  t.Sample e.Items = False;
+}
+
+$ENTRY Unique {
+  e.Uniques t.Repeated e.Items-B t.Repeated e.Items-E
+    = e.Uniques <Unique e.Items-B t.Repeated e.Items-E>;
+
+  e.Uniques = e.Uniques;
+}
+
+$ENTRY TryLoadExpr {
+  e.FileName
+    = <TryLoadExpr-Parse ('$') <TryLoadExpr-Prepare <LoadFile e.FileName>>>;
+}
+
+TryLoadExpr-Prepare {
+  e.Lines = <DelAccumulator <MapAccum TryLoadExpr-PrepareLine 1 e.Lines>>;
+}
+
+TryLoadExpr-PrepareLine {
+  s.LineNo ('*' e.Line) = <Inc s.LineNo>;
+
+  s.LineNo (e.Line) = <Inc s.LineNo> (s.LineNo <Lenw e.Line>);
+}
+
+TryLoadExpr-Parse {
+  (e.Scanned) (s.LineNo s.LineLen s.Letter e.Line) e.Lines
+    = <TryLoadExpr-Parse_check
+        (e.Scanned) s.LineNo s.LineLen s.Letter (e.Line) (e.Lines)
+        <Type s.Letter>
+      >;
+
+  e.Other = <TryLoadExpr-Parse_cont e.Other>;
+}
+
+TryLoadExpr-Parse_check {
+  (e.Scanned) s.LineNo s.LineLen s.Letter (e.Line) (e.Lines) 'L' e.1
+    = <TryLoadExpr-Parse-Ident
+        (e.Scanned) (s.LineNo s.LineLen <Implode s.Letter e.Line>) e.Lines
+      >;
+
+  (e.Scanned) s.LineNo s.LineLen s.Letter (e.Line) (e.Lines) e.Other
+    = <TryLoadExpr-Parse_cont
+        (e.Scanned) (s.LineNo s.LineLen s.Letter e.Line) e.Lines
+      >;
+}
+
+TryLoadExpr-Parse_cont {
+  (e.Scanned) (s.LineNo s.LineLen s.Digit e.Line) e.Lines
+    = <TryLoadExpr-Parse_check0
+        (e.Scanned) s.LineNo s.LineLen s.Digit (e.Line) (e.Lines)
+        <Type s.Digit>
+      >;
+
+  e.Other = <TryLoadExpr-Parse_cont0 e.Other>;
+}
+
+TryLoadExpr-Parse_check0 {
+  (e.Scanned) s.LineNo s.LineLen s.Digit (e.Line) (e.Lines) 'D' e.1
+    = <TryLoadExpr-Parse-Number
+        (e.Scanned) (s.Digit) (s.LineNo s.LineLen <Type e.Line>) e.Lines
+      >;
+
+  (e.Scanned) s.LineNo s.LineLen s.Digit (e.Line) (e.Lines) e.Other
+    = <TryLoadExpr-Parse_cont0
+        (e.Scanned) (s.LineNo s.LineLen s.Digit e.Line) e.Lines
+      >;
+}
+
+TryLoadExpr-Parse_cont0 {
+  (e.Scanned) (s.LineNo s.LineLen s.Quote e.Line) e.Lines
+    = <TryLoadExpr-Parse_check1
+        (e.Scanned) s.LineNo s.LineLen s.Quote (e.Line) (e.Lines) '\'\"'
+      >;
+
+  e.Other = <TryLoadExpr-Parse_cont1 e.Other>;
+}
+
+TryLoadExpr-Parse_check1 {
+  (e.Scanned) s.LineNo s.LineLen s.Quote (e.Line) (e.Lines) e.1 s.Quote e.2
+    = <TryLoadExpr-Parse-Quote
+        (e.Scanned) (s.Quote) (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+
+  (e.Scanned) s.LineNo s.LineLen s.Quote (e.Line) (e.Lines) e.Other
+    = <TryLoadExpr-Parse_cont1
+        (e.Scanned) (s.LineNo s.LineLen s.Quote e.Line) e.Lines
+      >;
+}
+
+TryLoadExpr-Parse_cont1 {
+  (t.Stack e.Scanned) (s.LineNo s.LineLen '(' e.Line) e.Lines
+    = <TryLoadExpr-Parse
+        ((t.Stack e.Scanned (s.LineNo s.LineLen e.Line)))
+        (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+
+  ((t.Stack e.Scanned t.PosInfo) e.Bracketed) (s.LineNo s.LineLen ')' e.Line)
+  e.Lines
+    = <TryLoadExpr-Parse
+        (t.Stack e.Scanned (e.Bracketed)) (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+
+  ('$' e.Scanned) (s.LineNo s.LineLen ')' e.Line) e.Lines
+    = <TryLoadExpr-MakeError
+        s.LineNo s.LineLen (e.Line) 'Unbalanced bracket \')\''
+      >;
+
+  (e.Scanned) (s.LineNo s.LineLen '/*' e.Comment '*/' e.Line) e.Lines
+    = <TryLoadExpr-Parse (e.Scanned) (s.LineNo s.LineLen e.Line) e.Lines>;
+
+  (e.Scanned) (s.LineNo-B s.LineLen-B '/*' e.Comment-B) e.CommentLines
+  (s.LineNo-E s.LineLen-E e.Comment-E '*/' e.Line) e.Lines
+    = <TryLoadExpr-Parse (e.Scanned) (s.LineNo-E s.LineLen-E e.Line) e.Lines>;
+
+  (e.Scanned) (s.LineNo s.LineLen '/*' e.UnclosedComment) e.Lines
+    = <TryLoadExpr-MakeError
+        s.LineNo s.LineLen ('/*' e.UnclosedComment) 'Unclosed comment /*...'
+      >;
+
+  (e.Scanned) (s.LineNo s.LineLen s.Char e.Line) e.Lines
+    = <TryLoadExpr-Parse
+        (e.Scanned <TryLoadExpr-SkipSpace s.Char>) (s.LineNo s.LineLen e.Line)
+        e.Lines
+      >;
+
+  (e.Scanned) (s.LineNo s.LineLen) e.Lines
+    = <TryLoadExpr-Parse (e.Scanned) e.Lines>;
+
+  ('$' e.Scanned) = Success e.Scanned;
+
+  ((t.Stack e.Scanned (s.LineNo s.LineLen e.Line)) e.Bracketed)
+    = <TryLoadExpr-MakeError
+        s.LineNo s.LineLen (e.Line) 'Unbalanced bracket \'(\''
+      >;
+}
+
+TryLoadExpr-Parse-Ident {
+  (e.Scanned) (s.LineNo s.LineLen s.Word e.Line) e.Lines
+    = <TryLoadExpr-Parse
+        (e.Scanned s.Word) (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+}
+
+TryLoadExpr-Parse-Number {
+  (e.Scanned) (e.Number) (s.LineNo s.LineLen 'D' s.1 s.Digit e.Line) e.Lines
+    = <TryLoadExpr-Parse-Number
+        (e.Scanned) (e.Number s.Digit) (s.LineNo s.LineLen <Type e.Line>)
+        e.Lines
+      >;
+
+  (e.Scanned) (e.Number) (s.LineNo s.LineLen s.1 s.2 e.Line) e.Lines
+    = <TryLoadExpr-Parse-Number0
+        (e.Scanned) (e.Number) s.LineNo s.LineLen s.1 s.2 (e.Line) (e.Lines)
+        <Numb e.Number>
+      >;
+}
+
+TryLoadExpr-Parse-Number0 {
+  (e.Scanned) (e.Number) s.LineNo s.LineLen s.1 s.2 (e.Line) (e.Lines)
+  s.OneNumber
+    = <TryLoadExpr-Parse
+        (e.Scanned s.OneNumber) (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+
+  (e.Scanned) (e.Number) s.LineNo s.LineLen s.1 s.2 (e.Line) (e.Lines)
+  e.SomeNumbers
+    = <TryLoadExpr-MakeError
+        s.LineNo s.LineLen (e.Line) 'Very long number literal ' e.Number
+      >;
+}
+
+TryLoadExpr-MakeError {
+  s.LineNo s.LineLen (e.Rest) e.Message
+    = <TryLoadExpr-MakeError_check
+        s.LineNo s.LineLen (e.Rest) (e.Message) <Lenw e.Rest>
+      >;
+}
+
+TryLoadExpr-MakeError_check {
+  s.LineNo s.LineLen (e.Rest) (e.Message) s.RestLen e.1
+    = Fails (s.LineNo <Inc <- s.LineLen s.RestLen>>) e.Message;
+}
+
+TryLoadExpr-Parse-Quote {
+  (e.Scanned) ('\'' e.Text) (s.LineNo s.LineLen '\'' e.Line) e.Lines
+    = <TryLoadExpr-Parse
+        (e.Scanned e.Text) (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+
+  (e.Scanned) ('\"' e.Text) (s.LineNo s.LineLen '\"' e.Line) e.Lines
+    = <TryLoadExpr-Parse
+        (e.Scanned <Implode_Ext e.Text>) (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+
+  (e.Scanned) (s.Quote e.Text) (s.LineNo s.LineLen '\\x' e.Line) e.Lines
+    = <TryLoadExpr-Parse-Hex
+        (e.Scanned) (s.Quote e.Text) (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+
+  (e.Scanned) (s.Quote e.Text) (s.LineNo s.LineLen '\\' s.Escaped e.Line)
+  e.Lines
+    = <TryLoadExpr-Parse-Quote0
+        (e.Scanned) s.Quote (e.Text) s.LineNo s.LineLen s.Escaped (e.Line)
+        (e.Lines) ('\'\'') ('\"\"') ('\\\\') ('n\n') ('r\r') ('t\t') ('<<')
+        ('>>') ('((') ('))')
+      >;
+
+  (e.Scanned) (s.Quote e.Text) (s.LineNo s.LineLen s.Char e.Line) e.Lines
+    = <TryLoadExpr-Parse-Quote
+        (e.Scanned) (s.Quote e.Text s.Char) (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+
+  (e.Scanned) (s.Quote e.Text) (s.LineNo s.LineLen) e.Lines
+    = <TryLoadExpr-MakeError s.LineNo s.LineLen () 'Unclosed quote ' s.Quote>;
+}
+
+TryLoadExpr-Parse-Quote0 {
+  (e.Scanned) s.Quote (e.Text) s.LineNo s.LineLen s.Escaped (e.Line) (e.Lines)
+  e.Escapes-B (s.Escaped s.Char) e.Escapes-E
+    = <TryLoadExpr-Parse-Quote
+        (e.Scanned) (s.Quote e.Text s.Char) (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+
+  (e.Scanned) s.Quote (e.Text) s.LineNo s.LineLen s.Escaped (e.Line) (e.Lines)
+  e.Escapes
+    = <TryLoadExpr-MakeError
+        s.LineNo s.LineLen (e.Line) 'Bad escape sequence \\' s.Escaped
+      >;
+}
+
+TryLoadExpr-SkipSpace {
+  ' ' = ;
+
+  '\t' = ;
+
+  s.Char = s.Char;
+}
+
+TryLoadExpr-Parse-Hex {
+  (e.Scanned) (s.Quote e.Text) (s.LineNo s.LineLen s.H1 s.H2 e.Line) e.Lines
+    = <TryLoadExpr-Parse-Hex_check
+        (e.Scanned) s.Quote (e.Text) s.LineNo s.LineLen s.H1 s.H2 (e.Line)
+        (e.Lines) <TryLoadExpr-Hex s.H1>
+      >;
+
+  e.Other = <TryLoadExpr-Parse-Hex_cont e.Other>;
+}
+
+TryLoadExpr-Parse-Hex_check {
+  (e.Scanned) s.Quote (e.Text) s.LineNo s.LineLen s.H1 s.H2 (e.Line) (e.Lines)
+  s.Val1
+    = <TryLoadExpr-Parse-Hex_check0
+        (e.Scanned) s.Quote (e.Text) s.LineNo s.LineLen s.H1 s.H2 (e.Line)
+        (e.Lines) s.Val1 <TryLoadExpr-Hex s.H2>
+      >;
+
+  e.Other = <TryLoadExpr-Parse-Hex_cont0 e.Other>;
+}
+
+TryLoadExpr-Parse-Hex_cont {
+  (e.Scanned) (s.Qoute e.Text) (s.LineNo s.LineLen e.Line) e.Lines
+    = <TryLoadExpr-MakeError
+        s.LineNo s.LineLen (e.Line) 'Bad hex escape sequence \\x'
+        <TryLoadExpr-First2 e.Line>
+      >;
+}
+
+TryLoadExpr-Parse-Hex_check0 {
+  (e.Scanned) s.Quote (e.Text) s.LineNo s.LineLen s.H1 s.H2 (e.Line) (e.Lines)
+  s.Val1 s.Val2
+    = <TryLoadExpr-Parse-Quote
+        (e.Scanned) (s.Quote e.Text <Chr <+ <* s.Val1 16> s.Val2>>)
+        (s.LineNo s.LineLen e.Line) e.Lines
+      >;
+
+  (e.Scanned) s.Quote (e.Text) s.LineNo s.LineLen s.H1 s.H2 (e.Line) (e.Lines)
+  s.Val1 e.Other
+    = <TryLoadExpr-Parse-Hex_cont0
+        (e.Scanned) s.Quote (e.Text) s.LineNo s.LineLen s.H1 s.H2 (e.Line)
+        (e.Lines) s.Val1
+      >;
+}
+
+TryLoadExpr-Parse-Hex_cont0 {
+  (e.Scanned) s.Quote (e.Text) s.LineNo s.LineLen s.H1 s.H2 (e.Line) (e.Lines)
+  e.Other
+    = <TryLoadExpr-Parse-Hex_cont
+        (e.Scanned) (s.Quote e.Text) (s.LineNo s.LineLen s.H1 s.H2 e.Line)
+        e.Lines
+      >;
+}
+
+TryLoadExpr-Hex {
+  s.Digit = <TryLoadExpr-Hex_check s.Digit <Type s.Digit>>;
+
+  e.Other = <TryLoadExpr-Hex_cont e.Other>;
+}
+
+TryLoadExpr-Hex_check {
+  s.Digit 'D' e.1 = <Numb s.Digit>;
+
+  s.Digit e.Other = <TryLoadExpr-Hex_cont s.Digit>;
+}
+
+TryLoadExpr-Hex_cont {
+  s.Hex = <TryLoadExpr-Hex_check0 s.Hex <Upper s.Hex>>;
+
+  e.Other = <TryLoadExpr-Hex_cont0 e.Other>;
+}
+
+TryLoadExpr-Hex_check0 {
+  s.Hex s.UHex
+    = <TryLoadExpr-Hex_check1
+        s.Hex s.UHex ('A' 10) ('B' 11) ('C' 12) ('D' 13) ('E' 14) ('F' 15)
+      >;
+
+  e.Other = <TryLoadExpr-Hex_cont1 e.Other>;
+}
+
+TryLoadExpr-Hex_cont0 {
+  s.Other = ;
+}
+
+TryLoadExpr-Hex_check1 {
+  s.Hex s.UHex e.Hex-B (s.UHex s.Value) e.Hex-E = s.Value;
+
+  s.Hex s.UHex e.Other = <TryLoadExpr-Hex_cont1 s.Hex s.UHex>;
+}
+
+TryLoadExpr-Hex_cont1 {
+  s.Hex e.Other = <TryLoadExpr-Hex_cont0 s.Hex>;
+}
+
+TryLoadExpr-First2 {
+  s.1 s.2 e.Line = s.1 s.2;
+
+  e.Line = e.Line;
+}
+
+$ENTRY LoadExpr {
+  e.FileName = <LoadExpr0 (e.FileName) <TryLoadExpr e.FileName>>;
+}
+
+LoadExpr0 {
+  (e.FileName) Success e.Expr = e.Expr;
+
+  (e.FileName) Fails (s.Line s.Col) e.Message
+    = <Putout 0 e.FileName ':' <Symb s.Line> ':' <Symb s.Col> ':' e.Message>
+      <Exit 1>;
+}
+

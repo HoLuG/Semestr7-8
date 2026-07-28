@@ -1,0 +1,19 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{isIdentStart}\PYG{p}{(}\PYG{n}{c}\PYG{p}{))}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{           }\PYG{c+c1}{// (12)}
+\PYG{+w}{            }\PYG{n}{out}\PYG{p}{.}\PYG{n+na}{add}\PYG{p}{(}\PYG{n}{readIdentLike}\PYG{p}{(}\PYG{n}{startLine}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{startCol}\PYG{p}{));}
+\PYG{+w}{            }\PYG{n}{atLineStart}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kc}{false}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{continue}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{n}{Token}\PYG{+w}{ }\PYG{n}{punct}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{readPunct}\PYG{p}{(}\PYG{n}{c}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{startLine}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{startCol}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (13)}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{punct}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{out}\PYG{p}{.}\PYG{n+na}{add}\PYG{p}{(}\PYG{n}{punct}\PYG{p}{);}\PYG{+w}{ }\PYG{n}{atLineStart}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kc}{false}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{continue}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{isOperatorIdent}\PYG{p}{(}\PYG{n}{c}\PYG{p}{))}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{        }\PYG{c+c1}{// (14)}
+\PYG{+w}{            }\PYG{n}{out}\PYG{p}{.}\PYG{n+na}{add}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Token}\PYG{p}{(}\PYG{n}{IDENT}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{String}\PYG{p}{.}\PYG{n+na}{valueOf}\PYG{p}{(}\PYG{n}{c}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{...));}
+\PYG{+w}{            }\PYG{n}{advance}\PYG{p}{();}\PYG{+w}{ }\PYG{n}{atLineStart}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kc}{false}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{continue}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{LexException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Unexpected char \PYGZsq{}\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{c}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}\PYGZsq{}\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{...);}\PYG{+w}{ }\PYG{c+c1}{// (15)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{n}{out}\PYG{p}{.}\PYG{n+na}{add}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Token}\PYG{p}{(}\PYG{n}{EOF}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{line}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{col}\PYG{p}{));}\PYG{+w}{ }\PYG{c+c1}{// (16)}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{out}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

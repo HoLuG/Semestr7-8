@@ -1,0 +1,13 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{Token}\PYG{+w}{ }\PYG{n+nf}{readInt}\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{startLine}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{startCol}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{j}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{i}\PYG{p}{;}\PYG{+w}{               }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{src}\PYG{p}{.}\PYG{n+na}{charAt}\PYG{p}{(}\PYG{n}{j}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{l+s+sc}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{j}\PYG{o}{++}\PYG{p}{;}\PYG{+w}{  }\PYG{c+c1}{// (2)}
+\PYG{+w}{    }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{j}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{src}\PYG{p}{.}\PYG{n+na}{length}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }\PYG{n}{Character}\PYG{p}{.}\PYG{n+na}{isDigit}\PYG{p}{(}\PYG{n}{src}\PYG{p}{.}\PYG{n+na}{charAt}\PYG{p}{(}\PYG{n}{j}\PYG{p}{)))}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{j}\PYG{o}{++}\PYG{p}{;}\PYG{+w}{                 }\PYG{c+c1}{// (3)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{s}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{src}\PYG{p}{.}\PYG{n+na}{substring}\PYG{p}{(}\PYG{n}{i}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{j}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (4)}
+\PYG{+w}{    }\PYG{n}{col}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{s}\PYG{p}{.}\PYG{n+na}{length}\PYG{p}{();}\PYG{+w}{       }\PYG{c+c1}{// (5)}
+\PYG{+w}{    }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{j}\PYG{p}{;}\PYG{+w}{                   }\PYG{c+c1}{// (6)}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Token}\PYG{p}{(}\PYG{n}{INT}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{s}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{startLine}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{startCol}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (7)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

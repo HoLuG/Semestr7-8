@@ -1,0 +1,1631 @@
+*$FROM LibraryEx
+$EXTERN LoadFile, Inc, Map, MapAccum;
+
+$ENTRY TokName {
+  TkName = 'identifier';
+
+  TkCompound = 'compound symbol';
+
+  TkMacroDigit = 'number';
+
+  TkChar = 'character';
+
+  TkVariable = 'variable';
+
+  TkOpenBracket = '\'(\'';
+
+  TkCloseBracket = '\')\'';
+
+  TkOpenBlock = '\'{\'';
+
+  TkCloseBlock = '\'}\'';
+
+  TkOpenCall = '\'<\'';
+
+  TkCloseCall = '\'>\'';
+
+  TkComma = '\',\'';
+
+  TkColon = '\':\'';
+
+  TkAssign = '\'=\'';
+
+  TkSemicolon = '\';\'';
+
+  TkExtern = '$EXTERN';
+
+  TkEntry = '$ENTRY';
+
+  TkSpecComment = '\'*$\'-comment';
+
+  TkEOF = 'end of file';
+}
+
+$ENTRY Builtins {
+   = ('+') ('-') ('*') ('/') ('%') ('?') <DoBuiltins <ListOfBuiltin>>;
+}
+
+DoBuiltins {
+  (s.Number s.Name s.Type) e.Builtins
+    = (<Explode s.Name>) <DoBuiltins e.Builtins>;
+
+   = ;
+}
+
+$ENTRY Scan {
+  e.FileName = <DoScan (1 1 e.FileName) <SkipBOM <LoadFile e.FileName>>>;
+}
+
+$ENTRY ScanString-FromPos {
+  t.Pos e.String = <DoScan t.Pos (e.String)>;
+}
+
+SkipBOM {
+  ('ï»¿' e.FirstLine) e.Lines = (e.FirstLine) e.Lines;
+
+  (s.BOM e.FirstLine) e.Lines
+    = <SkipBOM_check s.BOM (e.FirstLine) (e.Lines) <Ord s.BOM>>;
+
+  e.Other = <SkipBOM_cont e.Other>;
+}
+
+SkipBOM_check {
+  s.BOM (e.FirstLine) (e.Lines) 65279 = (e.FirstLine) e.Lines;
+
+  s.BOM (e.FirstLine) (e.Lines) e.Other
+    = <SkipBOM_cont (s.BOM e.FirstLine) e.Lines>;
+}
+
+SkipBOM_cont {
+  e.Lines = e.Lines;
+}
+
+IncLine {
+  (s.Line s.Col e.FileName) = (<Inc s.Line> 1 e.FileName);
+}
+
+IncCol {
+  (s.Line s.Col e.FileName) = (s.Line <Inc s.Col> e.FileName);
+
+  t.Pos Len = t.Pos;
+
+  t.Pos Len s.First e.String = <IncCol <IncCol t.Pos> Len e.String>;
+
+  (s.Line s.Col e.FileName) '+' s.Number
+    = (s.Line <+ s.Col s.Number> e.FileName);
+}
+
+DoScan {
+  t.Pos = (TkEOF t.Pos);
+
+  t.Pos () e.Lines = <DoScan <IncLine t.Pos> e.Lines>;
+
+  t.Pos (' ' e.Line) e.Lines = <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos ('\t' e.Line) e.Lines = <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos ('\r' e.Line) e.Lines = <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos ('$' e.Line) e.Lines = <DoScan-Keyword t.Pos (e.Line) e.Lines>;
+
+  t.Pos (s.Digit e.Line) e.Lines
+    = <DoScan_check t.Pos s.Digit (e.Line) (e.Lines) <Type s.Digit>>;
+
+  e.Other = <DoScan_cont e.Other>;
+}
+
+DoScan_check {
+  t.Pos s.Digit (e.Line) (e.Lines) 'D0' s.Digit
+    = <DoScan-Number t.Pos t.Pos (s.Digit) (e.Line) e.Lines>;
+
+  t.Pos s.Digit (e.Line) (e.Lines) e.Other
+    = <DoScan_cont t.Pos (s.Digit e.Line) e.Lines>;
+}
+
+DoScan_cont {
+  t.Pos (s.Var '.' e.Line) e.Lines
+    = <DoScan_check0 t.Pos s.Var (e.Line) (e.Lines) <IsVarType s.Var>>;
+
+  e.Other = <DoScan_cont0 e.Other>;
+}
+
+DoScan_check0 {
+  t.Pos s.Var (e.Line) (e.Lines) True
+    = <DoScan-Var t.Pos (s.Var '.') (e.Line) e.Lines>;
+
+  t.Pos s.Var (e.Line) (e.Lines) e.Other
+    = <DoScan_cont0 t.Pos (s.Var '.' e.Line) e.Lines>;
+}
+
+DoScan_cont0 {
+  t.Pos ('/*' e.Line) e.Lines
+    = <DoScan-CComment t.Pos ('/*') (e.Line) e.Lines>;
+
+  (s.Line 1 e.FileName) ('*$' e.Line) e.Lines
+    = (TkSpecComment (s.Line 1 e.FileName) '*$' e.Line)
+      <DoScan (<Inc s.Line> 1 e.FileName) e.Lines>;
+
+  (s.Line 1 e.FileName) ('*' e.Comment) e.Lines
+    = <DoScan (<Inc s.Line> 1 e.FileName) e.Lines>;
+
+  t.Pos (s.StartIdent e.Line) e.Lines
+    = <DoScan_check1 t.Pos s.StartIdent (e.Line) (e.Lines) <Type s.StartIdent>>;
+
+  e.Other = <DoScan_cont1 e.Other>;
+}
+
+DoScan_check1 {
+  t.Pos s.StartIdent (e.Line) (e.Lines) 'L' s.Case s.StartIdent
+    = <DoScan-Ident t.Pos (s.StartIdent) (e.Line) e.Lines>;
+
+  t.Pos s.StartIdent (e.Line) (e.Lines) e.Other
+    = <DoScan_cont1 t.Pos (s.StartIdent e.Line) e.Lines>;
+}
+
+DoScan_cont1 {
+  t.Pos (s.Punctuation e.Line) e.Lines
+    = <DoScan_check2
+        t.Pos s.Punctuation (e.Line) (e.Lines) <IsPunctuation s.Punctuation>
+      >;
+
+  e.Other = <DoScan_cont2 e.Other>;
+}
+
+DoScan_check2 {
+  t.Pos s.Punctuation (e.Line) (e.Lines) s.TokType
+    = (s.TokType t.Pos) <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos s.Punctuation (e.Line) (e.Lines) e.Other
+    = <DoScan_cont2 t.Pos (s.Punctuation e.Line) e.Lines>;
+}
+
+DoScan_cont2 {
+  t.Pos ('<' s.StartIdent e.Line) e.Lines
+    = <DoScan_check3 t.Pos s.StartIdent (e.Line) (e.Lines) <Type s.StartIdent>>;
+
+  e.Other = <DoScan_cont3 e.Other>;
+}
+
+DoScan_check3 {
+  t.Pos s.StartIdent (e.Line) (e.Lines) 'L' s.Case s.StartIdent
+    = <DoScan-Ident t.Pos ('<' s.StartIdent) (e.Line) e.Lines>;
+
+  t.Pos s.StartIdent (e.Line) (e.Lines) e.Other
+    = <DoScan_cont3 t.Pos ('<' s.StartIdent e.Line) e.Lines>;
+}
+
+DoScan_cont3 {
+  t.Pos ('<' s.Arithm e.Line) e.Lines
+    = <DoScan_check4 t.Pos s.Arithm (e.Line) (e.Lines) '+-*/%?'>;
+
+  e.Other = <DoScan_cont4 e.Other>;
+}
+
+DoScan_check4 {
+  t.Pos s.Arithm (e.Line) (e.Lines) e.Arithms-B s.Arithm e.Arithms-E
+    = (TkOpenCall t.Pos s.Arithm)
+      <DoScan <IncCol t.Pos Len '<' s.Arithm> (e.Line) e.Lines>;
+
+  t.Pos s.Arithm (e.Line) (e.Lines) e.Other
+    = <DoScan_cont4 t.Pos ('<' s.Arithm e.Line) e.Lines>;
+}
+
+DoScan_cont4 {
+  t.Pos ('<' e.Line) e.Lines
+    = (TkError t.Pos 'Identifier expected after \'<\'')
+      <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos ('\'' e.Line) e.Lines = <DoScan-Chars <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos ('\"' e.Line) e.Lines
+    = <DoScan-Compound t.Pos <IncCol t.Pos> () (e.Line) e.Lines>;
+
+  t.Pos ('\\' e.Line) e.Lines
+    = <DoScan-Escape t.Pos <Escape <IncCol t.Pos> e.Line> e.Lines>;
+
+  t.Pos (s.Other e.Line) e.Lines
+    = (TkError t.Pos 'Bad character \'' s.Other '\'')
+      <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+}
+
+IsVarType {
+  's' = True;
+
+  't' = True;
+
+  'e' = True;
+
+  s.Other = False;
+}
+
+IsPunctuation {
+  s.Punct
+    = <IsPunctuation_check
+        s.Punct ('(' TkOpenBracket) (')' TkCloseBracket) ('{' TkOpenBlock)
+        ('}' TkCloseBlock) ('>' TkCloseCall) (',' TkComma) (':' TkColon)
+        ('=' TkAssign) (';' TkSemicolon)
+      >;
+
+  e.Other = <IsPunctuation_cont e.Other>;
+}
+
+IsPunctuation_check {
+  s.Punct e.Types-B (s.Punct s.TokType) e.Types-E = s.TokType;
+
+  s.Punct e.Other = <IsPunctuation_cont s.Punct>;
+}
+
+IsPunctuation_cont {
+  s.Other = ;
+}
+
+DoScan-Keyword {
+  t.Pos (e.Line) e.Lines = <DoScan-BuildKeyword t.Pos ('$') (e.Line) e.Lines>;
+}
+
+DoScan-BuildKeyword {
+  t.Pos (e.KeywordChars) (s.Next e.Line) e.Lines
+    = <DoScan-BuildKeyword_check
+        t.Pos (e.KeywordChars) s.Next (e.Line) (e.Lines) <Type s.Next>
+      >;
+
+  e.Other = <DoScan-BuildKeyword_cont e.Other>;
+}
+
+DoScan-BuildKeyword_check {
+  t.Pos (e.KeywordChars) s.Next (e.Line) (e.Lines) 'L' s.SubType s.Next
+    = <DoScan-BuildKeyword t.Pos (e.KeywordChars s.Next) (e.Line) e.Lines>;
+
+  t.Pos (e.KeywordChars) s.Next (e.Line) (e.Lines) e.Other
+    = <DoScan-BuildKeyword_cont t.Pos (e.KeywordChars) (s.Next e.Line) e.Lines>;
+}
+
+DoScan-BuildKeyword_cont {
+  t.Pos (e.KeywordChars) (e.Line) e.Lines
+    = <DoScan-BuildKeyword_check0
+        t.Pos (e.KeywordChars) (e.Line) (e.Lines) (TkExtern '$EXTERN')
+        (TkExtern '$EXTRN') (TkExtern '$EXTERNAL') (TkEntry '$ENTRY')
+      >;
+
+  e.Other = <DoScan-BuildKeyword_cont0 e.Other>;
+}
+
+DoScan-BuildKeyword_check0 {
+  t.Pos (e.KeywordChars) (e.Line) (e.Lines) e.Keywords-B (s.Tag e.KeywordChars)
+  e.Keywords-E
+    = (s.Tag t.Pos) <DoScan <IncCol t.Pos Len e.KeywordChars> (e.Line) e.Lines>;
+
+  t.Pos (e.KeywordChars) (e.Line) (e.Lines) e.Other
+    = <DoScan-BuildKeyword_cont0 t.Pos (e.KeywordChars) (e.Line) e.Lines>;
+}
+
+DoScan-BuildKeyword_cont0 {
+  t.Pos (e.KeywordChars) (e.Line) e.Lines
+    = (TkError t.Pos 'Bad keyword \'' e.KeywordChars '\'')
+      <DoScan <IncCol t.Pos Len e.KeywordChars> (e.Line) e.Lines>;
+}
+
+DoScan-Number {
+  t.Pos t.Start (e.Number) (s.Next e.Line) e.Lines
+    = <DoScan-Number_check
+        t.Pos t.Start (e.Number) s.Next (e.Line) (e.Lines) <Type s.Next>
+      >;
+
+  e.Other = <DoScan-Number_cont e.Other>;
+}
+
+DoScan-Number_check {
+  t.Pos t.Start (e.Number) s.Next (e.Line) (e.Lines) 'D0' s.Next
+    = <DoScan-Number
+        <IncCol t.Pos> t.Start (<DropZero e.Number> s.Next) (e.Line) e.Lines
+      >;
+
+  t.Pos t.Start (e.Number) s.Next (e.Line) (e.Lines) e.Other
+    = <DoScan-Number_cont t.Pos t.Start (e.Number) (s.Next e.Line) e.Lines>;
+}
+
+DoScan-Number_cont {
+  t.Pos t.Start (e.Number) (e.Line) e.Lines
+    = <CheckNumber t.Start e.Number> <DoScan t.Pos (e.Line) e.Lines>;
+}
+
+DropZero {
+  '0' = ;
+
+  e.Number = e.Number;
+}
+
+CheckNumber {
+  t.Pos e.Number = <CheckNumber0 t.Pos (e.Number) <DoCheckNumber 0 e.Number>>;
+}
+
+CheckNumber0 {
+  t.Pos (e.Number) Ok s.Value = (TkMacroDigit t.Pos s.Value);
+
+  t.Pos (e.Number) Overflow
+    = (TkError t.Pos 'Very big numeric literal: ' e.Number);
+}
+
+DoCheckNumber {
+  s.Value = Ok s.Value;
+
+  s.Value s.Digit e.Digits
+    = <DoCheckNumber0
+        s.Value s.Digit (e.Digits) <CheckNumber-AppendDigit s.Value s.Digit>
+      >;
+}
+
+DoCheckNumber0 {
+  s.Value s.Digit (e.Digits) Ok s.NewValue
+    = <DoCheckNumber s.NewValue e.Digits>;
+
+  s.Value s.Digit (e.Digits) Overflow = Overflow;
+}
+
+CheckNumber-AppendDigit {
+  s.Value s.Digit
+    = <CheckNumber-AppendDigit_check s.Value s.Digit <Numb s.Digit>>;
+
+  e.Other = <CheckNumber-AppendDigit_cont e.Other>;
+}
+
+CheckNumber-AppendDigit_check {
+  s.Value s.Digit s.DigitValue
+    = <CheckNumber-AppendDigit_check0
+        s.Value s.Digit s.DigitValue <* s.Value 10>
+      >;
+
+  e.Other = <CheckNumber-AppendDigit_cont0 e.Other>;
+}
+
+CheckNumber-AppendDigit_cont {
+  s.Value s.Digit = Overflow;
+}
+
+CheckNumber-AppendDigit_check0 {
+  s.Value s.Digit s.DigitValue s.Value10
+    = <CheckNumber-AppendDigit_check1
+        s.Value s.Digit s.DigitValue s.Value10 <+ s.Value10 s.DigitValue>
+      >;
+
+  e.Other = <CheckNumber-AppendDigit_cont1 e.Other>;
+}
+
+CheckNumber-AppendDigit_cont0 {
+  s.Value s.Digit e.Other = <CheckNumber-AppendDigit_cont s.Value s.Digit>;
+}
+
+CheckNumber-AppendDigit_check1 {
+  s.Value s.Digit s.DigitValue s.Value10 s.NewValue
+    = <CheckNumber-AppendDigit_check2
+        s.Value s.Digit s.DigitValue s.Value10 s.NewValue
+        <Divmod s.NewValue 10>
+      >;
+
+  e.Other = <CheckNumber-AppendDigit_cont2 e.Other>;
+}
+
+CheckNumber-AppendDigit_cont1 {
+  s.Value s.Digit s.DigitValue e.Other
+    = <CheckNumber-AppendDigit_cont0 s.Value s.Digit s.DigitValue>;
+}
+
+CheckNumber-AppendDigit_check2 {
+  s.Value s.Digit s.DigitValue s.Value10 s.NewValue (s.Value) s.DigitValue
+    = Ok s.NewValue;
+
+  s.Value s.Digit s.DigitValue s.Value10 s.NewValue e.Other
+    = <CheckNumber-AppendDigit_cont2
+        s.Value s.Digit s.DigitValue s.Value10 s.NewValue
+      >;
+}
+
+CheckNumber-AppendDigit_cont2 {
+  s.Value s.Digit s.DigitValue s.Value10 e.Other
+    = <CheckNumber-AppendDigit_cont1 s.Value s.Digit s.DigitValue s.Value10>;
+}
+
+DoScan-Var {
+  t.Pos (e.Variable) (s.Next e.Line) e.Lines
+    = <DoScan-Var_check
+        t.Pos (e.Variable) s.Next (e.Line) (e.Lines) <IsIdentTail s.Next>
+      >;
+
+  e.Other = <DoScan-Var_cont e.Other>;
+}
+
+DoScan-Var_check {
+  t.Pos (e.Variable) s.Next (e.Line) (e.Lines) True
+    = <DoScan-Var t.Pos (e.Variable s.Next) (e.Line) e.Lines>;
+
+  t.Pos (e.Variable) s.Next (e.Line) (e.Lines) e.Other
+    = <DoScan-Var_cont t.Pos (e.Variable) (s.Next e.Line) e.Lines>;
+}
+
+DoScan-Var_cont {
+  t.Pos (s.Type '.' e.Index) (e.Line) e.Lines
+    = (TkVariable t.Pos s.Type e.Index) <CheckIndex t.Pos e.Index>
+      <DoScan <IncCol t.Pos Len s.Type '.' e.Index> (e.Line) e.Lines>;
+}
+
+IsIdentTail {
+  '-' = True;
+
+  '_' = True;
+
+  s.Other = <IsIdentTail0 s.Other <Type s.Other>>;
+}
+
+IsIdentTail0 {
+  s.Other 'D0' s.Other = True;
+
+  s.Other 'L' s.Case s.Other = True;
+
+  s.Other e.OtherType = False;
+}
+
+CheckIndex {
+  t.Pos s.Digit e.MustBeDigits
+    = <CheckIndex_check t.Pos s.Digit (e.MustBeDigits) <Type s.Digit>>;
+
+  e.Other = <CheckIndex_cont e.Other>;
+}
+
+CheckIndex_check {
+  t.Pos s.Digit (e.MustBeDigits) 'D0' s.Digit_
+    = <CheckIndex-Digits t.Pos e.MustBeDigits>;
+
+  t.Pos s.Digit (e.MustBeDigits) e.Other
+    = <CheckIndex_cont t.Pos s.Digit e.MustBeDigits>;
+}
+
+CheckIndex_cont {
+  t.Pos s.Letter e.Any
+    = <CheckIndex_check0 t.Pos s.Letter (e.Any) <Type s.Letter>>;
+
+  e.Other = <CheckIndex_cont0 e.Other>;
+}
+
+CheckIndex_check0 {
+  t.Pos s.Letter (e.Any) 'L' s.st s.Letter_ = ;
+
+  t.Pos s.Letter (e.Any) e.Other = <CheckIndex_cont0 t.Pos s.Letter e.Any>;
+}
+
+CheckIndex_cont0 {
+  t.Pos s.Other e.Any
+    = (TkError t.Pos 'index must start with a letter or a number');
+
+  t.Pos = (TkError t.Pos 'empty variable index');
+}
+
+CheckIndex-Digits {
+  t.Pos = ;
+
+  t.Pos s.Digit e.MustBeDigits
+    = <CheckIndex-Digits_check t.Pos s.Digit (e.MustBeDigits) <Type s.Digit>>;
+
+  e.Other = <CheckIndex-Digits_cont e.Other>;
+}
+
+CheckIndex-Digits_check {
+  t.Pos s.Digit (e.MustBeDigits) 'D0' s.Digit_
+    = <CheckIndex-Digits t.Pos e.MustBeDigits>;
+
+  t.Pos s.Digit (e.MustBeDigits) e.Other
+    = <CheckIndex-Digits_cont t.Pos s.Digit e.MustBeDigits>;
+}
+
+CheckIndex-Digits_cont {
+  t.Pos s.Unexpected e.Tail = (TkError t.Pos 'index must be whole number');
+}
+
+DoScan-CComment {
+  t.Pos (e.Comment) ('*/' e.Line) e.Lines
+    = <DoScan <IncCol t.Pos Len e.Comment '*/'> (e.Line) e.Lines>;
+
+  t.Pos (e.Comment) (s.Char e.Line) e.Lines
+    = <DoScan-CComment t.Pos (e.Comment s.Char) (e.Line) e.Lines>;
+
+  t.Pos (e.Comment) () e.Lines = <DoScan-CComment <IncLine t.Pos> () e.Lines>;
+
+  t.Pos (e.Comment)
+    = (TkError t.Pos 'Unexpected EOF, unclosed comment')
+      (TkEOF <IncCol t.Pos Len e.Comment>);
+}
+
+DoScan-Ident {
+  t.Pos (e.Ident) (s.Next e.Line) e.Lines
+    = <DoScan-Ident_check
+        t.Pos (e.Ident) s.Next (e.Line) (e.Lines) <IsIdentTail s.Next>
+      >;
+
+  e.Other = <DoScan-Ident_cont e.Other>;
+}
+
+DoScan-Ident_check {
+  t.Pos (e.Ident) s.Next (e.Line) (e.Lines) True
+    = <DoScan-Ident t.Pos (e.Ident s.Next) (e.Line) e.Lines>;
+
+  t.Pos (e.Ident) s.Next (e.Line) (e.Lines) e.Other
+    = <DoScan-Ident_cont t.Pos (e.Ident) (s.Next e.Line) e.Lines>;
+}
+
+DoScan-Ident_cont {
+  t.Pos ('<' e.Ident) (e.Line) e.Lines
+    = (TkOpenCall t.Pos e.Ident)
+      <DoScan <IncCol t.Pos Len '<' e.Ident> (e.Line) e.Lines>;
+
+  t.Pos (e.Ident) (e.Line) e.Lines
+    = (TkName t.Pos e.Ident)
+      <DoScan <IncCol t.Pos Len e.Ident> (e.Line) e.Lines>;
+}
+
+DoScan-Chars {
+  t.Pos ('\\' e.Line) e.Lines
+    = <DoScan-Chars-Escape t.Pos <Escape <IncCol t.Pos> e.Line> e.Lines>;
+
+  t.Pos ('\'' e.Line) e.Lines = <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos (s.Char e.Line) e.Lines
+    = (TkChar t.Pos s.Char) <DoScan-Chars <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos () e.Lines
+    = (TkError t.Pos 'Unclosed \' - single quote')
+      <DoScan <IncLine t.Pos> e.Lines>;
+}
+
+Escape {
+  t.Pos s.Escaped e.Line
+    = <Escape_check
+        t.Pos s.Escaped (e.Line) ('\'\'') ('\"\"') ('\\\\') ('n\n') ('r\r')
+        ('t\t') ('<<') ('>>') ('((') ('))')
+      >;
+
+  e.Other = <Escape_cont e.Other>;
+}
+
+Escape_check {
+  t.Pos s.Escaped (e.Line) e.Escapes-B (s.Escaped s.Char) e.Escapes-E
+    = Ok s.Char <IncCol t.Pos> (e.Line);
+
+  t.Pos s.Escaped (e.Line) e.Other = <Escape_cont t.Pos s.Escaped e.Line>;
+}
+
+Escape_cont {
+  t.Pos 'x' s.Hex1 s.Hex2 e.Line
+    = <Escape_check0 t.Pos s.Hex1 s.Hex2 (e.Line) <HexDigit s.Hex1>>;
+
+  e.Other = <Escape_cont0 e.Other>;
+}
+
+Escape_check0 {
+  t.Pos s.Hex1 s.Hex2 (e.Line) s.Num1
+    = <Escape_check1 t.Pos s.Hex1 s.Hex2 (e.Line) s.Num1 <HexDigit s.Hex2>>;
+
+  e.Other = <Escape_cont1 e.Other>;
+}
+
+Escape_cont0 {
+  t.Pos 'x' e.Line
+    = Error ('After \\x must be two hex digits') <IncCol t.Pos> (e.Line);
+
+  t.Pos s.Other e.Line
+    = Error ('Bad escape sequence \\' s.Other) <IncCol t.Pos> (e.Line);
+
+  t.Pos = Error-EOL;
+}
+
+Escape_check1 {
+  t.Pos s.Hex1 s.Hex2 (e.Line) s.Num1 s.Num2
+    = Ok <Chr <+ <* s.Num1 16> s.Num2>> <IncCol t.Pos Len 'x' s.Hex1 s.Hex2>
+      (e.Line);
+
+  t.Pos s.Hex1 s.Hex2 (e.Line) s.Num1 e.Other
+    = <Escape_cont1 t.Pos s.Hex1 s.Hex2 (e.Line) s.Num1>;
+}
+
+Escape_cont1 {
+  t.Pos s.Hex1 s.Hex2 (e.Line) e.Other
+    = <Escape_cont0 t.Pos 'x' s.Hex1 s.Hex2 e.Line>;
+}
+
+DoScan-Chars-Escape {
+  t.Pos Ok s.Char t.NextPos (e.Line) e.Lines
+    = (TkChar t.Pos s.Char) <DoScan-Chars t.NextPos (e.Line) e.Lines>;
+
+  t.Pos Error (e.Message) t.NextPos (e.Line) e.Lines
+    = (TkError t.Pos e.Message) <DoScan-Chars t.NextPos (e.Line) e.Lines>;
+
+  t.Pos Error-EOL e.Lines
+    = (TkError t.Pos 'Unexpected \\ at end of string literal')
+      <DoScan <IncLine t.Pos> e.Lines>;
+}
+
+HexDigit {
+  s.Digit = <HexDigit0 s.Digit <Type s.Digit>>;
+}
+
+HexDigit0 {
+  s.Digit 'D0' s.Digit = <Numb s.Digit>;
+
+  s.Digit 'Lu' s.Digit = <DoHexDigit 'ABCDEF' 10 s.Digit>;
+
+  s.Digit 'Ll' s.Digit = <DoHexDigit 'abcdef' 10 s.Digit>;
+
+  s.Digit s.OtherType s.OtherSubtype s.OtherChar = ;
+}
+
+DoHexDigit {
+  s.Digit e.Samples s.Val s.Digit = s.Val;
+
+  s.OtherDigit e.Samples s.Val s.Digit
+    = <DoHexDigit e.Samples <Inc s.Val> s.Digit>;
+
+  s.BadVal s.Digit = ;
+}
+
+DoScan-Compound {
+  t.StartPos t.Pos (e.Compound) ('\"' e.Line) e.Lines
+    = (TkCompound t.StartPos e.Compound)
+      <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.StartPos t.Pos (e.Compound) ('\\' e.Line) e.Lines
+    = <DoScan-Compound-HandleEscape
+        t.StartPos t.Pos (e.Compound) <Escape <IncCol t.Pos> e.Line> e.Lines
+      >;
+
+  t.StartPos t.Pos (e.Compound) (s.Char e.Line) e.Lines
+    = <DoScan-Compound
+        t.StartPos <IncCol t.Pos> (e.Compound s.Char) (e.Line) e.Lines
+      >;
+
+  t.StartPos t.Pos (e.Compound) () e.Lines
+    = (TkError t.Pos 'Unclosed \" - double quote')
+      <DoScan <IncLine t.Pos> e.Lines>;
+}
+
+DoScan-Compound-HandleEscape {
+  t.StartPos t.EscapePos (e.Compound) Ok s.Char t.NextPos (e.Line) e.Lines
+    = <DoScan-Compound
+        t.StartPos t.NextPos (e.Compound s.Char) (e.Line) e.Lines
+      >;
+
+  t.StartPos t.EscapePos (e.Compound) Error (e.Message) t.NextPos (e.Line)
+  e.Lines
+    = (TkError t.EscapePos e.Message)
+      <DoScan-Compound t.StartPos t.NextPos (e.Compound) (e.Line) e.Lines>;
+
+  t.StartPos t.EscapePos (e.Compound) Error-EOL e.Lines
+    = (TkError t.EscapePos 'Unexpected \\ at end of compound literal')
+      (TkCompound t.StartPos e.Compound) <DoScan <IncLine t.EscapePos> e.Lines>;
+}
+
+DoScan-Escape {
+  t.Pos Ok s.Char t.NextPos (e.Line) e.Lines
+    = (TkChar t.Pos s.Char) <DoScan t.NextPos (e.Line) e.Lines>;
+
+  t.Pos Error (e.Message) t.NextPos (e.Line) e.Lines
+    = (TkError t.Pos e.Message) <DoScan t.NextPos (e.Line) e.Lines>;
+
+  t.Pos Error-EOL e.Lines
+    = (TkError t.Pos 'Unexpected \\ at end of line')
+      <DoScan <IncLine t.Pos> e.Lines>;
+}
+
+$ENTRY Parse {
+  t.First e.Tokens = <Parse_check t.First (e.Tokens) t.First>;
+}
+
+Parse_check {
+  t.First (e.Tokens) (s.Type t.Pos e.Value)
+    = <Parse-Aux t.Pos <Program () <SeparateLexerErrors t.First e.Tokens ()>>>;
+}
+
+Parse-Aux {
+  t.FirstTokenPos (Program e.Units) (TkEOF t.EOFPos) (e.Errors)
+    = <SemanticCheck t.FirstTokenPos e.Units (e.Errors)>;
+}
+
+SeparateLexerErrors {
+  (TkError t.Pos e.Message) e.Tokens (e.Errors)
+    = <SeparateLexerErrors e.Tokens (e.Errors (Error t.Pos e.Message))>;
+
+  t.ValidToken e.Tokens (e.Errors)
+    = t.ValidToken <SeparateLexerErrors e.Tokens (e.Errors)>;
+
+  (e.Errors) = (e.Errors);
+}
+
+Program {
+  () t.First e.Tokens (e.Errors)
+    = <Program_check t.First (e.Tokens) (e.Errors) t.First>;
+
+  e.Other = <Program_cont e.Other>;
+}
+
+Program_check {
+  t.First (e.Tokens) (e.Errors) (s.Type t.Pos e.Value)
+    = <Program_check0
+        t.First (e.Tokens) (e.Errors) s.Type t.Pos (e.Value) <FIRST_Unit>
+      >;
+
+  e.Other = <Program_cont0 e.Other>;
+}
+
+Program_cont {
+  () (Unit t.Unit) e.Tokens (e.Errors)
+    = <Program ((Unit t.Unit)) <Program () e.Tokens (e.Errors)>>;
+
+  ((Unit t.Unit)) (Program e.Program) e.Tokens (e.Errors)
+    = (Program t.Unit e.Program) e.Tokens (e.Errors);
+
+  () (TkSemicolon t.Pos) e.Tokens (e.Errors)
+    = <Program () e.Tokens (e.Errors)>;
+
+  () (TkEOF t.Pos) (e.Errors) = (Program) (TkEOF t.Pos) (e.Errors);
+
+  () t.Unexpected e.Tokens (e.Errors)
+    = <Program
+        () e.Tokens
+        (
+          e.Errors
+          <UnexpectedToken
+            t.Unexpected '$EXTERN, $ENTRY, function name or special comment'
+          >
+        )
+      >;
+}
+
+Program_check0 {
+  t.First (e.Tokens) (e.Errors) s.Type t.Pos (e.Value) e.1 s.Type e.2
+    = <Program () <Unit () t.First e.Tokens (e.Errors)>>;
+
+  t.First (e.Tokens) (e.Errors) s.Type t.Pos (e.Value) e.Other
+    = <Program_cont0 t.First (e.Tokens) (e.Errors) (s.Type t.Pos e.Value)>;
+}
+
+Program_cont0 {
+  t.First (e.Tokens) (e.Errors) e.Other
+    = <Program_cont () t.First e.Tokens (e.Errors)>;
+}
+
+FIRST_Unit {
+   = TkSpecComment TkExtern TkEntry TkName;
+}
+
+Unit {
+  () (TkSpecComment t.Pos e.Text) e.Tokens (e.Errors)
+    = (Unit (SpecialComment t.Pos e.Text)) e.Tokens (e.Errors);
+
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens (e.Errors)
+    = <Unit (e.Scanned) e.Tokens (e.Errors)>;
+
+  () (TkExtern t.Pos) e.Tokens (e.Errors)
+    = <Unit (Extern) <NameList () e.Tokens (e.Errors)>>;
+
+  (Extern) (NameList e.Names) e.Tokens (e.Errors)
+    = <Unit (Extern (NameList e.Names)) e.Tokens (e.Errors)>;
+
+  (Extern) (TkSemicolon t.Pos) e.Tokens (e.Errors)
+    = e.Tokens (e.Errors (Error t.Pos 'No names after $EXTERN'));
+
+  (Extern) t.Unexpected e.Tokens (e.Errors)
+    = <Unit_check t.Unexpected (e.Tokens) (e.Errors) t.Unexpected>;
+
+  e.Other = <Unit_cont e.Other>;
+}
+
+Unit_check {
+  t.Unexpected (e.Tokens) (e.Errors) (s.1 t.Pos e.2)
+    = t.Unexpected e.Tokens
+      (e.Errors (Error t.Pos 'Can\'t parse names after $EXTERN'));
+
+  t.Unexpected (e.Tokens) (e.Errors) e.Other
+    = <Unit_cont (Extern) t.Unexpected e.Tokens (e.Errors)>;
+}
+
+Unit_cont {
+  (Extern (NameList e.Names)) (TkSemicolon t.Pos) e.Tokens (e.Errors)
+    = (Unit (Extern e.Names)) e.Tokens (e.Errors);
+
+  (Extern (NameList e.Names)) t.NextToken e.Tokens (e.Errors)
+    = <Unit_check0 (e.Names) t.NextToken (e.Tokens) (e.Errors) t.NextToken>;
+
+  e.Other = <Unit_cont0 e.Other>;
+}
+
+Unit_check0 {
+  (e.Names) t.NextToken (e.Tokens) (e.Errors) (s.1 t.Pos e.2)
+    = (Unit (Extern e.Names)) t.NextToken e.Tokens
+      (e.Errors (Error t.Pos 'missed semicolon'));
+
+  (e.Names) t.NextToken (e.Tokens) (e.Errors) e.Other
+    = <Unit_cont0 (Extern (NameList e.Names)) t.NextToken e.Tokens (e.Errors)>;
+}
+
+Unit_cont0 {
+  () (Function e.Function) e.Tokens (e.Errors)
+    = (Unit (Function e.Function)) e.Tokens (e.Errors);
+
+  () (s.Type t.Pos e.Value) e.Tokens (e.Errors)
+    = <Unit_check1 s.Type t.Pos (e.Value) (e.Tokens) (e.Errors) TkName TkEntry>;
+
+  e.Other = <Unit_cont1 e.Other>;
+}
+
+Unit_check1 {
+  s.Type t.Pos (e.Value) (e.Tokens) (e.Errors) e.1 s.Type e.2
+    = <Unit () <FunctionDef () (s.Type t.Pos e.Value) e.Tokens (e.Errors)>>;
+
+  s.Type t.Pos (e.Value) (e.Tokens) (e.Errors) e.Other
+    = <Unit_cont1 () (s.Type t.Pos e.Value) e.Tokens (e.Errors)>;
+}
+
+Unit_cont1 {
+  () (TkSemicolon t.Pos) e.Tokens (e.Errors) = e.Tokens (e.Errors);
+
+  () t.Unexpected e.Tokens (e.Errors)
+    = t.Unexpected e.Tokens
+      (
+        e.Errors
+        <UnexpectedToken
+          t.Unexpected '$EXTERN, $ENTRY, function name or special comment'
+        >
+      );
+}
+
+NameList {
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens (e.Errors)
+    = <NameList (e.Scanned) e.Tokens (e.Errors)>;
+
+  () (TkName t.Pos e.Name) e.Tokens (e.Errors)
+    = <NameList ((NameList (t.Pos e.Name))) e.Tokens (e.Errors)>;
+
+  () t.Unexpected e.Tokens (e.Errors)
+    = <NameList_check t.Unexpected (e.Tokens) (e.Errors) t.Unexpected>;
+
+  e.Other = <NameList_cont e.Other>;
+}
+
+NameList_check {
+  t.Unexpected (e.Tokens) (e.Errors) (s.1 t.Pos e.2)
+    = t.Unexpected e.Tokens
+      (e.Errors (Error t.Pos 'expected function name after $EXTERN keyword'));
+
+  t.Unexpected (e.Tokens) (e.Errors) e.Other
+    = <NameList_cont () t.Unexpected e.Tokens (e.Errors)>;
+}
+
+NameList_cont {
+  ((NameList e.Names)) (TkComma t.Pos) e.Tokens (e.Errors)
+    = <NameList ((NameList e.Names) ',' t.Pos) e.Tokens (e.Errors)>;
+
+  ((NameList e.Names) ',' t.CommaPos) (TkName t.Pos e.Name) e.Tokens (e.Errors)
+    = <NameList ((NameList e.Names (t.Pos e.Name))) e.Tokens (e.Errors)>;
+
+  ((NameList e.Names) ',' t.Pos) e.Tokens (e.Errors)
+    = <NameList
+        ((NameList e.Names)) e.Tokens
+        (e.Errors (Error t.Pos 'expected name after comma'))
+      >;
+
+  ((NameList e.Names)) (TkName t.NamePos e.Name) (TkOpenBlock t.BracketPos)
+  e.Tokens (e.Errors)
+    = (NameList e.Names) (TkName t.NamePos e.Name) (TkOpenBlock t.BracketPos)
+      e.Tokens
+      (
+        e.Errors
+        (Error t.NamePos 'missed semicolon after previous $EXTERN declaration')
+      );
+
+  ((NameList e.Names)) (TkName t.Pos e.Name) e.Tokens (e.Errors)
+    = <NameList
+        ((NameList e.Names (t.Pos e.Name))) e.Tokens
+        (e.Errors (Error t.Pos 'missed comma after external name'))
+      >;
+
+  ((NameList e.Names)) e.Tokens (e.Errors)
+    = (NameList e.Names) e.Tokens (e.Errors);
+}
+
+FunctionDef {
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens (e.Errors)
+    = <FunctionDef (e.Scanned) e.Tokens (e.Errors)>;
+
+  () (TkEntry t.EntryPos) e.Tokens (e.Errors)
+    = <FunctionDef ((TkEntry t.EntryPos)) e.Tokens (e.Errors)>;
+
+  ((TkEntry t.EntryPos)) (TkName t.NamePos e.Name) e.Tokens (e.Errors)
+    = <FunctionDef (t.EntryPos (e.Name) Entry) e.Tokens (e.Errors)>;
+
+  ((TkEntry t.EntryPos)) e.Tokens (e.Errors)
+    = e.Tokens
+      (e.Errors (Error t.EntryPos '$ENTRY without function name, skipped'));
+
+  () (TkName t.Pos e.Name) e.Tokens (e.Errors)
+    = <FunctionDef (t.Pos (e.Name) Local) e.Tokens (e.Errors)>;
+
+  (t.Pos (e.Name) s.Scope) (Block e.Sentences) e.Tokens (e.Errors)
+    = (Function t.Pos (e.Name) s.Scope e.Sentences) e.Tokens (e.Errors);
+
+  (t.Pos (e.Name) s.Scope) (TkOpenBlock t.OpenPos) e.Tokens (e.Errors)
+    = <FunctionDef
+        (t.Pos (e.Name) s.Scope)
+        <Block () (TkOpenBlock t.OpenPos) e.Tokens (e.Errors)>
+      >;
+
+  (t.Pos (e.Name) s.Scope) t.Unexpected e.Tokens (e.Errors)
+    = (Function t.Pos (e.Name) s.Scope) t.Unexpected e.Tokens
+      (e.Errors <UnexpectedToken t.Unexpected '\'{\''>);
+}
+
+Block {
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens (e.Errors)
+    = <Block (e.Scanned) e.Tokens (e.Errors)>;
+
+  () (TkOpenBlock t.OpenPos) e.Tokens (e.Errors)
+    = <Block ('{' t.OpenPos) <Sentences () e.Tokens (e.Errors)>>;
+
+  () t.Unexpected e.Tokens (e.Errors)
+    = e.Tokens (e.Errors <UnexpectedToken t.Unexpected '\'{\''>);
+
+  ('{' t.OpenPos) (Sentences e.Sentences) e.Tokens (e.Errors)
+    = <Block
+        ('{' t.OpenPos (e.Sentences)) e.Tokens
+        (e.Errors <CheckEmptyBlock t.OpenPos e.Sentences>)
+      >;
+
+  ('{' t.OpenPos (e.Sentences)) (TkCloseBlock t.Pos) e.Tokens (e.Errors)
+    = (Block e.Sentences) e.Tokens (e.Errors);
+
+  ('{' t.OpenPos (e.Sentences)) t.Unexpected e.Tokens (e.Errors)
+    = (Block e.Sentences) t.Unexpected e.Tokens
+      (e.Errors <UnexpectedToken t.Unexpected '\'}\''>);
+}
+
+CheckEmptyBlock {
+  t.Pos = (Error t.Pos 'Empty function block');
+
+  t.Pos e.Sentences = ;
+}
+
+Sentences {
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens (e.Errors)
+    = <Sentences (e.Scanned) e.Tokens (e.Errors)>;
+
+  () t.Start e.Tokens (e.Errors)
+    = <Sentences_check t.Start (e.Tokens) (e.Errors) t.Start>;
+
+  e.Other = <Sentences_cont e.Other>;
+}
+
+Sentences_check {
+  t.Start (e.Tokens) (e.Errors) (s.Type t.Pos e.Value)
+    = <Sentences_check0
+        t.Start (e.Tokens) (e.Errors) s.Type t.Pos (e.Value) <FIRST_Sentence>
+      >;
+
+  e.Other = <Sentences_cont0 e.Other>;
+}
+
+Sentences_cont {
+  () (Sentence t.Sentence) e.Tokens (e.Errors)
+    = <Sentences ((t.Sentence)) e.Tokens (e.Errors)>;
+
+  () t.Unexpected e.Tokens (e.Errors)
+    = (Sentences) t.Unexpected e.Tokens
+      (e.Errors <UnexpectedToken t.Unexpected 'start of sentence'>);
+
+  ((e.Sentences)) (TkSemicolon t.Pos) e.Tokens (e.Errors)
+    = <Sentences ((e.Sentences) ';') e.Tokens (e.Errors)>;
+
+  ((e.Sentences)) e.Tokens (e.Errors)
+    = (Sentences e.Sentences) e.Tokens (e.Errors);
+
+  ((e.Sentences) ';') t.Start e.Tokens (e.Errors)
+    = <Sentences_check1 (e.Sentences) t.Start (e.Tokens) (e.Errors) t.Start>;
+
+  e.Other = <Sentences_cont1 e.Other>;
+}
+
+Sentences_check0 {
+  t.Start (e.Tokens) (e.Errors) s.Type t.Pos (e.Value) e.1 s.Type e.2
+    = <Sentences () <Sentence () t.Start e.Tokens (e.Errors)>>;
+
+  t.Start (e.Tokens) (e.Errors) s.Type t.Pos (e.Value) e.Other
+    = <Sentences_cont0 t.Start (e.Tokens) (e.Errors) (s.Type t.Pos e.Value)>;
+}
+
+Sentences_cont0 {
+  t.Start (e.Tokens) (e.Errors) e.Other
+    = <Sentences_cont () t.Start e.Tokens (e.Errors)>;
+}
+
+Sentences_check1 {
+  (e.Sentences) t.Start (e.Tokens) (e.Errors) (s.Type t.Pos e.Value)
+    = <Sentences_check2
+        (e.Sentences) t.Start (e.Tokens) (e.Errors) s.Type t.Pos (e.Value)
+        <FIRST_Sentence>
+      >;
+
+  e.Other = <Sentences_cont2 e.Other>;
+}
+
+Sentences_cont1 {
+  ((e.Sentences) ';') (Sentence t.Sentence) e.Tokens (e.Errors)
+    = <Sentences ((e.Sentences t.Sentence)) e.Tokens (e.Errors)>;
+
+  ((e.Sentences) ';') e.Tokens (e.Errors)
+    = (Sentences e.Sentences) e.Tokens (e.Errors);
+}
+
+Sentences_check2 {
+  (e.Sentences) t.Start (e.Tokens) (e.Errors) s.Type t.Pos (e.Value) e.1 s.Type
+  e.2
+    = <Sentences ((e.Sentences) ';') <Sentence () t.Start e.Tokens (e.Errors)>>;
+
+  (e.Sentences) t.Start (e.Tokens) (e.Errors) s.Type t.Pos (e.Value) e.Other
+    = <Sentences_cont2
+        (e.Sentences) t.Start (e.Tokens) (e.Errors) (s.Type t.Pos e.Value)
+      >;
+}
+
+Sentences_cont2 {
+  (e.Sentences) t.Start (e.Tokens) (e.Errors) e.Other
+    = <Sentences_cont1 ((e.Sentences) ';') t.Start e.Tokens (e.Errors)>;
+}
+
+FIRST_Sentence {
+   = <FIRST_Term> TkAssign TkComma;
+}
+
+Sentence {
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens (e.Errors)
+    = <Sentence (e.Scanned) e.Tokens (e.Errors)>;
+
+  () (Pattern t.Pattern) e.Tokens (e.Errors)
+    = <Sentence (t.Pattern) e.Tokens (e.Errors)>;
+
+  () e.Tokens (e.Errors) = <Sentence () <Pattern () e.Tokens (e.Errors)>>;
+
+  (t.Pattern) (SentenceTail e.SentenceTail) e.Tokens (e.Errors)
+    = (Sentence (t.Pattern e.SentenceTail)) e.Tokens (e.Errors);
+
+  (t.Pattern) e.Tokens (e.Errors)
+    = <Sentence (t.Pattern) <SentenceTail () e.Tokens (e.Errors)>>;
+}
+
+UnexpectedTokenInSentence {
+  t.Unexpected
+    = <UnexpectedToken
+        t.Unexpected 'valid Refal expression, \'=\', \',\', \':\' or \';\''
+      >;
+}
+
+SentenceTail {
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens (e.Errors)
+    = <SentenceTail (e.Scanned) e.Tokens (e.Errors)>;
+
+  () (TkAssign t.Pos) e.Tokens (e.Errors)
+    = <SentenceTail ('=') <Result () e.Tokens (e.Errors)>>;
+
+  () (TkComma t.Pos) e.Tokens (e.Errors)
+    = <SentenceTail (',') <Result () e.Tokens (e.Errors)>>;
+
+  () (TkSemicolon t.Pos) e.Tokens (e.Errors)
+    = <SentenceTail
+        ('=')
+        <Result
+          () (TkSemicolon t.Pos) e.Tokens
+          (e.Errors (Error t.Pos 'Missed \'=\''))
+        >
+      >;
+
+  () (TkColon t.Pos) e.Tokens (e.Errors)
+    = <SentenceTail
+        (',') (TkColon t.Pos) e.Tokens (e.Errors (Error t.Pos 'Missed \',\''))
+      >;
+
+  () t.Unexpected e.Tokens (e.Errors)
+    = (SentenceTail RETURN ()) t.Unexpected e.Tokens
+      (e.Errors <UnexpectedTokenInSentence t.Unexpected>);
+
+  ('=') (Result t.Result) e.Tokens (e.Errors)
+    = (SentenceTail RETURN t.Result) e.Tokens (e.Errors);
+
+  (',') (Result t.Result) e.Tokens (e.Errors)
+    = <SentenceTail (',' t.Result) e.Tokens (e.Errors)>;
+
+  (',') e.Tokens (e.Errors)
+    = <SentenceTail (',') <Result () e.Tokens (e.Errors)>>;
+
+  (',' t.Result) (TkColon t.ColonPos) e.Tokens (e.Errors)
+    = <SentenceTail (',' t.Result ':') e.Tokens (e.Errors)>;
+
+  (',' t.Result ':') (TkOpenBlock t.BlockPos) e.Tokens (e.Errors)
+    = <SentenceTail
+        (CALL-BLOCK t.Result ':{')
+        <Block () (TkOpenBlock t.BlockPos) e.Tokens (e.Errors)>
+      >;
+
+  (',' t.Result) (TkOpenBlock t.Pos) e.Tokens (e.Errors)
+    = <SentenceTail
+        (CALL-BLOCK t.Result ':{')
+        <Block
+          () (TkOpenBlock t.Pos) e.Tokens
+          (e.Errors (Error t.Pos 'Missed \':\' before block'))
+        >
+      >;
+
+  (',' t.Result) (TkSemicolon t.Pos) e.Tokens (e.Errors)
+    = (SentenceTail RETURN t.Result) (TkSemicolon t.Pos) e.Tokens
+      (e.Errors (Error t.Pos 'Mistaken \',\' for \'=\''));
+
+  (',' t.Result) (s.Type t.Pos) e.Tokens (e.Errors)
+    = <SentenceTail_check
+        t.Result s.Type t.Pos (e.Tokens) (e.Errors) TkComma TkAssign
+      >;
+
+  e.Other = <SentenceTail_cont e.Other>;
+}
+
+SentenceTail_check {
+  t.Result s.Type t.Pos (e.Tokens) (e.Errors) e.1 s.Type e.2
+    = <SentenceTail
+        (',' t.Result ':')
+        <Pattern
+          () (s.Type t.Pos) e.Tokens (e.Errors (Error t.Pos 'Missed \':\''))
+        >
+      >;
+
+  t.Result s.Type t.Pos (e.Tokens) (e.Errors) e.Other
+    = <SentenceTail_cont (',' t.Result) (s.Type t.Pos) e.Tokens (e.Errors)>;
+}
+
+SentenceTail_cont {
+  (',' t.Result) t.Unexpected e.Tokens (e.Errors)
+    = (SentenceTail RETURN t.Result) t.Unexpected e.Tokens
+      (e.Errors <UnexpectedTokenInSentence t.Unexpected>);
+
+  (CALL-BLOCK t.Result ':{') (Block e.Sentences) e.Tokens (e.Errors)
+    = (SentenceTail CALL-BLOCK t.Result e.Sentences) e.Tokens (e.Errors);
+
+  (',' t.Result ':') (Pattern t.Pattern) e.Tokens (e.Errors)
+    = <SentenceTail
+        (',' t.Result ':' t.Pattern) <SentenceTail () e.Tokens (e.Errors)>
+      >;
+
+  (',' t.Result ':') e.Tokens (e.Errors)
+    = <SentenceTail (',' t.Result ':') <Pattern () e.Tokens (e.Errors)>>;
+
+  (',' t.Result ':' t.Pattern) (SentenceTail e.SentenceTail) e.Tokens
+  (e.Errors)
+    = (SentenceTail (Condition t.Result t.Pattern) e.SentenceTail) e.Tokens
+      (e.Errors);
+}
+
+Pattern {
+  () e.Tokens (e.Errors) = <DirtyExpression () e.Tokens Pattern (e.Errors)>;
+}
+
+Result {
+  () e.Tokens (e.Errors) = <DirtyExpression () e.Tokens Result (e.Errors)>;
+}
+
+DirtyExpression {
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens s.Kind (e.Errors)
+    = <DirtyExpression (e.Scanned) e.Tokens s.Kind (e.Errors)>;
+
+  () (Expression e.Expression) e.Tokens s.Kind (e.Errors)
+    = <DirtyExpression
+        ((e.Expression)) <Unbalanced () e.Tokens s.Kind (e.Errors)>
+      >;
+
+  () e.Tokens s.Kind (e.Errors)
+    = <DirtyExpression () <Expression () e.Tokens s.Kind (e.Errors)>>;
+
+  ((e.Expression)) (Unbalanced e.Unbalanced) e.Tokens s.Kind (e.Errors)
+    = (s.Kind (e.Expression e.Unbalanced)) e.Tokens (e.Errors);
+}
+
+Expression {
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens s.Kind (e.Errors)
+    = <Expression (e.Scanned) e.Tokens s.Kind (e.Errors)>;
+
+  (e.Scanned) t.TermStart e.Tokens s.Kind (e.Errors)
+    = <Expression_check
+        (e.Scanned) t.TermStart (e.Tokens) s.Kind (e.Errors) t.TermStart
+      >;
+
+  e.Other = <Expression_cont e.Other>;
+}
+
+Expression_check {
+  (e.Scanned) t.TermStart (e.Tokens) s.Kind (e.Errors) (s.Type t.Pos e.Value)
+    = <Expression_check0
+        (e.Scanned) t.TermStart (e.Tokens) s.Kind (e.Errors) s.Type t.Pos
+        (e.Value) <FIRST_Term>
+      >;
+
+  e.Other = <Expression_cont0 e.Other>;
+}
+
+Expression_cont {
+  (e.Scanned) (Term t.Term) e.Tokens s.Kind (e.Errors)
+    = <Expression (e.Scanned t.Term) e.Tokens s.Kind (e.Errors)>;
+
+  (e.Scanned) e.Tokens s.Kind (e.Errors)
+    = (Expression e.Scanned) e.Tokens s.Kind (e.Errors);
+}
+
+Expression_check0 {
+  (e.Scanned) t.TermStart (e.Tokens) s.Kind (e.Errors) s.Type t.Pos (e.Value)
+  e.1 s.Type e.2
+    = <Expression (e.Scanned) <Term () t.TermStart e.Tokens s.Kind (e.Errors)>>;
+
+  (e.Scanned) t.TermStart (e.Tokens) s.Kind (e.Errors) s.Type t.Pos (e.Value)
+  e.Other
+    = <Expression_cont0
+        (e.Scanned) t.TermStart (e.Tokens) s.Kind (e.Errors)
+        (s.Type t.Pos e.Value)
+      >;
+}
+
+Expression_cont0 {
+  (e.Scanned) t.TermStart (e.Tokens) s.Kind (e.Errors) e.Other
+    = <Expression_cont (e.Scanned) t.TermStart e.Tokens s.Kind (e.Errors)>;
+}
+
+FIRST_Term {
+   = TkName TkCompound TkMacroDigit TkChar TkVariable TkOpenBracket TkOpenCall;
+}
+
+Term {
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens s.Kind (e.Errors)
+    = <Term (e.Scanned) e.Tokens s.Kind (e.Errors)>;
+
+  () (s.Literal t.Pos e.Value) e.Tokens s.Kind (e.Errors)
+    = <Term_check
+        s.Literal t.Pos (e.Value) (e.Tokens) s.Kind (e.Errors) (TkName Word)
+        (TkCompound Word) (TkMacroDigit Number) (TkChar Char)
+      >;
+
+  e.Other = <Term_cont e.Other>;
+}
+
+Term_check {
+  s.Literal t.Pos (e.Value) (e.Tokens) s.Kind (e.Errors) e.1
+  (s.Literal s.SymbolType) e.2
+    = (Term (Symbol s.SymbolType e.Value)) e.Tokens s.Kind (e.Errors);
+
+  s.Literal t.Pos (e.Value) (e.Tokens) s.Kind (e.Errors) e.Other
+    = <Term_cont () (s.Literal t.Pos e.Value) e.Tokens s.Kind (e.Errors)>;
+}
+
+Term_cont {
+  () (TkVariable t.Pos s.VarType e.Index) e.Tokens s.Kind (e.Errors)
+    = (Term (Variable t.Pos s.VarType e.Index)) e.Tokens s.Kind (e.Errors);
+
+  () (TkOpenBracket t.Pos) e.Tokens s.Kind (e.Errors)
+    = <Term ('(' t.Pos) <Expression () e.Tokens s.Kind (e.Errors)>>;
+
+  ('(' t.OpenPos) (Expression e.Nested) e.Tokens s.Kind (e.Errors)
+    = <Term ('(' t.OpenPos (e.Nested)) e.Tokens s.Kind (e.Errors)>;
+
+  ('(' t.OpenPos (e.Nested)) (TkCloseBracket t.ClosePos) e.Tokens s.Kind
+  (e.Errors)
+    = (Term (Brackets e.Nested)) e.Tokens s.Kind (e.Errors);
+
+  ('(' t.OpenPos (e.Nested)) (s.Type t.Pos e.Value) e.Tokens s.Kind (e.Errors)
+    = (Term (Brackets e.Nested)) (s.Type t.Pos e.Value) e.Tokens s.Kind
+      (
+        e.Errors (Error t.OpenPos 'unbalanced \'(\'')
+        (Error t.Pos 'Missed \')\'')
+      );
+
+  () (TkOpenCall t.Pos e.FuncName) e.Tokens s.Kind (e.Errors)
+    = <Term
+        ('<' t.Pos (e.FuncName)) <Expression () e.Tokens s.Kind (e.Errors)>
+      >;
+
+  ('<' t.OpenPos (e.FuncName)) (Expression e.Nested) e.Tokens s.Kind (e.Errors)
+    = <Term ('<' t.OpenPos (e.FuncName) (e.Nested)) e.Tokens s.Kind (e.Errors)>;
+
+  ('<' t.OpenPos (e.FuncName) (e.Nested)) (TkCloseCall t.ClosePos) e.Tokens
+  s.Kind (e.Errors)
+    = (Term (Call t.OpenPos (e.FuncName) e.Nested)) e.Tokens s.Kind
+      (e.Errors <CallBracketInPattern t.OpenPos s.Kind '<'>);
+
+  ('<' t.OpenPos (e.FuncName) (e.Nested)) (s.Type t.Pos e.Value) e.Tokens
+  s.Kind (e.Errors)
+    = (Term (Call t.OpenPos (e.FuncName) e.Nested)) e.Tokens s.Kind
+      (
+        (Error t.OpenPos 'unbalanced \'<\'') (Error t.Pos 'Missed \'>\'')
+        <CallBracketInPattern t.OpenPos s.Kind '>'>
+      );
+}
+
+CallBracketInPattern {
+  t.CallPos Result s.Bracket = ;
+
+  t.CallPos Pattern s.Bracket
+    = (
+        Error t.CallPos 'unexpected \'' s.Bracket '\' in pattern expression, m'
+        'aybe missed \'=\''
+      );
+}
+
+Unbalanced {
+  (e.Scanned) (TkSpecComment t.Pos e.Text) e.Tokens s.Kind (e.Errors)
+    = <Unbalanced (e.Scanned) e.Tokens s.Kind (e.Errors)>;
+
+  () (s.Type t.Pos) e.Tokens s.Kind (e.Errors)
+    = <Unbalanced_check
+        s.Type t.Pos (e.Tokens) s.Kind (e.Errors) TkCloseBracket TkCloseCall
+      >;
+
+  e.Other = <Unbalanced_cont e.Other>;
+}
+
+Unbalanced_check {
+  s.Type t.Pos (e.Tokens) s.Kind (e.Errors) e.1 s.Type e.2
+    = <Unbalanced
+        (TkCloseBracket)
+        <Expression
+          () e.Tokens s.Kind
+          (e.Errors (Error t.Pos 'unbalanced ' <TokName s.Type>))
+        >
+      >;
+
+  s.Type t.Pos (e.Tokens) s.Kind (e.Errors) e.Other
+    = <Unbalanced_cont () (s.Type t.Pos) e.Tokens s.Kind (e.Errors)>;
+}
+
+Unbalanced_cont {
+  () e.Tokens s.Kind (e.Errors) = (Unbalanced) e.Tokens s.Kind (e.Errors);
+
+  (s.Type) (Expression e.Expression) e.Tokens s.Kind (e.Errors)
+    = <Unbalanced
+        (s.Type (e.Expression)) <Unbalanced () e.Tokens s.Kind (e.Errors)>
+      >;
+
+  (s.Type (e.Expression)) (Unbalanced e.Unbalanced) e.Tokens s.Kind (e.Errors)
+    = (Unbalanced e.Expression e.Unbalanced) e.Tokens s.Kind (e.Errors);
+}
+
+UnexpectedToken {
+  (s.Type t.Pos e.Value) e.Expected
+    = (Error t.Pos 'unexpected ' <TokName s.Type> ', expected ' e.Expected);
+}
+
+SemanticCheck {
+  t.FirstTokenPos e.Program (e.ParseErrors)
+    = <SemanticCheck_check
+        t.FirstTokenPos (e.Program) (e.ParseErrors) <GetFuncNames e.Program>
+      >;
+}
+
+SemanticCheck_check {
+  t.FirstTokenPos (e.Program) (e.ParseErrors) s.HasEntry e.Functions
+    = <SemanticCheck0
+        t.FirstTokenPos (e.ParseErrors) (e.Program) s.HasEntry (e.Functions)
+        <Map r5fw-parser_FormatError e.ParseErrors>
+        <FindSemanticsErrors (e.Functions <Builtins>) e.Program>
+        <NoEntryError t.FirstTokenPos s.HasEntry>
+      >;
+}
+
+SemanticCheck0 {
+  t.FirstTokenPos (e.ParseErrors) (e.Program) s.HasEntry (e.Functions)
+    = Success e.Program;
+
+  t.FirstTokenPos (e.ParseErrors) (e.Program) s.HasEntry (e.Functions) e.Errors
+    = Fails e.Errors;
+}
+
+$ENTRY r5fw-parser_FormatError {
+  (Error t.Pos e.Message) = (t.Pos e.Message);
+}
+
+NoEntryError {
+  t.Pos NoEntry = (t.Pos 'No $ENTRY functions in a file');
+
+  t.Pos HasEntry = ;
+}
+
+GetFuncNames {
+  e.Units = <MapAccum r5fw-parser_GetNames NoEntry e.Units>;
+}
+
+$ENTRY r5fw-parser_GetNames {
+  s.HasEntry (SpecialComment t.Pos e.Text) = s.HasEntry;
+
+  s.HasEntry (Function t.Pos (e.Name) s.Scope e.Sentences)
+    = <UpdateHasEntry s.HasEntry s.Scope> (e.Name);
+
+  s.HasEntry (Extern e.ExternalNames)
+    = s.HasEntry <Map r5fw-parser_RemovePos e.ExternalNames>;
+}
+
+UpdateHasEntry {
+  HasEntry s.Scope = HasEntry;
+
+  s.HasEntry Entry = HasEntry;
+
+  s.HasEntry Local = s.HasEntry;
+}
+
+$ENTRY r5fw-parser_RemovePos {
+  (t.Pos e.Name) = (e.Name);
+}
+
+FindSemanticsErrors {
+  (e.FuncNames) e.Units
+    = <Map (r5fw-parser_FindSemanticsErrors e.FuncNames) e.Units>
+      <FindRedefinitions e.Units>;
+}
+
+FindRedefinitions {
+  e.Units
+    = <DoFindRedefinitions
+        <Map r5fw-parser_BuiltinDefinition <Builtins>>
+        <Map r5fw-parser_ExtractDefinition e.Units>
+      >;
+}
+
+$ENTRY r5fw-parser_BuiltinDefinition {
+  (e.Name) = (Builtin NO-POS e.Name);
+}
+
+$ENTRY r5fw-parser_ExtractDefinition {
+  (Builtin NO-POS e.Name) = (Builtin NO-POS e.Name);
+
+  (SpecialComment t.Pos e.Text) = ;
+
+  (Function t.Pos (e.Name) s.Scope e.Sentences) = (Define t.Pos e.Name);
+
+  (Extern e.ExternalNames)
+    = <Map r5fw-parser_MarkExternalName e.ExternalNames>;
+}
+
+$ENTRY r5fw-parser_MarkExternalName {
+  (t.Pos e.Name) = (External t.Pos e.Name);
+}
+
+DoFindRedefinitions {
+  e.Defs-B (s.Type1 t.Pos1 e.Name) e.Defs-E (s.Type2 t.Pos2 e.Name)
+    = <DoFindRedefinitions e.Defs-B (s.Type1 t.Pos1 e.Name) e.Defs-E>
+      <MakeRedefinitionError s.Type1 t.Pos1 s.Type2 t.Pos2 e.Name>;
+
+  e.Defs t.Other = <DoFindRedefinitions e.Defs>;
+
+   = ;
+}
+
+MakeRedefinitionError {
+  Builtin NO-POS s.Type t.Pos e.Name
+    = (t.Pos 'Re' <DeclType s.Type> 'ion of builtin function ' e.Name);
+
+  s.Type1 t.Pos1 s.Type2 t.Pos2 e.Name
+    = (
+        t.Pos2 'Re' <DeclType s.Type2> 'ion of function ' e.Name ' (function i'
+        's already ' <DeclType s.Type1> 'ed)'
+      );
+}
+
+DeclType {
+  Define = 'defin';
+
+  External = 'declar';
+}
+
+$ENTRY r5fw-parser_FindSemanticsErrors {
+  e.FuncNames (SpecialComment t.Pos e.Text) = ;
+
+  e.FuncNames (Function t.Pos (e.Name) s.Scope e.Sentences)
+    = <CheckSentences
+        (e.FuncNames) () <ExtractCheckable-Sentences e.Sentences>
+      >;
+
+  e.FuncNames (Extern e.Names) = ;
+}
+
+CheckSentences {
+  (e.FuncNames) (e.Variables) e.Sentences
+    = <Map (r5fw-parser_CheckSentence (e.FuncNames) (e.Variables)) e.Sentences>;
+}
+
+ExtractCheckable {
+  (e.Pattern) e.Conditions-And-SentenceTail
+    = (<ExtractCheckable-Expr e.Pattern>)
+      <ExtractCheckable-Tail e.Conditions-And-SentenceTail>;
+}
+
+ExtractCheckable-Tail {
+  (Condition (e.Result) (e.Pattern)) e.Tail
+    = (
+        Condition (<ExtractCheckable-Expr e.Result>)
+        (<ExtractCheckable-Expr e.Pattern>)
+      )
+      <ExtractCheckable-Tail e.Tail>;
+
+  RETURN (e.Result) = RETURN (<ExtractCheckable-Expr e.Result>);
+
+  CALL-BLOCK (e.Result) e.Sentences
+    = CALL-BLOCK (<ExtractCheckable-Expr e.Result>)
+      <ExtractCheckable-Sentences e.Sentences>;
+}
+
+ExtractCheckable-Sentences {
+  (e.Sentence) e.Sentences
+    = (<ExtractCheckable e.Sentence>) <ExtractCheckable-Sentences e.Sentences>;
+
+   = ;
+}
+
+ExtractCheckable-Expr {
+  e.Expr = <Map r5fw-parser_ExtractCheckable-Term e.Expr>;
+}
+
+$ENTRY r5fw-parser_ExtractCheckable-Term {
+  (Variable t.SrcPos s.VarType e.Index)
+    = (Variable t.SrcPos s.VarType e.Index);
+
+  (Brackets e.Expr) = <ExtractCheckable-Expr e.Expr>;
+
+  (Call t.Pos (e.Name) e.Expr)
+    = (Call t.Pos e.Name) <ExtractCheckable-Expr e.Expr>;
+
+  t.OtherTerm = ;
+}
+
+$ENTRY r5fw-parser_CheckSentence {
+  (e.FuncNames) (e.Variables) ((e.PatternItems) e.Tail)
+    = <CheckSentence-Tail (e.FuncNames) (e.Variables e.PatternItems) e.Tail>;
+}
+
+CheckSentence-Tail {
+  (e.FuncNames) (e.Variables) (Condition (e.ResultItems) (e.PatternItems))
+  e.Tail
+    = <CheckResult (e.FuncNames) (e.Variables) e.ResultItems>
+      <CheckSentence-Tail (e.FuncNames) (e.Variables e.PatternItems) e.Tail>;
+
+  (e.FuncNames) (e.Variables) RETURN (e.ResultItems)
+    = <CheckResult (e.FuncNames) (e.Variables) e.ResultItems>;
+
+  (e.FuncNames) (e.Variables) CALL-BLOCK (e.ResultItems) e.Sentences
+    = <CheckResult (e.FuncNames) (e.Variables) e.ResultItems>
+      <CheckSentences (e.FuncNames) (e.Variables) e.Sentences>;
+}
+
+CheckResult {
+  (e.FuncNames-B (e.Name) e.FuncNames-E) (e.Variables) (Call t.Pos e.Name)
+  e.Items
+    = <CheckResult
+        (e.FuncNames-B (e.Name) e.FuncNames-E) (e.Variables) e.Items
+      >;
+
+  (e.FuncNames) (e.Variables) (Call t.Pos e.Name) e.Items
+    = (t.Pos 'function ' e.Name ' is not declared')
+      <CheckResult (e.FuncNames) (e.Variables) e.Items>;
+
+  (e.FuncNames) (e.Variables) (Variable t.Pos s.Type e.Index) e.Items
+    = <CheckResult0
+        (e.FuncNames) (e.Variables) t.Pos s.Type (e.Index) (e.Items)
+        e.Variables
+      >;
+
+  (e.FuncNames) (e.Variables) = ;
+}
+
+CheckResult0 {
+  (e.FuncNames) (e.Variables) t.Pos s.Type (e.Index) (e.Items) e.Vars-B
+  (Variable t.DeclPos s.Type e.Index) e.Vars-E
+    = <CheckResult (e.FuncNames) (e.Variables) e.Items>;
+
+  (e.FuncNames) (e.Variables) t.Pos s.Type (e.Index) (e.Items) e.Vars
+    = (t.Pos 'variable ' s.Type '.' e.Index ' is not declared')
+      <CheckResult (e.FuncNames) (e.Variables) e.Items>;
+}
+

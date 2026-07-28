@@ -1,0 +1,9 @@
+$ENTRY Platform { = POSIX; }
+
+$ENTRY DirectorySeparator { = '/'; }
+
+$ENTRY IsDirectorySeparator {
+  '/' = True; s.Other = False;
+}
+
+$ENTRY PathSeparator { = ':' }

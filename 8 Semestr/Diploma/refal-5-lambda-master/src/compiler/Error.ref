@@ -1,0 +1,250 @@
+$INCLUDE "LibraryEx";
+
+$EXTERN Config-AllWarningIds;
+
+/**
+  Внутренний формат:
+  [ErrorList (e.FileName) (t.Error*) (t.Warning*)]
+
+  t.Error ::= (t.SrcPos e.Message)
+  t.Warning ::= (s.WarningId t.SrcPos e.Message)
+  t.SrcPos ::=
+      NoPos
+    | (FileLine s.LineNumber e.FileName)
+    | (RowCol s.Row s.Col)
+    | (FileRowCol (s.Row s.Col) e.FileName)
+  s.WarningId ::=
+      screening
+    | multiscreening
+    | multiscreening5
+    | nul-in-compound
+    | repeated
+*/
+$ENUM ErrorList;
+
+$ENTRY EL-Create {
+  e.FileName = [ErrorList (e.FileName) () ()];
+}
+
+$ENTRY EL-AddError {
+  [ErrorList (e.FileName) (e.Errors) t.Warnings] e.Message
+    = [ErrorList
+        (e.FileName) (<gen_e__ e.Errors (NoPos e.Message)>) t.Warnings
+      ];
+}
+
+gen_e__ { e.Arg = e.Arg }
+
+$ENTRY EL-AddWarning {
+  [ErrorList (e.FileName) t.Errors (e.Warnings)] s.WarningId e.Message
+    = [ErrorList
+        (e.FileName)
+        t.Errors
+        (<gen_e__ e.Warnings (s.WarningId NoPos e.Message)>)
+      ];
+}
+
+$ENTRY EL-AddErrorAt {
+  [ErrorList (e.FileName) (e.Errors) t.Warnings] t.SrcPos e.Message
+    = [ErrorList
+        (e.FileName)
+        (<gen_e__ e.Errors (<WithFileName t.SrcPos e.FileName> e.Message)>)
+        t.Warnings
+      ];
+}
+
+WithFileName {
+  NoPos e.FileName = NoPos;
+  s.LineNumber e.FileName = (FileLine s.LineNumber e.FileName);
+  (RowCol s.Row s.Col) e.FileName = (FileRowCol (s.Row s.Col) e.FileName);
+  t.SrcPos e.FileName = t.SrcPos;
+}
+
+$ENTRY EL-AddWarningAt {
+  [ErrorList (e.FileName) t.Errors (e.Warnings)]
+  s.WarningId
+  t.SrcPos
+  e.Message
+    = <WithFileName t.SrcPos e.FileName> : t.SrcPos^
+    = e.Warnings (s.WarningId t.SrcPos e.Message) : e.Warnings^
+    = [ErrorList (e.FileName) t.Errors (<gen_e__ e.Warnings>)];
+}
+
+$ENTRY EL-Concat {
+  [ErrorList (e.FileName-L) (e.Errors-L) (e.Warnings-L)]
+  [ErrorList (e.FileName-R) (e.Errors-R) (e.Warnings-R)]
+    = [ErrorList
+        (e.FileName-L)
+        (e.Errors-L e.Errors-R)
+        (e.Warnings-L e.Warnings-R)
+      ];
+}
+
+/*
+<EL-Destroy t.ErrorList (e.EnabledWarningIds) (e.WarningIdsAsErrors)>
+  == EL-NoErrors
+  == EL-HasErrors
+
+e.EnabledWarningIds ::= s.WarningId*
+e.WarningIdsAsErrors ::= s.WarningId*
+*/
+$ENTRY EL-Destroy {
+  [ErrorList (e.FileName) (e.Errors) (e.Warnings)]
+  (e.EnabledWarningIds)
+  (e.WarningIdsAsErrors)
+    = <FilterEnabledWarnings (e.Warnings) e.EnabledWarningIds> : e.Warnings^
+    = <CheckHasErrors
+        [ErrorList (e.FileName) (e.Errors) (e.Warnings)]
+        e.WarningIdsAsErrors
+      >
+    : s.HasErrors
+    = <Map
+        &PrintMessageError
+        <Sort e.Errors>
+      >
+      <Map
+        (&PrintMessageWarning (e.WarningIdsAsErrors))
+        <Sort e.Warnings>
+      >
+      <PrintWarningsAsErrorsMessage
+        (e.FileName)
+        <CheckWarningsAsErrors (e.Warnings) e.WarningIdsAsErrors>
+      >
+      s.HasErrors
+}
+
+FilterEnabledWarnings {
+  (e.Warnings) e.EnabledWarningIds =
+    <Map
+      (&IsWarningEnabled e.EnabledWarningIds)
+      e.Warnings
+    >
+}
+
+IsWarningEnabled{
+  e._ s.WarningId e._ (s.WarningId t.SrcPos e.Message)
+    = (s.WarningId t.SrcPos e.Message);
+
+  e.WarningIds t.Skipped = /* пусто */
+}
+
+CheckHasErrors {
+  [ErrorList (e.FileName) (t.Error e._) (e.Warnings)] e._
+    = EL-HasErrors;
+
+  [ErrorList (e.FileName) () (e._ (s.WarningId e._) e._)]
+  e._
+  s.WarningId
+  e._
+    = EL-HasErrors;
+
+  t.ErrorList e._ = EL-NoErrors
+}
+
+CheckWarningsAsErrors {
+  (e._ (s.WarningId t.SrcPos e.Message) e._) e.Ids-RB s.WarningId e.Ids-RE
+  , <SetsEq
+      (e.Ids-RB s.WarningId e.Ids-RE)
+      <Config-AllWarningIds>
+    >
+  : True = All;
+
+  (e._ (s.WarningId t.SrcPos e.Message) e._) e._ s.WarningId e._  = Some;
+
+  (e.Warnings) e.WarningIds = None
+}
+
+SetsEq {
+  () () = True;
+
+  (e.Set-LB s.Item e.Set-LE) (e.Set-RB s.Item e.Set-RE)
+    = <SetsEq (e.Set-LB e.Set-LE) (e.Set-RB e.Set-RE)>;
+
+  (e.Set-L) (e.Set-R) = False
+}
+
+PrintWarningsAsErrorsMessage {
+  (e.FileName) All
+    = <PrintErr e.FileName ': all warnings being treated as errors'>;
+  (e.FileName) Some
+    = <PrintErr e.FileName ': some warnings being treated as errors'>;
+
+  (e.FileName) None = /* пусто */
+}
+
+PrintMessageError {
+  (t.SrcPos e.Message)
+    = <PrintErr
+        <StrFromPos t.SrcPos>
+        'ERROR: '
+        e.Message
+      >;
+}
+
+PrintMessageWarning {
+  (e._ s.WarningId e._)
+  (s.WarningId t.SrcPos e.Message)
+    = <PrintErr
+        <StrFromPos t.SrcPos>
+        'ERROR: ' e.Message ' '
+        '[-Werror=' <Explode s.WarningId> ']'
+      >;
+  (e._)
+  (s.WarningId t.SrcPos e.Message)
+    = <PrintErr
+        <StrFromPos t.SrcPos>
+        'WARNING: ' e.Message ' '
+        '[-W' <Explode s.WarningId> ']'
+      >;
+}
+
+StrFromPos {
+  NoPos = '  ';
+  (FileLine s.LineNumber e.FileName)
+    = e.FileName ':' <Symb s.LineNumber> ': ';
+  (FileRowCol (s.Row s.Col) e.FileName)
+    = e.FileName ':' <Symb s.Row> ':' <Symb s.Col> ': ';
+}
+
+$ENTRY PrintErr {
+  e.Message = <Putout stderr e.Message>;
+}
+
+/**
+  <EL-CheckEntryDuplicates ((e.EntryName) t.SrcPos+)*>
+    == EL-NoErrors
+    == EL-HasErrors
+*/
+$ENTRY EL-CheckEntryDuplicates {
+  e.Entries
+    = <CheckEntries e.Entries> : t.ErrorList
+    = <EL-Destroy t.ErrorList (/* no warnings */) (/* no error warnings */)>
+}
+
+CheckEntries {
+  e.Entries
+    = <Reduce
+        {
+          t.ErrorList ((e.Name) t.OnePos) = t.ErrorList;
+
+          t.ErrorList ((e.Name) e.Positions)
+            = <Reduce (&AddEntryError e.Name) t.ErrorList e.Positions>;
+        }
+        <EL-Create>
+        <GroupEntries e.Entries>
+      >
+}
+
+AddEntryError {
+  e.Name t.ErrorList t.Pos
+    = <EL-AddErrorAt
+        t.ErrorList t.Pos 'Entry function ' e.Name ' is multiple defined'
+      >;
+}
+
+GroupEntries {
+  e.Begin ((e.Name) e.Pos1) e.Middle ((e.Name) e.Pos2) e.End
+    = e.Begin <GroupEntries e.Middle ((e.Name) e.Pos1 e.Pos2) e.End>;
+
+  e.Entries = e.Entries;
+}

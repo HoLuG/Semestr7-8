@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Program.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.ast</a> &gt; <span class="el_source">Program.java</span></div><h1>Program.java</h1><pre class="source lang-java linenums">package refal.ast;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
+// Полная программа: набор функций, список $EXTERN, точка входа $ENTRY,
+// и список имён функций, объявленных более одного раза (для проверки на дубли).
+public record Program(
+        Map&lt;String, Func&gt; funcs,
+        Optional&lt;String&gt; entry,
+        Set&lt;String&gt; externs,
+        Set&lt;String&gt; duplicateFuncNames) {
+
+<span class="fc" id="L20">    public Program {</span>
+<span class="fc" id="L21">        Objects.requireNonNull(funcs, &quot;Program.funcs&quot;);</span>
+<span class="fc" id="L22">        Objects.requireNonNull(entry, &quot;Program.entry&quot;);</span>
+<span class="fc" id="L23">        Objects.requireNonNull(externs, &quot;Program.externs&quot;);</span>
+<span class="fc" id="L24">        Objects.requireNonNull(duplicateFuncNames, &quot;Program.duplicateFuncNames&quot;);</span>
+        // Map.copyOf не гарантирует порядок итерации; нам важен порядок
+        // объявления функций (для $ENTRY-резолвера и для повторяемых тестов).
+<span class="fc" id="L27">        funcs = Collections.unmodifiableMap(new LinkedHashMap&lt;&gt;(funcs));</span>
+<span class="fc" id="L28">        externs = Collections.unmodifiableSet(new LinkedHashSet&lt;&gt;(externs));</span>
+<span class="fc" id="L29">        duplicateFuncNames = Collections.unmodifiableSet(new LinkedHashSet&lt;&gt;(duplicateFuncNames));</span>
+<span class="fc" id="L30">    }</span>
+
+    public static Builder builder() {
+<span class="fc" id="L33">        return new Builder();</span>
+    }
+
+    public Optional&lt;Func&gt; getFunc(String name) {
+<span class="fc" id="L37">        return Optional.ofNullable(funcs.get(name));</span>
+    }
+
+    // Вспомогательный класс для пошаговой сборки программы парсером.
+    public static final class Builder {
+<span class="fc" id="L42">        private final LinkedHashMap&lt;String, Func&gt; funcs = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L43">        private final java.util.LinkedHashSet&lt;String&gt; externs = new java.util.LinkedHashSet&lt;&gt;();</span>
+<span class="fc" id="L44">        private final java.util.LinkedHashSet&lt;String&gt; duplicates = new java.util.LinkedHashSet&lt;&gt;();</span>
+        private String entry;
+
+<span class="fc" id="L47">        private Builder() {</span>
+<span class="fc" id="L48">        }</span>
+
+        public Builder addFunc(Func f) {
+<span class="fc bfc" id="L51" title="All 2 branches covered.">            if (funcs.containsKey(f.name())) {</span>
+<span class="fc" id="L52">                duplicates.add(f.name());</span>
+            }
+<span class="fc" id="L54">            funcs.put(f.name(), f);</span>
+<span class="fc" id="L55">            return this;</span>
+        }
+
+        public boolean hasFunc(String name) {
+<span class="fc" id="L59">            return funcs.containsKey(name);</span>
+        }
+
+        public Builder addExterns(List&lt;String&gt; names) {
+<span class="fc" id="L63">            externs.addAll(names);</span>
+<span class="fc" id="L64">            return this;</span>
+        }
+
+        public Builder entry(String name) {
+<span class="fc" id="L68">            this.entry = name;</span>
+<span class="fc" id="L69">            return this;</span>
+        }
+
+        public String entryOrNull() {
+<span class="nc" id="L73">            return entry;</span>
+        }
+
+        public Program build() {
+<span class="fc" id="L77">            return new Program(</span>
+                    funcs,
+<span class="fc" id="L79">                    Optional.ofNullable(entry),</span>
+                    externs,
+                    duplicates);
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Character}\PYG{p}{.}\PYG{n+na}{isDigit}\PYG{p}{(}\PYG{n}{c}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{||}
+\PYG{+w}{              }\PYG{p}{(}\PYG{n}{c}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{l+s+sc}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{+w}{ }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{src}\PYG{p}{.}\PYG{n+na}{length}\PYG{p}{()}
+\PYG{+w}{               }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }\PYG{n}{Character}\PYG{p}{.}\PYG{n+na}{isDigit}\PYG{p}{(}\PYG{n}{src}\PYG{p}{.}\PYG{n+na}{charAt}\PYG{p}{(}\PYG{n}{i}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{))))}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{c+c1}{// (11)}
+\PYG{+w}{            }\PYG{n}{out}\PYG{p}{.}\PYG{n+na}{add}\PYG{p}{(}\PYG{n}{readInt}\PYG{p}{(}\PYG{n}{startLine}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{startCol}\PYG{p}{));}
+\PYG{+w}{            }\PYG{n}{atLineStart}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kc}{false}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{continue}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

@@ -1,0 +1,23 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{\PYGZsh{} Build (from refal5j\PYGZhy{}impl directory):}
+mvn\PYG{+w}{ }\PYGZhy{}q\PYG{+w}{ }package\PYG{+w}{ }\PYGZhy{}DskipTests
+
+\PYG{c+c1}{\PYGZsh{} Single .ref file:}
+java\PYG{+w}{ }\PYGZhy{}jar\PYG{+w}{ }target/refal5q.jar\PYG{+w}{ }tests/autotests/01\PYGZhy{}go.ref
+
+\PYG{c+c1}{\PYGZsh{} All unit tests (expected: 224 passed, 7 skipped):}
+mvn\PYG{+w}{ }\PYG{n+nb}{test}
+
+\PYG{c+c1}{\PYGZsh{} Only AutotestsRunnerTest:}
+mvn\PYG{+w}{ }\PYG{n+nb}{test}\PYG{+w}{ }\PYGZhy{}Dtest\PYG{o}{=}AutotestsRunnerTest
+
+\PYG{c+c1}{\PYGZsh{} Desugarer via our interpreter:}
+java\PYG{+w}{ }\PYGZhy{}jar\PYG{+w}{ }target/refal5q.jar\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }tests/desugar/desugar\PYGZus{}desugared.ref+tests/desugar/LibraryEx\PYGZus{}desugared.ref+\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }tests/desugar/R5FW\PYGZhy{}Parser\PYGZus{}desugared.ref+tests/desugar/R5FW\PYGZhy{}Plainer\PYGZus{}desugared.ref+\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }tests/desugar/R5FW\PYGZhy{}Transformer\PYGZus{}desugared.ref\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }\PYGZhy{}\PYGZhy{}entry\PYG{+w}{ }Go\PYG{+w}{ }tests/multifile/extended.ref
+
+\PYG{c+c1}{\PYGZsh{} Multi\PYGZhy{}file mode:}
+java\PYG{+w}{ }\PYGZhy{}jar\PYG{+w}{ }target/refal5q.jar\PYG{+w}{ }tests/multifile/main.ref+tests/multifile/lib.ref
+\end{MintedVerbatim}

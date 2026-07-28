@@ -1,0 +1,66 @@
+\thispagestyle{empty}
+
+\vspace*{-30pt}
+\hspace{-45pt}
+\begin{minipage}{0.17\textwidth}
+\hspace*{-20pt}\centering
+\includegraphics[width=1.1\textwidth]{emblem_titul.png}
+\end{minipage}
+\begin{minipage}{0.82\textwidth}\small \textbf{%
+\vspace*{-0.7ex}
+\hspace*{-10pt}\centerline{Министерство науки и высшего образования Российской Федерации}
+\vspace*{-0.7ex}
+\centerline{Федеральное государственное автономное образовательное учреждение}
+\vspace*{-0.7ex}
+\centerline{высшего образования}
+\vspace*{-0.7ex}
+\centerline{<<Московский государственный технический университет}
+\vspace*{-0.7ex}
+\centerline{имени Н.Э. Баумана}
+\vspace*{-0.7ex}
+\centerline{(национальный исследовательский университет)>>}
+\vspace*{-0.7ex}
+\centerline{(МГТУ им. Н.Э. Баумана)}}
+\end{minipage}
+
+\vspace{-2pt}
+\vkrheaderrule
+
+\vspace{1.8ex}
+\vkrfacultyline{ФАКУЛЬТЕТ}{<<Информатика и системы управления>>}
+\vspace{0.6ex}
+\vkrfacultyline{КАФЕДРА}{<<Теоретическая информатика и компьютерные технологии>>}
+
+\vspace{2.2em}
+\begin{center}
+\Large\bfseries РАСЧЕТНО-ПОЯСНИТЕЛЬНАЯ ЗАПИСКА\\[0.6em]
+\large\bfseries\itshape К ВЫПУСКНОЙ КВАЛИФИКАЦИОННОЙ РАБОТЕ\\[0.6em]
+\large\bfseries\itshape НА ТЕМУ:\\[1.0em]
+\large\bfseries\itshape
+Компилятор базисного подмножества Рефала-5\\[0.15em]
+с представлением данных,\\[0.15em]
+использующим раскрученные очереди
+\end{center}
+
+\vspace{\fill}
+
+% Ширина зоны метки слева (подписи прижаты вправо, как у Морозова)
+\newlength{\vkrlabelw}\setlength{\vkrlabelw}{\dimexpr\textwidth-10cm\relax}
+\newcommand{\vkrsigline}{\underline{\makebox[4.8cm]{\strut}}}
+\newcommand{\vkrsignamed}[1]{\underline{\makebox[4.8cm]{\strut #1}}}
+
+% Обычная строка подписи: #1 - роль, #2 - И.О. Фамилия (или пусто)
+\newcommand{\vkrsigrow}[2]{%
+\noindent\makebox[\vkrlabelw][l]{#1}\vkrsigline\hspace{0.4cm}\vkrsignamed{#2}\\[-0.5ex]
+\noindent\makebox[\vkrlabelw][l]{}\makebox[4.8cm][c]{\scriptsize(Подпись, дата)}\hspace{0.4cm}\makebox[4.8cm][c]{\scriptsize(И.О. Фамилия)}\\[0.42em]}
+
+% Строка студента с полем группы
+\noindent\makebox[\vkrlabelw][l]{Студент\hspace{0.7em}\underline{\makebox[2.6cm]{\strut ИУ9-82Б}}}\vkrsigline\hspace{0.4cm}\vkrsignamed{М.А. Аринин}\\[-0.5ex]
+\noindent\makebox[\vkrlabelw][l]{\hspace{1.85cm}\makebox[2.6cm][c]{\scriptsize(Группа)}}\makebox[4.8cm][c]{\scriptsize(Подпись, дата)}\hspace{0.4cm}\makebox[4.8cm][c]{\scriptsize(И.О. Фамилия)}\\[0.42em]
+\vkrsigrow{Руководитель ВКР}{}
+\vkrsigrow{Нормоконтролер}{}
+
+\vfill
+\begin{center}
+\textsl{\the\year{} г.}
+\end{center}

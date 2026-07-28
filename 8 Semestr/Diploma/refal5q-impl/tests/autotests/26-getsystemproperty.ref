@@ -1,0 +1,28 @@
+$EXTERN R5J-GetSystemProperty;
+
+$ENTRY Go {
+  /* пусто */
+    , <R5J-GetSystemProperty 'java.class.path'> : e.ClassPath
+    , <R5J-GetSystemProperty 'file.separator'> : s.FileSep
+    , <R5J-GetSystemProperty 'path.separator'> : s.PathSep
+
+    = <Eq '..' s.FileSep 'lib' s.PathSep 'gen.@@@' (e.ClassPath)>
+
+      <Open 'r' 7 'satellite' s.FileSep '26-getsystemproperty.txt'>
+      <Eq <Get 7> ('Превед, Медвед!')>
+      <Close 7>
+
+      <ShowProperty 'java.version'>
+      <ShowProperty 'os.name'>
+      <ShowProperty 'os.arch'>
+      <ShowProperty 'user.dir'>
+
+      <Eq <R5J-GetSystemProperty 'preved'> ('medved')>
+      <Eq <R5J-GetSystemProperty 'medved'> (null)>;
+}
+
+Eq { e.X (e.X) = }
+
+ShowProperty {
+  e.Name = <Prout e.Name ': "' <R5J-GetSystemProperty e.Name> '"'>;
+}

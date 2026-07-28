@@ -1,0 +1,18 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+match(pattern, expr, env):
+  if pattern пуст и expr пуст: успех
+  if pattern пуст: провал
+  p = pattern.head
+  if p is e.Var:
+    for k from len(expr) down to 0:
+      chunk = expr[0:k]
+      если env[e.Var] уже задан и env[e.Var] != chunk: continue
+      env\PYGZsq{} = env с env[e.Var]=chunk
+      если match(pattern.tail, expr[k:], env\PYGZsq{}): успех
+    провал
+  else:
+    если expr пуст: провал
+    если p — s/t.Var: проверить/задать связывание на один терм
+    иначе p должен совпасть с expr.head
+    продолжить с хвостами
+\end{MintedVerbatim}

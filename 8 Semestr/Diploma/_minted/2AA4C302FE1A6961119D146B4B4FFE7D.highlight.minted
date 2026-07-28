@@ -1,0 +1,22 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@Override}
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{PeekResult}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{separateFront}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{DeepDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{norm}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{normalizeForFront}\PYG{p}{();}\PYG{+w}{      }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{pr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{norm}\PYG{p}{.}\PYG{n+na}{front}\PYG{p}{.}\PYG{n+na}{separateFront}\PYG{p}{();}\PYG{+w}{           }\PYG{c+c1}{// (2)}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{PeekResult}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{pr}\PYG{p}{.}\PYG{n+na}{term}\PYG{p}{(),}
+\PYG{+w}{        }\PYG{n}{mkDeep}\PYG{p}{((}\PYG{n}{ShallowDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{pr}\PYG{p}{.}\PYG{n+na}{rest}\PYG{p}{(),}
+\PYG{+w}{               }\PYG{n}{norm}\PYG{p}{.}\PYG{n+na}{mid}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{norm}\PYG{p}{.}\PYG{n+na}{back}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{sz}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{));}\PYG{+w}{     }\PYG{c+c1}{// (3)}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{DeepDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{normalizeForFront}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{front}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}\PYG{+w}{ }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{;}\PYG{+w}{            }\PYG{c+c1}{// (4)}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{mid}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                         }\PYG{c+c1}{// (5)}
+\PYG{+w}{        }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{pr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{mid}\PYG{p}{.}\PYG{n+na}{separateFront}\PYG{p}{();}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{DeepDeque}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{pr}\PYG{p}{.}\PYG{n+na}{term}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{pr}\PYG{p}{.}\PYG{n+na}{rest}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{back}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{sz}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{back}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                        }\PYG{c+c1}{// (6)}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{DeepDeque}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{back}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{empty}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{empty}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{sz}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{IllegalStateException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}empty but sz \PYGZgt{} 0\PYGZdq{}}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (7)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

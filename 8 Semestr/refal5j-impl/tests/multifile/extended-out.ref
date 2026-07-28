@@ -1,0 +1,32 @@
+$ENTRY Go {
+   = <Prout <Classify 1>> <Prout <Classify 2>> <Prout <Classify 3>>;
+}
+
+Classify {
+  s.N = <Classify_check s.N <Compare s.N 2>>;
+
+  e.Other = <Classify_cont e.Other>;
+}
+
+Classify_check {
+  s.N '-' = Less;
+
+  s.N e.Other = <Classify_cont s.N>;
+}
+
+Classify_cont {
+  s.N = <Classify_check0 s.N <Compare s.N 2>>;
+
+  e.Other = <Classify_cont0 e.Other>;
+}
+
+Classify_check0 {
+  s.N '0' = Equal;
+
+  s.N e.Other = <Classify_cont0 s.N>;
+}
+
+Classify_cont0 {
+  s.N = Greater;
+}
+

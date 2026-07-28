@@ -1,0 +1,15 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{        }\PYG{c+c1}{// leftEvar, !rightEvar: обрабатываем с правого конца}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{expr}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{());}
+\PYG{+w}{        }\PYG{n}{PeekResult}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{pr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{.}\PYG{n+na}{separateBack}\PYG{p}{();}\PYG{+w}{   }\PYG{c+c1}{// (7)}
+\PYG{+w}{        }\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{consumed}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pr}\PYG{p}{.}\PYG{n+na}{term}\PYG{p}{();}
+\PYG{+w}{        }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{rest}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pr}\PYG{p}{.}\PYG{n+na}{rest}\PYG{p}{();}
+\PYG{+w}{        }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{finalPi}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pi}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{newPe}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pe}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{...}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{matchSingleAll}\PYG{p}{(}\PYG{n}{right}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{consumed}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{env}\PYG{p}{,}
+\PYG{+w}{            }\PYG{n}{env1}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{More}\PYG{p}{(}
+\PYG{+w}{                }\PYG{p}{()}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{rec}\PYG{p}{(}\PYG{n}{pat}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{finalPi}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{newPe}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{rest}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{env1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{outerCont}\PYG{p}{)));}\PYG{+w}{ }\PYG{c+c1}{// (8)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

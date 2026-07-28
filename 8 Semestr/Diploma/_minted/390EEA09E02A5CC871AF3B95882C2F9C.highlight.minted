@@ -1,0 +1,17 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{checkNoCallInPattern}\PYG{p}{(}
+\PYG{+w}{        }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{fn}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{ruleIdx}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Iterable}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{pattern}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{t}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{pattern}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{t}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{Call}\PYG{+w}{ }\PYG{n}{c}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                   }\PYG{c+c1}{// (1)}
+\PYG{+w}{            }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{SemanticException}\PYG{p}{(}
+\PYG{+w}{                }\PYG{n}{Kind}\PYG{p}{.}\PYG{n+na}{CALL\PYGZus{}IN\PYGZus{}PATTERN}\PYG{p}{,}
+\PYG{+w}{                }\PYG{l+s}{\PYGZdq{}function \PYGZsq{}\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{fn}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}\PYGZsq{}, rule \PYGZsh{}\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{ruleIdx}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{)}
+\PYG{+w}{                }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}: call \PYGZsq{}\PYGZlt{}\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{c}\PYG{p}{.}\PYG{n+na}{fn}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{} ...\PYGZgt{}\PYGZsq{} not allowed in pattern\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{                }\PYG{n}{fn}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ruleIdx}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{t}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{Br}\PYG{+w}{ }\PYG{n}{br}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                   }\PYG{c+c1}{// (2)}
+\PYG{+w}{            }\PYG{n}{checkNoCallInPattern}\PYG{p}{(}\PYG{n}{fn}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ruleIdx}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{br}\PYG{p}{.}\PYG{n+na}{items}\PYG{p}{());}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

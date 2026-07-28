@@ -1,0 +1,39 @@
+ksi1 - Age
+ksi2 - Pregnancies
+alpha=34.325034, beta=0.04187364
+подтвердилась
+
+ksi1 - Pregnancies
+ksi2 - Age
+alpha=2.1257084e-37, beta=23.88137166
+подтвердилась
+
+ksi1 - Insulin
+ksi2 - SkinThickness
+alpha=0.04468479, beta=1.17508679
+не подтвердилась
+
+ksi1 - SkinThickness
+ksi2 - Insulin
+alpha=14.083655, beta=0.85100097
+не подтвердилась
+
+ksi1 - BMI
+ksi2 - SkinThickness
+alpha=57.393411, beta=0.25305691
+не подтвердилась
+
+ksi1 - SkinThickness
+ksi2 - BMI
+alpha=1.1208297e-07, beta=3.95168024
+не подтвердилась
+
+ksi1 - Age
+ksi2 - BloodPressure
+alpha=24.921986, beta=0.07025702
+подтвердилась
+
+ksi1 - BloodPressure
+ksi2 - Age
+alpha=1.3237488e-20, beta=14.23345364
+подтвердилась

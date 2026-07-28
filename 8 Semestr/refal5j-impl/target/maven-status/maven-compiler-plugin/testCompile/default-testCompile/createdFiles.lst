@@ -1,0 +1,17 @@
+refal\lexer\LexerTest.class
+refal\runtime\BuiltinsTest.class
+refal\AutotestsRunnerTest.class
+refal\runtime\RuntimeIntegrationTest$Fixture.class
+refal\deque\DeepDequeTest.class
+refal\runtime\MatcherTest.class
+refal\deque\ConcatTest.class
+refal\MainTest$Captured.class
+refal\support\Resources.class
+refal\runtime\RuntimeIntegrationTest.class
+refal\deque\ShallowDequeTest.class
+refal\runtime\SubstitutorTest.class
+refal\MainTest.class
+refal\parser\ParserTest.class
+refal\semantic\SemanticTest.class
+refal\ast\AstTest.class
+refal\AutotestsRunnerTest$TestRecord.class

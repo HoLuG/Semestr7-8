@@ -1,0 +1,17 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{k+kd}{class} \PYG{n+nc}{ShallowDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{CAPACITY}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{9}\PYG{p}{;}\PYG{+w}{  }\PYG{c+c1}{// maximum capacity}
+\PYG{+w}{    }\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{MIN\PYGZus{}FILL}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{5}\PYG{p}{;}\PYG{+w}{  }\PYG{c+c1}{// minimum fill after split}
+
+\PYG{+w}{    }\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{n}{Object}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{buf}\PYG{p}{;}\PYG{+w}{  }\PYG{c+c1}{// circular buffer of exactly CAPACITY slots}
+\PYG{+w}{    }\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{head}\PYG{p}{;}\PYG{+w}{      }\PYG{c+c1}{// index of first element}
+\PYG{+w}{    }\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{sz}\PYG{p}{;}\PYG{+w}{        }\PYG{c+c1}{// current size}
+
+\PYG{+w}{    }\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n+nf}{idx}\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n+na}{floorMod}\PYG{p}{(}\PYG{n}{head}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{i}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{CAPACITY}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// circular indexing}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{c+c1}{// pushFront: head = floorMod(head\PYGZhy{}1, CAPACITY); buf[head] = x; sz++}
+\PYG{+w}{    }\PYG{c+c1}{// pushBack:  buf[idx(sz)] = x; sz++}
+\PYG{+w}{    }\PYG{c+c1}{// If buffer full (sz == CAPACITY) \PYGZhy{}\PYGZhy{} create DeepDeque via split}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

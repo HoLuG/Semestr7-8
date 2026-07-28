@@ -1,0 +1,10 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{c+c1}{// Шаг 1: проверка дубликатов функций}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{prog}\PYG{p}{.}\PYG{n+na}{duplicateFuncNames}\PYG{p}{().}\PYG{n+na}{isEmpty}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{        }\PYG{c+c1}{// (2)}
+\PYG{+w}{        }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{name}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{prog}\PYG{p}{.}\PYG{n+na}{duplicateFuncNames}\PYG{p}{().}\PYG{n+na}{iterator}\PYG{p}{().}\PYG{n+na}{next}\PYG{p}{();}
+\PYG{+w}{        }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{SemanticException}\PYG{p}{(}
+\PYG{+w}{            }\PYG{n}{Kind}\PYG{p}{.}\PYG{n+na}{DUPLICATE\PYGZus{}FUNCTION}\PYG{p}{,}
+\PYG{+w}{            }\PYG{l+s}{\PYGZdq{}duplicate function definition: \PYGZsq{}\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{name}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}\PYGZsq{}\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{            }\PYG{n}{name}\PYG{p}{,}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="refal.semantic.SemanticTest" time="0.051" tests="12" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="25"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="Cp1251"/>
+    <property name="java.class.path" value="D:\Programming\Projects\8 Semestr\Diploma\refal5q-impl\target\test-classes;D:\Programming\Projects\8 Semestr\Diploma\refal5q-impl\target\classes;C:\Users\User\.m2\repository\org\junit\jupiter\junit-jupiter\5.11.3\junit-jupiter-5.11.3.jar;C:\Users\User\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.11.3\junit-jupiter-api-5.11.3.jar;C:\Users\User\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\User\.m2\repository\org\junit\platform\junit-platform-commons\1.11.3\junit-platform-commons-1.11.3.jar;C:\Users\User\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.11.3\junit-jupiter-engine-5.11.3.jar;C:\Users\User\.m2\repository\org\junit\platform\junit-platform-engine\1.11.3\junit-platform-engine-1.11.3.jar;C:\Users\User\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.11.3\junit-jupiter-params-5.11.3.jar;C:\Users\User\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\User\.m2\repository\org\assertj\assertj-core\3.26.3\assertj-core-3.26.3.jar;C:\Users\User\.m2\repository\net\bytebuddy\byte-buddy\1.14.18\byte-buddy-1.14.18.jar;"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Europe/Moscow"/>
+    <property name="os.name" value="Windows 10"/>
+    <property name="java.vm.specification.version" value="25"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="RU"/>
+    <property name="sun.boot.library.path" value="D:\Iterpretators\jdk-25\bin"/>
+    <property name="sun.java.command" value="C:\Users\User\AppData\Local\Temp\surefire13882722333898081774\surefirebooter-20260619013230645_3.jar C:\Users\User\AppData\Local\Temp\surefire13882722333898081774 2026-06-19T01-32-30_541-jvmRun1 surefire-20260619013230645_1tmp surefire_0-20260619013230645_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="D:\Programming\Projects\8 Semestr\Diploma\refal5q-impl\target\test-classes;D:\Programming\Projects\8 Semestr\Diploma\refal5q-impl\target\classes;C:\Users\User\.m2\repository\org\junit\jupiter\junit-jupiter\5.11.3\junit-jupiter-5.11.3.jar;C:\Users\User\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.11.3\junit-jupiter-api-5.11.3.jar;C:\Users\User\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\User\.m2\repository\org\junit\platform\junit-platform-commons\1.11.3\junit-platform-commons-1.11.3.jar;C:\Users\User\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.11.3\junit-jupiter-engine-5.11.3.jar;C:\Users\User\.m2\repository\org\junit\platform\junit-platform-engine\1.11.3\junit-platform-engine-1.11.3.jar;C:\Users\User\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.11.3\junit-jupiter-params-5.11.3.jar;C:\Users\User\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\User\.m2\repository\org\assertj\assertj-core\3.26.3\assertj-core-3.26.3.jar;C:\Users\User\.m2\repository\net\bytebuddy\byte-buddy\1.14.18\byte-buddy-1.14.18.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\User"/>
+    <property name="user.language" value="ru"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2026-04-21"/>
+    <property name="java.home" value="D:\Iterpretators\jdk-25"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="D:\Programming\Projects\8 Semestr\Diploma\refal5q-impl"/>
+    <property name="java.vm.compressedOopsMode" value="32-bit"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="surefire.real.class.path" value="C:\Users\User\AppData\Local\Temp\surefire13882722333898081774\surefirebooter-20260619013230645_3.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="25.0.3+9-LTS-195"/>
+    <property name="user.name" value="User"/>
+    <property name="stdout.encoding" value="Cp1251"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="localRepository" value="C:\Users\User\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="C:\Users\User\AppData\Local\Temp\"/>
+    <property name="java.version" value="25.0.3"/>
+    <property name="user.dir" value="D:\Programming\Projects\8 Semestr\Diploma\refal5q-impl"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="native.encoding" value="Cp1251"/>
+    <property name="java.library.path" value="D:\Iterpretators\jdk-25\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;%JAVA_HOME%\bin;C:\Program Files\Microsoft MPI\Bin\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\dotnet\;D:\msys\mingw64\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;D:\Programming\Go\bin;C:\Program Files\CMake\bin;D:\Open\install\bin;C:\Program Files\Git\cmd;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files\Microsoft SQL Server\110\DTS\Binn\;C:\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn\ManagementStudio\;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PrivateAssemblies\;C:\Program Files (x86)\Microsoft SQL Server\110\DTS\Binn\;D:\Iterpretators\kotlinc\bin;C:\Program Files\Java\jdk-23\bin;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;D:\gnuplot\bin;C:\Program Files\Docker\Docker\resources\bin;D:\texlive\2025\bin\windows;D:\Windows Kits\10\Windows Performance Toolkit\;D:\cursor\resources\app\bin;D:\Iterpretators\refal5;C:\Users\User\.local\bin;D:\Iterpretators\jdk-25\bin;D:\Iterpretators\apache-maven-3.9.15\bin;D:\Iterpretators\Python3.13\Scripts\;D:\Iterpretators\Python3.13\;D:\Iterpretators\Python3.11\Scripts;D:\Iterpretators\Python3.11\;C:\Users\User\AppData\Local\Microsoft\WindowsApps;C:\Users\User\.dotnet\tools;C:\Users\User\AppData\Local\JetBrains\Toolbox\scripts;D:\Microsoft VS Code\bin;D:\Iterpretators\msys\mingw64\bin;C:\Users\User\AppData\Local\Microsoft\WindowsApps;D:\Iterpretators\Go\go1.20\bin;D:\Programming\IntelliJ IDEA Community Edition 2024.3\bin;C:\Program Files\Graphviz\bin;C:\Users\User\AppData\Local\Programs\julia-1.11.2\bin;C:\Users\User\.dotnet\tools;C:\Users\User\AppData\Local\Coursier\data\bin;C:\GnuWin32\bin;D:\Programming\CLion 2024.3.5\bin;;D:\Iterpretators\Java\bin;D:\flutter\bin;D:\ffmpeg\bin;D:\cursor2\resources\app\bin;;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="Cp1251"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="25.0.3+9-LTS-195"/>
+    <property name="stdin.encoding" value="Cp1251"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="69.0"/>
+  </properties>
+  <testcase name="okProgramReportsResolvedEntry" classname="refal.semantic.SemanticTest" time="0.003"/>
+  <testcase name="undefinedCallRejected" classname="refal.semantic.SemanticTest" time="0.002"/>
+  <testcase name="duplicateFunctionRejected" classname="refal.semantic.SemanticTest" time="0.001"/>
+  <testcase name="externDeclaredCallIsAccepted" classname="refal.semantic.SemanticTest" time="0.001"/>
+  <testcase name="unboundResultVariableRejected" classname="refal.semantic.SemanticTest" time="0.001"/>
+  <testcase name="badSemanticFixtureMatchesExpectedKind(String, String)[1]" classname="refal.semantic.SemanticTest" time="0.003"/>
+  <testcase name="badSemanticFixtureMatchesExpectedKind(String, String)[2]" classname="refal.semantic.SemanticTest" time="0.001"/>
+  <testcase name="badSemanticFixtureMatchesExpectedKind(String, String)[3]" classname="refal.semantic.SemanticTest" time="0.001"/>
+  <testcase name="badSemanticFixtureMatchesExpectedKind(String, String)[4]" classname="refal.semantic.SemanticTest" time="0.001"/>
+  <testcase name="overrideEntryWins" classname="refal.semantic.SemanticTest" time="0.0"/>
+  <testcase name="userFunctionShadowingBuiltinRejected" classname="refal.semantic.SemanticTest" time="0.001"/>
+  <testcase name="undefinedEntryRejected" classname="refal.semantic.SemanticTest" time="0.0"/>
+</testsuite>

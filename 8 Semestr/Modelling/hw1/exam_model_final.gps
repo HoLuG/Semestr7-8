@@ -1,0 +1,102 @@
+* Моделирование сдачи зачета студентами (FIFO, без приоритета пересдач)
+* Меняй только NSTUD для сценариев 60/80/100
+
+NSTUD      EQU 60
+DAYCAP     EQU 20
+MAXDAY     EQU 6
+
+SIMULATE
+
+INIT        GENERATE 0,0,0,1
+            SAVEVALUE PASSED,0
+            SAVEVALUE DAYUSED,0
+            SAVEVALUE CURDAY,1
+            TERMINATE
+
+* Все студенты приходят в систему в начале (день 1)
+NEW_ALL     GENERATE 0,0,0,NSTUD
+            ASSIGN 1,1
+            ASSIGN 2,0
+            TRANSFER ,WAIT_SLOT
+
+* Общая FIFO-очередь: и новые, и пересдачи попадают в один и тот же поток
+WAIT_SLOT   TEST LE X$CURDAY,MAXDAY,TIME_OVER
+            TEST L X$DAYUSED,DAYCAP,WAIT_NEXT
+            TRANSFER ,ENTER_EXAM
+
+* Мест на текущий день нет -> ждем и снова проверяем
+WAIT_NEXT   ADVANCE 0.01
+            TRANSFER ,WAIT_SLOT
+
+ENTER_EXAM  SAVEVALUE DAYUSED+,1
+            TEST E P2,0,NOT_FIRST
+
+* Первая попытка: запоминаем день первой попытки в P2
+FIRST_ATT   ASSIGN 2,X$CURDAY
+            TRANSFER ,ATTEMPT_1
+
+NOT_FIRST   TEST E P1,2,CHECK_ATT_3
+            TRANSFER ,ATTEMPT_2
+
+CHECK_ATT_3 TEST E P1,3,BAD_ATTEMPT
+            TRANSFER ,ATTEMPT_3
+
+BAD_ATTEMPT TERMINATE
+
+* В GPSS TRANSFER A,B,C: переход в C с вероятностью A, иначе в B
+* Поэтому C = успех, B = неуспех
+ATTEMPT_1   TRANSFER 0.6,FAILED_1,PASSED_OK
+ATTEMPT_2   TRANSFER 0.25,FAILED_2,PASSED_OK
+ATTEMPT_3   TRANSFER 0.1,FINAL_FAIL,PASSED_OK
+
+PASSED_OK   SAVEVALUE PASSED+,1
+            TERMINATE
+
+* После неуспеха -> в конец общей FIFO-очереди, не ранее чем через 1 день
+FAILED_1    TEST L X$CURDAY,MAXDAY,NO_RETRY_2
+            ASSIGN 1,2
+            ADVANCE 1.01
+            TRANSFER ,WAIT_SLOT
+
+NO_RETRY_2  TERMINATE
+
+FAILED_2    TEST L X$CURDAY,MAXDAY,NO_RETRY_3
+            ASSIGN 1,3
+            ADVANCE 1.01
+            TRANSFER ,WAIT_SLOT
+
+NO_RETRY_3  TERMINATE
+
+FINAL_FAIL  TERMINATE
+TIME_OVER   TERMINATE
+
+* Начало нового дня: сброс счетчика дневных попыток
+DAY_START   GENERATE 1,0,1,5
+            SAVEVALUE DAYUSED,0
+            SAVEVALUE CURDAY+,1
+            TERMINATE
+
+END_SIM     GENERATE 0,0,MAXDAY,1
+            TERMINATE 1
+
+* ------------------------------------------------------------
+* Серии прогонов (выполняются командами в GPSS World):
+* 1) Установи NSTUD = 60 (или 80, 100), затем Translate
+* 2) Выполни 10-30 запусков с разными seed через RMULT:
+*
+* CLEAR
+* RMULT 1,10101
+* START 1
+* CLEAR
+* RMULT 1,10102
+* START 1
+* CLEAR
+* RMULT 1,10103
+* START 1
+* ...
+*
+* Для N=80 и N=100:
+* - поменяй NSTUD,
+* - снова Translate,
+* - повтори серию RMULT/START.
+* ------------------------------------------------------------

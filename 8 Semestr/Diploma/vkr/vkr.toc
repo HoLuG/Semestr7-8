@@ -1,0 +1,61 @@
+\babel@toc {russian}{}\relax 
+\contentsline {section}{ВВЕДЕНИЕ}{5}{section*.1}%
+\contentsline {section}{\numberline {1}Исследовательская часть}{7}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Программа, функции и предложения}{7}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Объектные выражения, термы и символы}{7}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Неоднозначное сопоставление}{8}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Объектное выражение как абстрактный тип}{9}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Классическое (плоское двусвязное) представление}{10}{subsection.1.5}%
+\contentsline {subsection}{\numberline {1.6}Компромиссное представление с подвешенными скобками}{11}{subsection.1.6}%
+\contentsline {subsection}{\numberline {1.7}Массивное представление}{12}{subsection.1.7}%
+\contentsline {subsection}{\numberline {1.8}Векторно-списковое представление}{13}{subsection.1.8}%
+\contentsline {subsection}{\numberline {1.9}Гипотетическое представление: дерево конкатенаций}{14}{subsection.1.9}%
+\contentsline {subsection}{\numberline {1.10}Предлагаемое представление: раскрученная двусторонняя очередь}{14}{subsection.1.10}%
+\contentsline {subsubsection}{\numberline {1.10.1}Структура мелкого и глубокого уровней}{15}{subsubsection.1.10.1}%
+\contentsline {subsubsection}{\numberline {1.10.2}Краткое обоснование амортизированных оценок}{16}{subsubsection.1.10.2}%
+\contentsline {subsubsection}{\numberline {1.10.3}Сводное сравнение представлений}{16}{subsubsection.1.10.3}%
+\contentsline {subsubsection}{\numberline {1.10.4}Область применимости и ограничения}{17}{subsubsection.1.10.4}%
+\contentsline {subsection}{\numberline {1.11}Выводы по разделу}{17}{subsection.1.11}%
+\contentsline {section}{\numberline {2}Конструкторская часть}{19}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Функциональные требования}{19}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Архитектура и потоки данных}{19}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Внутренние представления данных}{20}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Интерфейс контейнера выражений}{21}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Декомпозиция на модули}{21}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Модель выполнения и точки расширения}{22}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Нефункциональные требования}{22}{subsection.2.7}%
+\contentsline {subsection}{\numberline {2.8}Обработка ошибок и форматы сообщений}{23}{subsection.2.8}%
+\contentsline {subsection}{\numberline {2.9}Выбор и сокращение встроенной библиотеки}{23}{subsection.2.9}%
+\contentsline {subsection}{\numberline {2.10}Представление термов и вложенность}{23}{subsection.2.10}%
+\contentsline {subsection}{\numberline {2.11}Окружение сопоставления и представление подстановок}{24}{subsection.2.11}%
+\contentsline {subsection}{\numberline {2.12}Требования к механизму сопоставления}{24}{subsection.2.12}%
+\contentsline {subsection}{\numberline {2.13}Сценарии использования системы}{25}{subsection.2.13}%
+\contentsline {section}{\numberline {3}Технологическая часть}{26}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Инструкция пользователя}{26}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Структура данных: раскрученная двусторонняя очередь}{28}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Цикл нормализации}{31}{subsection.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.1}Поле зрения и иерархия ViewTerm}{31}{subsubsection.3.3.1}%
+\contentsline {subsubsection}{\numberline {3.3.2}Двустековая реализация нормализатора}{32}{subsubsection.3.3.2}%
+\contentsline {subsubsection}{\numberline {3.3.3}Оптимизация BulkPassive}{34}{subsubsection.3.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.4}Укладка правой части правила}{35}{subsubsection.3.3.4}%
+\contentsline {section}{\numberline {4}Аналитическая часть}{38}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Стратегия тестирования}{38}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Состав тестов}{38}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Юнит-тесты раскрученной очереди}{39}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Юнит-тесты лексера, парсера и семантики}{39}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.2.3}Юнит-тесты исполнения}{40}{subsubsection.4.2.3}%
+\contentsline {subsubsection}{\numberline {4.2.4}Интеграционные тесты и тесты совместимости}{40}{subsubsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.3}Покрытие кода}{41}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Сравнительные прогоны}{42}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Условия измерений}{42}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}Тестовая программа и методика измерений}{42}{subsubsection.4.4.2}%
+\contentsline {subsubsection}{\numberline {4.4.3}Результаты Loop/Select}{43}{subsubsection.4.4.3}%
+\contentsline {subsubsection}{\numberline {4.4.4}Тест на реальной программе: рассахариватель}{44}{subsubsection.4.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.5}Методика и результаты рассахаривателя}{45}{subsubsection.4.4.5}%
+\contentsline {subsubsection}{\numberline {4.4.6}Обсуждение результатов}{45}{subsubsection.4.4.6}%
+\contentsline {section}{ЗАКЛЮЧЕНИЕ}{48}{section*.15}%
+\contentsline {section}{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}{51}{section*.16}%
+\contentsline {section}{ПРИЛОЖЕНИЕ А}{53}{section*.17}%
+\contentsline {section}{ПРИЛОЖЕНИЕ Б}{55}{section*.23}%
+\contentsline {section}{ПРИЛОЖЕНИЕ В}{62}{section*.29}%
+\contentsline {section}{ПРИЛОЖЕНИЕ Г}{64}{section*.36}%

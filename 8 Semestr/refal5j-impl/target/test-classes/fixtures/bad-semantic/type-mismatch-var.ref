@@ -1,0 +1,6 @@
+$ENTRY Main;
+
+* Variable named 'X' used as both s.X (in pattern) and e.X (in result).
+Main {
+  s.X = e.X;
+}

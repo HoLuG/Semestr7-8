@@ -1,0 +1,95 @@
+N_LINEAGES = 5
+WARMUP_MUTATIONS = 0  # как в исходном варианте: стартуем из "точки"
+lw_r = isdefined(Main, :LINE_HALF_WIDTH) ? LINE_HALF_WIDTH : 0
+ref_genes = Int[2, 1, -3, 4, 2, -5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9, 2, 1]
+target_r = biomorph_raster(ref_genes; line_half_width = lw_r)
+
+# Старт из "точки": все направления 0, Lrec минимальный.
+line0 = Int[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0]
+ref_rgb = (ref_genes[BASE_GENE_COUNT+1], ref_genes[BASE_GENE_COUNT+2], ref_genes[BASE_GENE_COUNT+3])
+Ft_r = isdefined(Main, :Ft) ? Ft : (isdefined(Main, :FITNESS) ? FITNESS : NCC)
+Npop_r = isdefined(Main, :N_POP) ? N_POP : 24
+inits_r = Vector{Vector{Int}}(undef, N_LINEAGES)
+
+for c in 1:N_LINEAGES
+    g = copy(line0)
+    rng_w = Random.Xoshiro(10_000 + c)
+
+    # Разные стартовые цвета.
+    for i in (BASE_GENE_COUNT + 1):GENE_COUNT
+        g[i] = rand(rng_w, 0:9)
+    end
+
+    for _ in 1:WARMUP_MUTATIONS
+        g = mutate_one(g, rng_w)
+    end
+
+    inits_r[c] = g
+end
+RACE_MAX_GEN = 45
+RACE_STAG = 18
+runs_r = map(1:N_LINEAGES) do c
+    evolve_biomorph(
+        target_r;
+        N = Npop_r,
+        max_stagnation = RACE_STAG,
+        max_generations = RACE_MAX_GEN,
+        mode = Ft_r,
+        init = inits_r[c],
+        rng = Random.Xoshiro(20_000 + c),
+        line_half_width = lw_r,
+        target_color = ref_rgb,
+        colorλ = 20.0,
+        color_ramp_gens = 20,
+        color_mut_p = 0.25,
+        early_stop_offspring = false,
+        fitness_goal = nothing,
+    )
+end
+function _biomorph_heatmap_plain(genes::Vector{Int}; lw::Int = 0, px::Int = 120)
+    heatmap(
+        biomorph_image(genes; line_half_width = lw);
+        aspect_ratio = 1,
+        colorbar = false,
+        ticks = false,
+        showaxis = false,
+        grid = false,
+        legend = false,
+        framestyle = :none,
+        widen = false,
+        size = (px, px),
+    )
+end
+HM_TARGET = 400
+showplot(_biomorph_heatmap_plain(ref_genes; lw = lw_r, px = HM_TARGET))
+
+function _state_at_row(r, row::Int)
+    h = r.history_genes
+    h[min(row, length(h))]
+end
+Lmax = maximum(length.(getproperty.(runs_r, :history_genes)))
+HM_CELL = 240
+ROWS_PER_PAGE = 10
+pages = cld(Lmax, ROWS_PER_PAGE)
+for p in 1:pages
+    row_start = (p - 1) * ROWS_PER_PAGE + 1
+    row_end = min(Lmax, p * ROWS_PER_PAGE)
+    nrows = row_end - row_start + 1
+    tab_cells = []
+    for row in row_start:row_end
+        for c in 1:N_LINEAGES
+            g = _state_at_row(runs_r[c], row)
+            push!(
+                tab_cells,
+                _biomorph_heatmap_plain(g; lw = lw_r, px = HM_CELL),
+            )
+        end
+    end
+    p_table = plot(
+        tab_cells...;
+        layout = (nrows, N_LINEAGES),
+        size = (N_LINEAGES * HM_CELL, nrows * HM_CELL),
+        plot_title = "",
+    )
+    showplot(p_table)
+end

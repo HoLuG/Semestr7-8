@@ -1,0 +1,10 @@
+$ENTRY Main;
+
+* '<F ...>' must not appear in pattern.
+Main {
+  <Foo s.X> = s.X;
+}
+
+Foo {
+  s.X = s.X;
+}

@@ -1,0 +1,168 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{refal_book}{online}{}{}
+      \list{language}{1}{%
+        {english}%
+      }
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{{REFAL-5: Programming Guide \& Reference Manual}}
+      \field{urlday}{28}
+      \field{urlmonth}{3}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb http://refal.botik.ru/book/html/
+      \endverb
+      \verb{url}
+      \verb http://refal.botik.ru/book/html/
+      \endverb
+    \endentry
+    \entry{refal05_site}{online}{}{}
+      \list{language}{1}{%
+        {russian}%
+      }
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{media}{eresource}
+      \field{title}{Документация Refal-05}
+      \field{urlday}{3}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://mazdaywik.github.io/Refal-05/
+      \endverb
+      \verb{url}
+      \verb https://mazdaywik.github.io/Refal-05/
+      \endverb
+    \endentry
+    \entry{skorobogatov_repr}{unpublished}{}{}
+      \name{author}{1}{}{%
+        {{hash=cb7e85b9db3cf0eebcbc8756d986dea6}{%
+           family={Скоробогатов},
+           familyi={С\bibinitperiod},
+           given={С.\bibnamedelimi Ю.},
+           giveni={С\bibinitperiod\bibinitdelim Ю\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {russian}%
+      }
+      \strng{namehash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{fullhash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{fullhashraw}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{bibnamehash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{authorbibnamehash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{authornamehash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{authorfullhash}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \strng{authorfullhashraw}{cb7e85b9db3cf0eebcbc8756d986dea6}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Рукопись}
+      \field{title}{Реализация Рефал-компилятора. Представление данных и язык сборки}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2026}
+      \field{year}{2008}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://bmstu-iu9.github.io/
+      \endverb
+      \verb{url}
+      \verb https://bmstu-iu9.github.io/
+      \endverb
+    \endentry
+    \entry{abramov_romanenko_1988}{report}{}{}
+      \name{author}{2}{}{%
+        {{hash=5b9ea7e2d0f57c53e1b2800609179de2}{%
+           family={Абрамов},
+           familyi={А\bibinitperiod},
+           given={С.\bibnamedelimi М.},
+           giveni={С\bibinitperiod\bibinitdelim М\bibinitperiod}}}%
+        {{hash=42ca2fb8cf265eae1c938a4efa2949ee}{%
+           family={Романенко},
+           familyi={Р\bibinitperiod},
+           given={С.\bibnamedelimi А.},
+           giveni={С\bibinitperiod\bibinitdelim А\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {ИПМ им. М. В. Келдыша АН СССР}%
+      }
+      \list{language}{1}{%
+        {russian}%
+      }
+      \strng{namehash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{fullhash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{fullhashraw}{4eac64f707a071f812d1104a8486e30a}
+      \strng{bibnamehash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{authorbibnamehash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{authornamehash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{authorfullhash}{4eac64f707a071f812d1104a8486e30a}
+      \strng{authorfullhashraw}{4eac64f707a071f812d1104a8486e30a}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Представление объектных выражений массивами при реализации языка Рефал}
+      \field{type}{techreport}
+      \field{year}{1988}
+      \field{number}{186}
+      \range{number}{1}
+    \endentry
+    \entry{okasaki_pfds}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=e4e76cfb2d550f0048c93839f784f76d}{%
+           family={Okasaki},
+           familyi={O\bibinitperiod},
+           given={Chris},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {english}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{fullhash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{fullhashraw}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{bibnamehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authorbibnamehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authornamehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authorfullhash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authorfullhashraw}{e4e76cfb2d550f0048c93839f784f76d}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Purely Functional Data Structures}
+      \field{year}{1998}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

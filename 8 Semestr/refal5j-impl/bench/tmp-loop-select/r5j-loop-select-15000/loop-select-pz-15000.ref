@@ -1,0 +1,12 @@
+$ENTRY Go {
+  = <Loop Left () 15000>;
+}
+Loop {
+  s.Side (e.Acc) 0 = ;
+  s.Side (e.Acc) s.Rest
+    = <Loop <Select s.Side (e.Acc A) (e.Acc B)> <Sub s.Rest 1>>;
+}
+Select {
+  Left  t.Left t.Right = Right t.Left;
+  Right t.Left t.Right = Left  t.Right;
+}

@@ -1,0 +1,14 @@
+$ENTRY Go {
+  = <Reverse <RangeUp 1 300>>;
+}
+Reverse {
+  = ;
+  s.X e.Rest = <Reverse e.Rest> s.X;
+}
+RangeUp {
+  s.From s.To = <ConsBy <Compare s.From s.To> s.From s.To>;
+}
+ConsBy {
+  '+' s.From s.To = ;
+  s.Op  s.From s.To = s.From <RangeUp <Add s.From 1> s.To>;
+}

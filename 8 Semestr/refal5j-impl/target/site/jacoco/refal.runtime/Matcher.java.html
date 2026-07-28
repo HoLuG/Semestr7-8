@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Matcher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.runtime</a> &gt; <span class="el_source">Matcher.java</span></div><h1>Matcher.java</h1><pre class="source lang-java linenums">package refal.runtime;
+
+import refal.ast.Br;
+import refal.ast.EVar;
+import refal.ast.SVar;
+import refal.ast.TVar;
+import refal.ast.Term;
+import refal.ast.Var;
+import refal.deque.Expr;
+import refal.deque.PeekResult;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+
+public final class Matcher {
+
+    private Matcher() {
+    }
+
+    private sealed interface Thunk permits Thunk.Done, Thunk.More {
+<span class="fc" id="L25">        record Done(Optional&lt;Bindings&gt; value) implements Thunk {}</span>
+<span class="fc" id="L26">        record More(Supplier&lt;Thunk&gt; next) implements Thunk {}</span>
+
+        static Optional&lt;Bindings&gt; run(Thunk start) {
+<span class="fc" id="L29">            Thunk t = start;</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">            while (t instanceof More m) {</span>
+<span class="fc" id="L31">                t = m.next().get();</span>
+            }
+<span class="fc" id="L33">            return ((Done) t).value();</span>
+        }
+    }
+
+    // ---- Публичный API --------------------------------------------------
+
+    public static Optional&lt;Bindings&gt; match(List&lt;Term&gt; pattern, List&lt;Term&gt; expr) {
+<span class="fc" id="L40">        return match(pattern, Expr.fromList(expr));</span>
+    }
+
+    public static Optional&lt;Bindings&gt; match(List&lt;Term&gt; pattern, Expr&lt;Term&gt; expr) {
+<span class="fc" id="L44">        return Thunk.run(rec(pattern, 0, pattern.size(), expr, Bindings.empty(),</span>
+<span class="fc" id="L45">                env -&gt; new Thunk.Done(Optional.of(env))));</span>
+    }
+
+    // ---- Ядро -----------------------------------------------------------
+
+    private static Thunk rec(
+            List&lt;Term&gt; pat, int pi, int pe,
+            Expr&lt;Term&gt; expr, Bindings env,
+            Function&lt;Bindings, Thunk&gt; cont) {
+
+        // Двусторонняя «прогонка»: пока хотя бы один конец — не e-переменная.
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        while (pi &lt; pe) {</span>
+<span class="fc" id="L57">            Term left = pat.get(pi);</span>
+<span class="fc" id="L58">            Term right = pat.get(pe - 1);</span>
+
+<span class="fc" id="L60">            boolean leftEvar = left instanceof EVar;</span>
+<span class="fc" id="L61">            boolean rightEvar = right instanceof EVar;</span>
+
+<span class="fc bfc" id="L63" title="All 4 branches covered.">            if (leftEvar &amp;&amp; rightEvar) {</span>
+<span class="fc" id="L64">                break;</span>
+            }
+
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            if (!leftEvar) {</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">                if (expr.isEmpty()) {</span>
+<span class="fc" id="L69">                    return new Thunk.Done(Optional.empty());</span>
+                }
+<span class="fc" id="L71">                PeekResult&lt;Term&gt; pr = expr.separateFront();</span>
+<span class="fc" id="L72">                Term consumed = pr.term();</span>
+<span class="fc" id="L73">                Expr&lt;Term&gt; rest = pr.rest();</span>
+<span class="fc" id="L74">                final int newPi = pi + 1;</span>
+<span class="fc" id="L75">                final int finalPe = pe;</span>
+<span class="fc" id="L76">                final Expr&lt;Term&gt; finalRest = rest;</span>
+<span class="fc" id="L77">                final Function&lt;Bindings, Thunk&gt; outerCont = cont;</span>
+<span class="fc" id="L78">                return matchSingleAll(left, consumed, env,</span>
+<span class="fc" id="L79">                        env1 -&gt; new Thunk.More(</span>
+<span class="fc" id="L80">                                () -&gt; rec(pat, newPi, finalPe, finalRest, env1, outerCont)));</span>
+            }
+            // leftEvar, !rightEvar
+<span class="fc bfc" id="L83" title="All 2 branches covered.">            if (expr.isEmpty()) {</span>
+<span class="fc" id="L84">                return new Thunk.Done(Optional.empty());</span>
+            }
+<span class="fc" id="L86">            PeekResult&lt;Term&gt; pr = expr.separateBack();</span>
+<span class="fc" id="L87">            Term consumed = pr.term();</span>
+<span class="fc" id="L88">            Expr&lt;Term&gt; rest = pr.rest();</span>
+<span class="fc" id="L89">            final int finalPi = pi;</span>
+<span class="fc" id="L90">            final int newPe = pe - 1;</span>
+<span class="fc" id="L91">            final Expr&lt;Term&gt; finalRest = rest;</span>
+<span class="fc" id="L92">            final Function&lt;Bindings, Thunk&gt; outerCont = cont;</span>
+<span class="fc" id="L93">            return matchSingleAll(right, consumed, env,</span>
+<span class="fc" id="L94">                    env1 -&gt; new Thunk.More(</span>
+<span class="fc" id="L95">                            () -&gt; rec(pat, finalPi, newPe, finalRest, env1, outerCont)));</span>
+        }
+
+        // Образец исчерпан.
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        if (pi == pe) {</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">            return expr.isEmpty()</span>
+<span class="fc" id="L101">                    ? cont.apply(env)</span>
+<span class="fc" id="L102">                    : new Thunk.Done(Optional.empty());</span>
+        }
+
+<span class="fc" id="L105">        EVar leftV = (EVar) pat.get(pi);</span>
+<span class="fc" id="L106">        String key = leftV.key();</span>
+
+        // Ровно одна e-переменная в остатке.
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        if (pi == pe - 1) {</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">            if (env.contains(key)) {</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">                if (!Bindings.equalExprs(env.get(key), expr)) {</span>
+<span class="fc" id="L112">                    return new Thunk.Done(Optional.empty());</span>
+                }
+<span class="fc" id="L114">                return cont.apply(env);</span>
+            }
+<span class="fc" id="L116">            return cont.apply(env.with(key, expr));</span>
+        }
+
+        // Несколько e-переменных: повторное вхождение — длина зафиксирована.
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        if (env.contains(key)) {</span>
+<span class="fc" id="L121">            Expr&lt;Term&gt; bound = env.get(key);</span>
+<span class="fc" id="L122">            int len = bound.size();</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">            if (expr.size() &lt; len) {</span>
+<span class="nc" id="L124">                return new Thunk.Done(Optional.empty());</span>
+            }
+<span class="fc" id="L126">            Expr&lt;Term&gt; consumed = takeFront(expr, len);</span>
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">            if (!Bindings.equalExprs(consumed, bound)) {</span>
+<span class="nc" id="L128">                return new Thunk.Done(Optional.empty());</span>
+            }
+<span class="fc" id="L130">            Expr&lt;Term&gt; rest = dropFront(expr, len);</span>
+<span class="fc" id="L131">            return new Thunk.More(() -&gt; rec(pat, pi + 1, pe, rest, env, cont));</span>
+        }
+
+        // Свежая e-переменная: перебор длин 0..size.
+<span class="fc" id="L135">        return tryEVar(pat, pi, pe, key, Expr.empty(), expr, env, cont);</span>
+    }
+
+    // Перебирает длины для свежей e-переменной итеративно через Thunk,
+    // не рекурсивно — глубина стека O(1).
+    private static Thunk tryEVar(
+            List&lt;Term&gt; pat, int pi, int pe,
+            String key,
+            Expr&lt;Term&gt; consumed, Expr&lt;Term&gt; remaining,
+            Bindings env,
+            Function&lt;Bindings, Thunk&gt; cont) {
+
+<span class="fc" id="L147">        Bindings env1 = env.with(key, consumed);</span>
+<span class="fc" id="L148">        Function&lt;Bindings, Thunk&gt; outerCont = cont;</span>
+<span class="fc" id="L149">        Thunk attempt = new Thunk.More(</span>
+<span class="fc" id="L150">                () -&gt; rec(pat, pi + 1, pe, remaining, env1, outerCont));</span>
+        // Вычисляем немедленно, чтобы можно было перейти к следующей длине
+        // если attempt вернул empty. «Немедленно» — значит через run одного шага.
+<span class="fc" id="L153">        Optional&lt;Bindings&gt; r = Thunk.run(attempt);</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if (r.isPresent()) {</span>
+<span class="fc" id="L155">            return new Thunk.Done(r);</span>
+        }
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (remaining.isEmpty()) {</span>
+<span class="fc" id="L158">            return new Thunk.Done(Optional.empty());</span>
+        }
+<span class="fc" id="L160">        PeekResult&lt;Term&gt; pr = remaining.separateFront();</span>
+<span class="fc" id="L161">        Expr&lt;Term&gt; newConsumed = consumed.pushBack(pr.term());</span>
+<span class="fc" id="L162">        Expr&lt;Term&gt; newRemaining = pr.rest();</span>
+<span class="fc" id="L163">        return new Thunk.More(</span>
+<span class="fc" id="L164">                () -&gt; tryEVar(pat, pi, pe, key, newConsumed, newRemaining, env, cont));</span>
+    }
+
+    // Сопоставление одного терма; при успехе вызывает cont. При скобках —
+    // передаёт cont во внутренний rec, чтобы backtracking уходил вглубь.
+    private static Thunk matchSingleAll(
+            Term p, Term x, Bindings env,
+            Function&lt;Bindings, Thunk&gt; cont) {
+
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        if (p instanceof Var v) {</span>
+<span class="fc" id="L174">            String key = v.key();</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">            if (v instanceof SVar) {</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">                if (x instanceof Br) {</span>
+<span class="fc" id="L177">                    return new Thunk.Done(Optional.empty());</span>
+                }
+<span class="fc bfc" id="L179" title="All 2 branches covered.">                if (env.contains(key)) {</span>
+<span class="fc" id="L180">                    Expr&lt;Term&gt; bound = env.get(key);</span>
+<span class="pc bpc" id="L181" title="1 of 4 branches missed.">                    if (bound.size() != 1 || !singleEquals(bound, x)) {</span>
+<span class="fc" id="L182">                        return new Thunk.Done(Optional.empty());</span>
+                    }
+<span class="fc" id="L184">                    return cont.apply(env);</span>
+                }
+<span class="fc" id="L186">                return cont.apply(env.with(key, Expr.singleton(x)));</span>
+            }
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">            if (v instanceof TVar) {</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">                if (env.contains(key)) {</span>
+<span class="fc" id="L190">                    Expr&lt;Term&gt; bound = env.get(key);</span>
+<span class="pc bpc" id="L191" title="1 of 4 branches missed.">                    if (bound.size() != 1 || !singleEquals(bound, x)) {</span>
+<span class="fc" id="L192">                        return new Thunk.Done(Optional.empty());</span>
+                    }
+<span class="fc" id="L194">                    return cont.apply(env);</span>
+                }
+<span class="fc" id="L196">                return cont.apply(env.with(key, Expr.singleton(x)));</span>
+            }
+<span class="nc" id="L198">            return new Thunk.Done(Optional.empty());</span>
+        }
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        if (p instanceof Br pBr) {</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">            if (!(x instanceof Br xBr)) {</span>
+<span class="fc" id="L202">                return new Thunk.Done(Optional.empty());</span>
+            }
+<span class="fc" id="L204">            List&lt;Term&gt; innerPat = pBr.items().toList();</span>
+<span class="fc" id="L205">            return new Thunk.More(</span>
+<span class="fc" id="L206">                    () -&gt; rec(innerPat, 0, innerPat.size(), xBr.items(), env, cont));</span>
+        }
+        // Литералы.
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        return p.equals(x) ? cont.apply(env) : new Thunk.Done(Optional.empty());</span>
+    }
+
+    private static boolean singleEquals(Expr&lt;Term&gt; bound, Term x) {
+<span class="fc" id="L213">        Iterator&lt;Term&gt; it = bound.iterator();</span>
+<span class="pc bpc" id="L214" title="1 of 4 branches missed.">        return it.hasNext() &amp;&amp; it.next().equals(x);</span>
+    }
+
+    private static Expr&lt;Term&gt; takeFront(Expr&lt;Term&gt; e, int n) {
+<span class="fc" id="L218">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc" id="L219">        Expr&lt;Term&gt; cur = e;</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc" id="L221">            PeekResult&lt;Term&gt; pr = cur.separateFront();</span>
+<span class="fc" id="L222">            out = out.pushBack(pr.term());</span>
+<span class="fc" id="L223">            cur = pr.rest();</span>
+        }
+<span class="fc" id="L225">        return out;</span>
+    }
+
+    private static Expr&lt;Term&gt; dropFront(Expr&lt;Term&gt; e, int n) {
+<span class="fc" id="L229">        Expr&lt;Term&gt; cur = e;</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc" id="L231">            cur = cur.separateFront().rest();</span>
+        }
+<span class="fc" id="L233">        return cur;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

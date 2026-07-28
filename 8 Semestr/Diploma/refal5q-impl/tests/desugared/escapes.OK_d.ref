@@ -1,0 +1,8 @@
+$ENTRY Go {
+   = <Eq ('B\n\t\r\\\'\"<>()') 'B\n\t\r\\\'\"<>()'>;
+}
+
+Eq {
+  (e.Eq) e.Eq = <Prout e.Eq>;
+}
+

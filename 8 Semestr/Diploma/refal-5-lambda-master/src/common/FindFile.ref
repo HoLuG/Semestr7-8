@@ -1,0 +1,203 @@
+*$FROM LibraryEx
+$EXTERN Map;
+
+*$FROM Platform
+$EXTERN DirectorySeparator, PathSeparator;
+
+
+$INLINE DS;
+DS { = <DirectorySeparator> }
+
+
+/**
+  <FindFiles s.TargetMode (e.Folders) e.Files>
+    == t.FoundFile*
+
+  e.Folders ::= t.Folder*
+  t.Folder ::= (s.CHAR*) | REF5RSL
+  e.Files ::= (s.CHAR*)*
+
+  s.TargetMode ::=
+      DefaultEXE   -- subdir 'exe'
+    | EXE          -- subdir 'exe'
+    | LIB          -- subdir 'lib'
+    | R            -- subdir 'lib'
+    | CompileOnly  -- subdir 'exe'
+  t.FoundFile ::=
+    (Source (s.Dialect e.Source) e.Output)
+    (Output e.Output)
+    (OutputWithNative (e.Output) e.Native)
+    (NotFound e.FileName)
+
+  s.Dialect ::= R5 | SR | RSL
+*/
+$ENTRY FindFiles {
+  s.TargetMode (e.Folders) e.Files
+    = s.TargetMode
+    : {
+        DefaultEXE = 'exe';
+        EXE = 'exe';
+        LIB = 'lib';
+        R = 'lib';
+        CompileOnly = 'exe';
+      }
+    : e.Subdir
+    = <Map
+        {
+          (e.FileName)
+            = <AnalyzeFile-CheckNotFound
+                (e.FileName)
+                <AnalyzeFile e.Subdir <DS> e.FileName>
+                <AnalyzeFile e.FileName>
+                <Map
+                  {
+                    (e.Folder)
+                      = <AnalyzeFile e.Folder <DS> e.Subdir <DS> e.FileName>
+                        <AnalyzeFile e.Folder <DS> e.FileName>;
+                  }
+                  <ExpandREF5RSL e.Folders>
+                >
+              >;
+        }
+        e.Files
+      >;
+}
+
+ExpandREF5RSL {
+  e.Folders-B REF5RSL e.Folders-E
+    = <SplitPath <PathSeparator> <GetEnv 'REF5RSL'>> : e.REF5RSL
+    = e.Folders-B e.REF5RSL <ExpandREF5RSL e.Folders-E>;
+
+  e.Folders = e.Folders;
+}
+
+SplitPath {
+  s.Sep e.Path-B s.Sep e.Path-E
+    = <SplitPath-BracketNotEmtyItem e.Path-B>
+      <SplitPath s.Sep e.Path-E>;
+
+  s.Sep e.Path = <SplitPath-BracketNotEmtyItem e.Path>;
+}
+
+SplitPath-BracketNotEmtyItem {
+  /* пусто */ = /* пропускаем */;
+  e.PathEntry = (e.PathEntry);
+}
+
+AnalyzeFile-CheckNotFound {
+  (e.FileName) (Source (s.Dialect e.Source) e.Output) e.Variants =
+    (Source (s.Dialect e.Source) e.Output);
+
+  (e.FileName) (Output e.Output) e.Variants =
+    (Output e.Output);
+
+  (e.FileName) (OutputWithNative (e.Output) e.Native) e.Variants =
+    (OutputWithNative (e.Output) e.Native);
+
+  (e.FileName) (NotFound e.NotFoundPath) e.Variants =
+    <AnalyzeFile-CheckNotFound (e.FileName) e.Variants>;
+
+  (e.FileName) = (NotFound e.FileName);
+}
+
+ExistFile-T {
+  e.FileName = <ExistFile e.FileName> e.FileName;
+}
+
+SourceSuffixes { = (R5 '.ref') (SR '.sref') (RSL '.rsl') }
+
+AnalyzeFile {
+  e.FileName
+    , e.FileName : e.UnitName e.Suffix
+    , (R5 '.ref') (SR '.sref') (RSL '.rsl')
+    : e.Suffixes-B (s.Dialect e.Suffix) e.Suffixes-E
+    = <ExistFile e.FileName>
+    : {
+        True = (Source (s.Dialect e.FileName) e.UnitName '.rasl');
+
+        False = (NotFound e.FileName);
+      };
+
+  e.FileName '.rasl'
+    = <ExistFile-T e.FileName '.rasl'>
+    : {
+        True e.OutName
+          = <ExistFile-T e.FileName '.cpp'>
+          : {
+              True e.NativeName = (OutputWithNative (e.OutName) e.NativeName);
+
+              False e.NativeName = (Output e.OutName);
+            };
+
+        False e.OutName = (NotFound e.OutName);
+      };
+
+  e.FileName
+    , <SourceSuffixes>: e.Suffixes-B (s.Dialect e.Suffix) e.Suffixes-E
+    , <ExistFile-T e.FileName e.Suffix> : True e.SourceName
+    = (Source (s.Dialect e.SourceName) e.FileName '.rasl');
+
+  e.FileName
+    = (<ExistFile-T e.FileName '.rasl'>) (<ExistFile-T e.FileName '.cpp'>)
+    : {
+        (True e.OutName) (True e.Native)
+          = (OutputWithNative (e.OutName) e.Native);
+
+        (True e.OutName) (False e.Native)
+          = (Output e.OutName);
+
+        (False e.UnitName '.rasl') (s.Result e.UnitName '.cpp')
+          = (NotFound e.UnitName);
+      };
+}
+
+/**
+  <FindInclude (e.Folders) e.FileName>
+    == Success s.Dialect e.FullPath
+    == Fails
+  s.Dialect ::= R5 | SR
+*/
+$ENTRY FindInclude {
+  (e.Folders) e.FileName
+    = <AnalyzeInclude e.FileName>
+      <Map
+        {
+          (e.Folder) = <AnalyzeInclude e.Folder <DS> e.FileName>;
+        }
+        <ExpandREF5RSL e.Folders>
+      >
+    : {
+        e.Variants-B (Success s.Dialect e.FullPath) e.Variants-E
+          = Success s.Dialect e.FullPath;
+
+        e.Variants = Fails;
+      };
+}
+
+AnalyzeInclude {
+  e.FileName '.refi'
+    = <ExistFile-T e.FileName '.refi'>
+    : {
+        True e.FullPath = (Success R5 e.FullPath);
+        False e.FullPath = (Fails);
+      };
+
+  e.FileName '.srefi'
+    = <ExistFile-T e.FileName '.srefi'>
+    : {
+        True e.FullPath = (Success SR e.FullPath);
+        False e.FullPath = (Fails);
+      };
+
+  e.FileName
+    = (<ExistFile-T e.FileName '.refi'>) (<ExistFile-T e.FileName '.srefi'>)
+    : {
+        (True e.R5-FullPath) (s.ResSR e.SR-FullPath)
+          = (Success R5 e.R5-FullPath);
+
+        (False e.R5-FullPath) (True e.SR-FullPath)
+          = (Success SR e.SR-FullPath);
+
+        (False e.R5-FullPath) (False e.SR-FullPath) = (Fails);
+      };
+}

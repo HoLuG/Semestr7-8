@@ -1,0 +1,7 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{// val = bindings.get(key) \PYGZhy{}\PYGZhy{} Expr\PYGZlt{}Term\PYGZgt{} of size k}
+\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{t}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{val}\PYG{p}{.}\PYG{n+na}{toList}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{           }\PYG{c+c1}{// O(k) iterations}
+\PYG{+w}{    }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{addFirst}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Passive}\PYG{p}{(}\PYG{n}{t}\PYG{p}{));}\PYG{+w}{     }\PYG{c+c1}{// k addFirst calls}
+\PYG{p}{\PYGZcb{}}
+\PYG{c+c1}{// N Loop iterations, e.Acc of size k: O(k) * N = O(N\PYGZca{}2)}
+\end{MintedVerbatim}

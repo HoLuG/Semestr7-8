@@ -1,0 +1,8 @@
+$ENTRY Go {
+  /* пусто */
+    = <Eq ('BAR') <GetEnv 'FOO'>>
+      <Eq () <GetEnv 'UNDEF'>>
+      <Eq () <GetEnv>>;
+}
+
+Eq { (e.X) e.X = }

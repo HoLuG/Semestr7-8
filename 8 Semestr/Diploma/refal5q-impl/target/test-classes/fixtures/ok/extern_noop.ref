@@ -1,0 +1,8 @@
+$ENTRY Main;
+$EXTERN Foo, Bar;
+
+* $EXTERN is parsed but not enforced - the program does not actually
+* call any external function, so it should run successfully.
+Main {
+  = Done;
+}

@@ -1,0 +1,14 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@Test}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{addSubMulDivMod}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Runtime}\PYG{+w}{ }\PYG{n}{rt}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Runtime}\PYG{p}{(}\PYG{n}{emptyProgram}\PYG{p}{());}
+\PYG{+w}{    }\PYG{c+c1}{// \PYGZlt{}Add 3 4\PYGZgt{} \PYGZhy{}\PYGZgt{} [7]}
+\PYG{+w}{    }\PYG{n}{assertThat}\PYG{p}{(}\PYG{n}{rt}\PYG{p}{.}\PYG{n+na}{evalCall}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Add\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{List}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{))))}
+\PYG{+w}{        }\PYG{p}{.}\PYG{n+na}{containsExactly}\PYG{p}{(}\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{7}\PYG{p}{));}\PYG{+w}{           }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{c+c1}{// \PYGZlt{}Div 10 3\PYGZgt{} \PYGZhy{}\PYGZgt{} [3]}
+\PYG{+w}{    }\PYG{n}{assertThat}\PYG{p}{(}\PYG{n}{rt}\PYG{p}{.}\PYG{n+na}{evalCall}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Div\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{List}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{))))}
+\PYG{+w}{        }\PYG{p}{.}\PYG{n+na}{containsExactly}\PYG{p}{(}\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{));}\PYG{+w}{           }\PYG{c+c1}{// (2)}
+\PYG{+w}{    }\PYG{c+c1}{// \PYGZlt{}Mod 10 3\PYGZgt{} \PYGZhy{}\PYGZgt{} [1]}
+\PYG{+w}{    }\PYG{n}{assertThat}\PYG{p}{(}\PYG{n}{rt}\PYG{p}{.}\PYG{n+na}{evalCall}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Mod\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{List}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{))))}
+\PYG{+w}{        }\PYG{p}{.}\PYG{n+na}{containsExactly}\PYG{p}{(}\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{));}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

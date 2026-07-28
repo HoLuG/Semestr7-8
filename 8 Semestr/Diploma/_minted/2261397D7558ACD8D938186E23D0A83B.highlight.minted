@@ -1,0 +1,14 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@Test}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{compareReturnsMacrocharacter}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Runtime}\PYG{+w}{ }\PYG{n}{rt}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Runtime}\PYG{p}{(}\PYG{n}{emptyProgram}\PYG{p}{());}
+\PYG{+w}{    }\PYG{c+c1}{// \PYGZlt{}Compare 1 2\PYGZgt{} \PYGZhy{}\PYGZgt{} [Str(\PYGZdq{}\PYGZhy{}\PYGZdq{})]}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{lt}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{rt}\PYG{p}{.}\PYG{n+na}{evalCall}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Compare\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{List}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{)));}
+\PYG{+w}{    }\PYG{n}{assertThat}\PYG{p}{(}\PYG{n}{lt}\PYG{p}{.}\PYG{n+na}{toList}\PYG{p}{()).}\PYG{n+na}{containsExactly}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Str}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}\PYGZhy{}\PYGZdq{}}\PYG{p}{));}\PYG{+w}{ }\PYG{c+c1}{// (3)}
+\PYG{+w}{    }\PYG{c+c1}{// \PYGZlt{}Compare 2 2\PYGZgt{} \PYGZhy{}\PYGZgt{} [Str(\PYGZdq{}0\PYGZdq{})]}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{eq}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{rt}\PYG{p}{.}\PYG{n+na}{evalCall}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Compare\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{List}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{)));}
+\PYG{+w}{    }\PYG{n}{assertThat}\PYG{p}{(}\PYG{n}{eq}\PYG{p}{.}\PYG{n+na}{toList}\PYG{p}{()).}\PYG{n+na}{containsExactly}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Str}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}0\PYGZdq{}}\PYG{p}{));}\PYG{+w}{ }\PYG{c+c1}{// (4)}
+\PYG{+w}{    }\PYG{c+c1}{// \PYGZlt{}Compare 3 2\PYGZgt{} \PYGZhy{}\PYGZgt{} [Str(\PYGZdq{}+\PYGZdq{})]}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{gt}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{rt}\PYG{p}{.}\PYG{n+na}{evalCall}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Compare\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{List}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{)));}
+\PYG{+w}{    }\PYG{n}{assertThat}\PYG{p}{(}\PYG{n}{gt}\PYG{p}{.}\PYG{n+na}{toList}\PYG{p}{()).}\PYG{n+na}{containsExactly}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Str}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}+\PYGZdq{}}\PYG{p}{));}\PYG{+w}{  }\PYG{c+c1}{// (5)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

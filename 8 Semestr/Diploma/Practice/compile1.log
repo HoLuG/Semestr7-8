@@ -1,0 +1,34 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+! Undefined control sequence.
+<*> Semestr\Diploma
+                   \Practice D:\Programming\Projects\8 Semestr\Diploma\Pract...
+
+! Undefined control sequence.
+<*> Semestr\Diploma\Practice
+                             D:\Programming\Projects\8 Semestr\Diploma\Pract...
+
+! Undefined control sequence.
+<*> Semestr\Diploma\Practice D:\Programming
+                                           \Projects\8 Semestr\Diploma\Pract...
+
+! Undefined control sequence.
+<*> ...tr\Diploma\Practice D:\Programming\Projects
+                                                  \8 Semestr\Diploma\Practic...
+
+! Undefined control sequence.
+<*> ...\Diploma\Practice D:\Programming\Projects\8
+                                                   Semestr\Diploma\Practice\...
+
+! I can't find file `SemestrD:'.
+<*> ...Diploma\Practice D:\Programming\Projects\8 
+                                                  Semestr\Diploma\Practice\p...
+
+(Press Enter to retry, or Control-Z to exit)
+Please type another input file name
+! I can't write on file `texput.log'.
+(Press Enter to retry, or Control-Z to exit; default file extension is `.log')
+Please type another transcript file name
+! Emergency stop
+!  ==> Fatal error occurred, no output PDF file produced!

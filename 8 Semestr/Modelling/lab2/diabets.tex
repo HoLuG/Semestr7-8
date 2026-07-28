@@ -1,0 +1,716 @@
+\documentclass[a4paper, 14pt]{extarticle}
+
+% Поля
+%--------------------------------------
+\usepackage{geometry}
+\geometry{a4paper,tmargin=2cm,bmargin=2cm,lmargin=3cm,rmargin=1cm}
+%--------------------------------------
+
+
+%Russian-specific packages
+%--------------------------------------
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, main=russian]{babel}
+
+%--------------------------------------
+
+\usepackage{textcomp}
+
+% Красная строка
+%--------------------------------------
+\usepackage{indentfirst}               
+%--------------------------------------             
+
+
+%Graphics
+%--------------------------------------
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+\usepackage{float}%"Плавающие" картинки
+%--------------------------------------
+
+% Полуторный интервал
+%--------------------------------------
+\linespread{1.3}                    
+%--------------------------------------
+
+% Уменьшение расстояний между плавающими объектами
+%--------------------------------------
+\setlength{\floatsep}{10pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{15pt plus 2pt minus 4pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+%--------------------------------------
+
+%Выравнивание и переносы
+%--------------------------------------
+% Избавляемся от переполнений
+\sloppy
+% Запрещаем разрыв страницы после первой строки абзаца
+\clubpenalty=10000
+% Запрещаем разрыв страницы после последней строки абзаца
+\widowpenalty=10000
+%--------------------------------------
+
+%Списки
+\usepackage{enumitem}
+
+\usepackage{minted}
+%Подписи
+\usepackage{caption} 
+
+%Гиперссылки
+% \usepackage{hyperref}
+
+\usepackage[colorlinks, urlcolor = blue, filecolor = blue, citecolor = blue, linkcolor = black]{hyperref}
+
+
+\hypersetup {
+unicode=true
+}
+
+%Рисунки
+%--------------------------------------
+\DeclareCaptionLabelSeparator*{emdash}{~--- }
+\captionsetup[figure]{labelsep=emdash,font=onehalfspacing,position=bottom}
+%--------------------------------------
+
+\usepackage{tempora}
+
+%Листинги
+%--------------------------------------
+%Листинги
+%--------------------------------------
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize, 
+  %basicstyle=\footnotesize\AnkaCoder,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks shoulbd only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=t,                    % sets the caption-position to bottom
+  inputencoding=utf8,
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\bf,       % keyword style
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  xleftmargin=25pt,
+  xrightmargin=25pt,
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  tabsize=2,                       % sets default tabsize to 8 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+%--------------------------------------
+
+%%% Математические пакеты %%%
+%--------------------------------------
+\usepackage{amsthm,amsfonts,amsmath,amssymb,amscd}  % Математические дополнения от AMS
+\usepackage{mathtools}                              % Добавляет окружение multlined
+\usepackage[perpage]{footmisc}
+
+
+% графики
+\usepackage{booktabs}        % Пакет для улучшенных таблиц
+\usepackage{pgfplots}        % Пакет для построения графиков
+\pgfplotsset{compat=1.17}    % Установка совместимости
+\usepackage{tikz}            % Пакет для создания схем
+\usetikzlibrary{positioning, arrows.meta}  % Библиотеки для TikZ
+
+% Литература 
+
+% переименовываем  список литературы в "список используемой литературы"
+\addto\captionsrussian{\def\refname{Список литературы}}
+
+
+
+\captionsetup[figure]{name=Рисунок, labelsep=space}
+
+
+%--------------------------------------
+
+%--------------------------------------
+%			НАЧАЛО ДОКУМЕНТА
+%--------------------------------------
+
+\begin{document}
+
+%--------------------------------------
+%			ТИТУЛЬНЫЙ ЛИСТ
+%--------------------------------------
+\begin{titlepage}
+\thispagestyle{empty}
+\newpage
+
+
+%Шапка титульного листа
+%--------------------------------------
+\vspace*{-60pt}
+\hspace{-65pt}
+\begin{minipage}{0.3\textwidth}
+\hspace*{-20pt}\centering
+\includegraphics[width=\textwidth]{emblem}
+\end{minipage}
+\begin{minipage}{0.67\textwidth}\small \textbf{
+\vspace*{-0.7ex}
+\hspace*{-6pt}\centerline{Министерство науки и высшего образования Российской Федерации}
+\vspace*{-0.7ex}
+\centerline{Федеральное государственное автономное образовательное учреждение }
+\vspace*{-0.7ex}
+\centerline{высшего образования}
+\vspace*{-0.7ex}
+\centerline{<<Московский государственный технический университет}
+\vspace*{-0.7ex}
+\centerline{имени Н.Э. Баумана}
+\vspace*{-0.7ex}
+\centerline{(национальный исследовательский университет)>>}
+\vspace*{-0.7ex}
+\centerline{(МГТУ им. Н.Э. Баумана)}}
+\end{minipage}
+%--------------------------------------
+
+%Полосы
+%--------------------------------------
+\vspace{-25pt}
+\hspace{-35pt}\rule{\textwidth}{2.3pt}
+
+\vspace*{-20.3pt}
+\hspace{-35pt}\rule{\textwidth}{0.4pt}
+%--------------------------------------
+
+\vspace{1.5ex}
+\hspace{-35pt} \noindent \small ФАКУЛЬТЕТ\hspace{80pt} <<Информатика и системы управления>>
+
+\vspace*{-16pt}
+\hspace{47pt}\rule{0.83\textwidth}{0.4pt}
+
+\vspace{0.5ex}
+\hspace{-35pt} \noindent \small КАФЕДРА\hspace{50pt} <<Теоретическая информатика и компьютерные технологии>>
+
+\vspace*{-16pt}
+\hspace{30pt}\rule{0.866\textwidth}{0.4pt}
+
+\vspace{11em}
+
+\begin{center}
+\Large {\bf Лабораторная работа №2} \\ 
+\large <<Оценивание функций связи между ненаблюдаемыми одновременно параметрами>> \\
+\large {по курсу <<Моделирование>>} \\
+
+\end{center}\normalsize
+
+\vspace{8em}
+
+\vbox{%
+\hfill%
+\vbox{%
+\hbox{Студент: Аринин М.А.}%
+\hbox{Группа: ИУ9-82Б}%
+\hbox{Преподаватель: Домрачева А.Б.}%
+}%
+} 
+
+\bigskip
+
+\vfill
+
+
+\begin{center}
+\textsl{Москва 2026}
+\end{center}
+\end{titlepage}
+%--------------------------------------
+%		КОНЕЦ ТИТУЛЬНОГО ЛИСТА
+%--------------------------------------
+
+
+\renewcommand{\ttdefault}{pcr}
+
+\setlength{\tabcolsep}{3pt}
+
+\newpage
+\setcounter{page}{2}
+
+\section{Постановка задачи}
+
+В работе исследуется зависимость между уровнями глюкозы в крови у пациентов с разными исходами заболевания диабетом. Имеется датасет с 768 наблюдениями, содержащий медицинские показатели пациентов.
+
+Цель работы --- проверить гипотезу о возможности описания стохастической зависимости между уровнями глюкозы для пациентов с разными исходами заболевания с помощью двупараметрической степенной функции связи. Для оценки параметров используются методы моментов, наименьших квадратов и нелинейного метода наименьших квадратов с последующим выбором наилучшего метода. Проверка гипотезы выполняется с помощью критерия Колмогорова-Смирнова.
+
+\textbf{Входные данные:}
+\begin{itemize}
+  \item Датасет с 768 наблюдениями
+  \item Столбец \texttt{Glucose} --- уровень глюкозы (мг/дл)
+  \item Столбец \texttt{Outcome} --- исход заболевания (0 или 1)
+\end{itemize}
+
+%--------------------------------------------------------------------
+\section{Построение математической модели}
+
+В данной работе рассматривается задача оценки стохастической зависимости между уровнями глюкозы у пациентов с разными исходами заболевания. Ключевая особенность задачи заключается в том, что величины $\xi_0$ (уровень глюкозы при Outcome = 0) и $\xi_1$ (уровень глюкозы при Outcome = 1) не наблюдаются одновременно для одного и того же пациента --- это данные из разных групп пациентов. Поэтому классический подход построения функциональной зависимости по парным наблюдениям здесь неприменим.
+
+\subsection{Формализация задачи}
+
+Пусть $\xi_0$ --- случайная величина, представляющая уровень глюкозы для пациентов с одним диагнозом (Outcome = 0), а $\xi_1$ --- случайная величина для пациентов с иным исходом (Outcome = 1). Предполагается, что существует стохастическая зависимость, которую можно описать функцией:
+\[
+\xi_1 = \varphi(\xi_0) = \alpha \cdot \xi_0^{\beta},
+\]
+где $\alpha > 0$ и $\beta$ --- неизвестные параметры модели.
+
+В предельном случае, когда стохастическая зависимость может быть описана функцией, функции распределения должны совпадать:
+\[
+F(\varphi(\xi_0)) = F(\xi_1).
+\]
+
+Это означает, что распределение преобразованных значений $\varphi(\xi_0) = \alpha \cdot \xi_0^{\beta}$ должно совпадать с распределением $\xi_1$.
+
+\subsection{Методы оценки параметров}
+
+Для оценки параметров $\alpha$ и $\beta$ используются три метода, из которых выбирается наилучший по критерию Колмогорова-Смирнова.
+
+\textbf{Метод моментов:} После логарифмирования $\ln \xi_1 = \ln \alpha + \beta \ln \xi_0$ параметры оцениваются через выборочные моменты:
+\[
+\hat{\beta} = \sqrt{\frac{D[\ln \xi_1]}{D[\ln \xi_0]}}, \quad
+\hat{\alpha} = \exp\left(\mathbb{E}[\ln \xi_1] - \hat{\beta} \cdot \mathbb{E}[\ln \xi_0]\right),
+\]
+где $\mathbb{E}[\cdot]$ и $D[\cdot]$ --- выборочное среднее и дисперсия соответственно.
+
+\textbf{Метод наименьших квадратов (OLS):} Используется квантильное сопоставление распределений. Для квантилей $Q_{\xi_0}(p)$ и $Q_{\xi_1}(p)$ строится линейная регрессия $\ln Q_{\xi_1} = \ln \alpha + \beta \ln Q_{\xi_0}$ методом наименьших квадратов.
+
+\textbf{Нелинейный метод наименьших квадратов (NLS):} Параметры находятся минимизацией суммы квадратов ошибок между квантилями:
+\[
+(\hat{\alpha}, \hat{\beta}) = \arg\min_{\alpha, \beta} \sum_{i=1}^{n} (Q_{\xi_1}(p_i) - \alpha \cdot Q_{\xi_0}(p_i)^{\beta})^2,
+\]
+где $p_i$ --- уровни квантилей.
+
+Выбор наилучшего метода производится по минимальной статистике Колмогорова-Смирнова на контрольной выборке.
+
+\subsection{Схема модели}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+    node distance=1.5cm,
+    box/.style={rectangle, draw, fill=#1!20, minimum width=2.5cm, minimum height=1cm, text centered, font=\footnotesize, text width=2.3cm},
+    arrow/.style={->, >=stealth, thick}
+  ]
+    % Узлы верхнего уровня
+    \node[box=blue] (data) {Исходные\\данные};
+    
+    % Разделение на группы
+    \node[box=green, below left=1.8cm and 2cm of data] (xi0) {$\xi_0$\\Outcome=0};
+    \node[box=red, below right=1.8cm and 2cm of data] (xi1) {$\xi_1$\\Outcome=1};
+    
+    % Разделение на выборки
+    \node[box=yellow, below=of xi0] (train0) {Рабочая\\выборка\\$\xi_0$};
+    \node[box=orange, below=of train0] (test0) {Контрольная\\выборка\\$\xi_0$};
+    
+    \node[box=yellow, below=of xi1] (train1) {Рабочая\\выборка\\$\xi_1$};
+    \node[box=orange, below=of train1] (test1) {Контрольная\\выборка\\$\xi_1$};
+    
+    % Оценка параметров
+    \node[box=purple, below=3.5cm of data] (params) {Оценка\\параметров\\$\hat{\alpha}, \hat{\beta}$};
+    
+    % Применение функции
+    \node[box=cyan, below=of params] (phi) {$\varphi(\xi_0)$\\$=\hat{\alpha}\xi_0^{\hat{\beta}}$};
+    
+    % Функции распределения
+    \node[box=pink, below=of phi] (dist) {Функции\\распределения\\$F(\xi_1)$, $F(\varphi)$};
+    
+    % Критерий
+    \node[box=gray, below=of dist] (ks) {Критерий\\Колмогорова-\\Смирнова};
+    
+    % Стрелки от данных
+    \draw[arrow] (data) -| (xi0);
+    \draw[arrow] (data) -| (xi1);
+    
+    % Стрелки разделения на выборки
+    \draw[arrow] (xi0) -- (train0);
+    \draw[arrow] (train0) -- (test0);
+    \draw[arrow] (xi1) -- (train1);
+    \draw[arrow] (train1) -- (test1);
+    
+    % Стрелки к оценке параметров
+    \draw[arrow] (train0.east) -- ++(0.5cm,0) |- (params.west);
+    \draw[arrow] (train1.west) -- ++(-0.5cm,0) |- (params.east);
+    
+    % Стрелки к функции
+    \draw[arrow] (params) -- (phi);
+    \draw[arrow] (test0.east) -- ++(1.5cm,0) |- (phi.west);
+    
+    % Стрелки к функциям распределения
+    \draw[arrow] (phi) -- (dist);
+    \draw[arrow] (test1.west) -- ++(-1.5cm,0) |- (dist.east);
+    
+    % Стрелка к критерию
+    \draw[arrow] (dist) -- (ks);
+  \end{tikzpicture}
+  \caption{Схема построения стохастической модели зависимости}
+  \label{fig:model_scheme}
+\end{figure}
+
+\subsection{Критерий Колмогорова-Смирнова}
+
+Для проверки гипотезы о соответствии распределений $F(\xi_1)$ и $F(\varphi(\xi_0))$ используется критерий Колмогорова-Смирнова. Статистика критерия вычисляется как максимальное отклонение между эмпирическими функциями распределения:
+\[
+D_n = \sup_x |F(\xi_1)(x) - F(\varphi(\xi_0))(x)|.
+\]
+
+Критическое значение для уровня значимости $\alpha = 0.05$:
+\[
+K_{\alpha} = \sqrt{-\frac{1}{2} \ln\left(\frac{1-\alpha}{2}\right)}.
+\]
+
+Гипотеза о соответствии распределений принимается, если $D_n < K_{\alpha}$, и отвергается в противном случае. Этот критерий также используется для выбора наилучшего метода оценки параметров --- выбирается метод с минимальной статистикой $D_n$.
+
+%--------------------------------------------------------------------
+\section{Решение вычислительных задач}
+
+После формализации математической модели необходимо решить вычислительные задачи для оценки параметров и проверки гипотезы.
+
+\subsection{Оценка параметров модели}
+
+Для оценки параметров $\alpha$ и $\beta$ используются три метода на рабочей выборке. Поскольку величины $\xi_0$ и $\xi_1$ имеют разные размеры и не являются парными наблюдениями, используется квантильное сопоставление распределений.
+
+\textbf{Метод моментов:} Вычисляются выборочные средние и дисперсии логарифмированных значений:
+\[
+\mathbb{E}[\ln \xi_0] = \frac{1}{n_0} \sum_{i=1}^{n_0} \ln \xi_0^{(i)}, \quad
+D[\ln \xi_0] = \frac{1}{n_0} \sum_{i=1}^{n_0} (\ln \xi_0^{(i)} - \mathbb{E}[\ln \xi_0])^2,
+\]
+аналогично для $\xi_1$. Параметры оцениваются как:
+\[
+\hat{\beta} = \sqrt{\frac{D[\ln \xi_1]}{D[\ln \xi_0]}}, \quad
+\hat{\alpha} = \exp\left(\mathbb{E}[\ln \xi_1] - \hat{\beta} \cdot \mathbb{E}[\ln \xi_0]\right).
+\]
+
+\textbf{Метод наименьших квадратов (OLS):} Для квантилей $Q_{\xi_0}(p_i)$ и $Q_{\xi_1}(p_i)$ строится линейная регрессия $\ln Q_{\xi_1} = \ln \alpha + \beta \ln Q_{\xi_0}$ методом наименьших квадратов, минимизируя:
+\[
+\sum_{i=1}^{n} (\ln Q_{\xi_1}(p_i) - \ln \alpha - \beta \ln Q_{\xi_0}(p_i))^2.
+\]
+
+\textbf{Нелинейный метод наименьших квадратов (NLS):} Параметры находятся прямой минимизацией:
+\[
+(\hat{\alpha}, \hat{\beta}) = \arg\min_{\alpha, \beta} \sum_{i=1}^{n} (Q_{\xi_1}(p_i) - \alpha \cdot Q_{\xi_0}(p_i)^{\beta})^2.
+\]
+
+Выбор наилучшего метода производится по минимальной статистике Колмогорова-Смирнова на контрольной выборке.
+
+\subsection{Вычисление эмпирических функций распределения}
+
+Для контрольной выборки вычисляются эмпирические функции распределения. Для выборки $\{x^{(1)}, \ldots, x^{(n)}\}$ функция распределения определяется как:
+\[
+F_n(x) = \frac{1}{n} \sum_{i=1}^{n} \mathbf{1}_{\{x^{(i)} \leq x\}},
+\]
+где $\mathbf{1}_{\{\cdot\}}$ --- индикаторная функция. Вычисляются три функции:
+\begin{itemize}
+  \item $F(\xi_0^{\text{test}})$ --- для контрольной выборки $\xi_0$
+  \item $F(\xi_1^{\text{test}})$ --- для контрольной выборки $\xi_1$
+  \item $F(\varphi(\xi_0^{\text{test}}))$ --- для преобразованных значений $\varphi(\xi_0^{\text{test}}) = \hat{\alpha} \cdot (\xi_0^{\text{test}})^{\hat{\beta}}$
+\end{itemize}
+
+Для визуализации функции вычисляются на равномерной сетке с шагом $\Delta = 0.2$ в диапазоне от минимума до максимума выборки.
+
+\subsection{Вычисление статистики Колмогорова-Смирнова}
+
+Для сравнения функций распределения $F(\xi_1^{\text{test}})$ и $F(\varphi(\xi_0^{\text{test}}))$ они интерполируются на общей сетке значений. Статистика критерия вычисляется как:
+\[
+D_n = \max_x |F(\xi_1^{\text{test}})(x) - F(\varphi(\xi_0^{\text{test}}))(x)|.
+\]
+
+Критическое значение для уровня значимости $\alpha = 0.05$:
+\[
+K_{\alpha} = \sqrt{-\frac{1}{2} \ln\left(\frac{1-\alpha}{2}\right)}.
+\]
+
+Гипотеза о соответствии распределений принимается при $D_n < K_{\alpha}$.
+
+%--------------------------------------------------------------------
+\section{Практическая реализация}
+
+\newenvironment{longlisting}{\captionsetup{type=listing}}{}
+\begin{longlisting}
+\caption{Основной модуль анализа зависимости между уровнями глюкозы}
+\begin{minted}[frame=single,fontsize = \footnotesize, linenos, xleftmargin = 1.5em, breaklines=true]{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from scipy.interpolate import interp1d
+
+# Загрузка данных
+df = pd.read_csv('diabetes.csv')
+
+# Разделение данных по Outcome
+xi0 = df[df['Outcome'] == 0]['Glucose'].values
+xi1 = df[df['Outcome'] == 1]['Glucose'].values
+
+# Корректировка данных для возможности логарифмирования
+xi0_corrected = xi0 + 1
+xi1_corrected = xi1 + 1
+
+# Разделение на рабочие и контрольные выборки
+xi0_train, xi0_test = train_test_split(
+    xi0_corrected, test_size=0.2, random_state=42
+)
+xi1_train, xi1_test = train_test_split(
+    xi1_corrected, test_size=0.2, random_state=42
+)
+
+def moment_method(sample_x, sample_y):
+    """Оценка параметров методом моментов"""
+    log_x = np.log(sample_x)
+    log_y = np.log(sample_y)
+    
+    E_log_x = np.mean(log_x)
+    E_log_y = np.mean(log_y)
+    D_log_x = np.var(log_x, ddof=0)
+    D_log_y = np.var(log_y, ddof=0)
+    
+    beta = np.sqrt(D_log_y / D_log_x)
+    ln_alpha = E_log_y - beta * E_log_x
+    alpha = np.exp(ln_alpha)
+    
+    return alpha, beta
+
+def ols_method(sample_x, sample_y):
+    """Оценка параметров методом наименьших квадратов"""
+    n_quantiles = min(len(sample_x), len(sample_y))
+    quantiles = np.linspace(0.01, 0.99, n_quantiles)
+    
+    x_quantiles = np.quantile(sample_x, quantiles)
+    y_quantiles = np.quantile(sample_y, quantiles)
+    
+    log_x = np.log(x_quantiles)
+    log_y = np.log(y_quantiles)
+    
+    n = len(log_x)
+    sum_log_x = np.sum(log_x)
+    sum_log_y = np.sum(log_y)
+    sum_log_x_sq = np.sum(log_x ** 2)
+    sum_log_xy = np.sum(log_x * log_y)
+    
+    denominator = n * sum_log_x_sq - sum_log_x ** 2
+    if abs(denominator) < 1e-10:
+        return moment_method(sample_x, sample_y)
+    
+    beta = (n * sum_log_xy - sum_log_x * sum_log_y) / denominator
+    ln_alpha = (sum_log_y - beta * sum_log_x) / n
+    alpha = np.exp(ln_alpha)
+    
+    return alpha, beta
+
+def nls_method(sample_x, sample_y):
+    """Оценка параметров нелинейным методом наименьших квадратов"""
+    from scipy.optimize import minimize
+    
+    n_quantiles = min(len(sample_x), len(sample_y))
+    quantiles = np.linspace(0.01, 0.99, n_quantiles)
+    
+    x_quantiles = np.quantile(sample_x, quantiles)
+    y_quantiles = np.quantile(sample_y, quantiles)
+    
+    def objective(params):
+        alpha, beta = params
+        y_pred = alpha * x_quantiles ** beta
+        return np.sum((y_quantiles - y_pred) ** 2)
+    
+    try:
+        alpha_init, beta_init = ols_method(sample_x, sample_y)
+    except:
+        alpha_init, beta_init = moment_method(sample_x, sample_y)
+    
+    result = minimize(objective, [alpha_init, beta_init], method='BFGS')
+    alpha, beta = result.x
+    
+    return alpha, beta
+
+# Оценка параметров тремя методами
+alpha_mm, beta_mm = moment_method(xi0_train, xi1_train)
+alpha_ols, beta_ols = ols_method(xi0_train, xi1_train)
+alpha_nls, beta_nls = nls_method(xi0_train, xi1_train)
+
+def empirical_distribution_function(sample):
+    """Построение эмпирической функции распределения"""
+    min_value = sample.min()
+    max_value = sample.max()
+    values = np.arange(min_value, max_value, 0.2)
+    probs = []
+    
+    for value in values:
+        prob = np.sum(sample <= value) / len(sample)
+        probs.append(prob)
+    
+    return values, np.array(probs)
+
+def calculate_ks_statistic(sample_y, alpha, beta, sample_x):
+    """Вычисление статистики Колмогорова-Смирнова"""
+    phi_x = alpha * sample_x ** beta
+    
+    y_sorted = np.sort(sample_y)
+    phi_sorted = np.sort(phi_x)
+    
+    n_y = len(y_sorted)
+    n_phi = len(phi_sorted)
+    
+    all_values = np.unique(np.concatenate([y_sorted, phi_sorted]))
+    
+    F_y = np.array([np.sum(y_sorted <= val) / n_y for val in all_values])
+    F_phi = np.array([np.sum(phi_sorted <= val) / n_phi for val in all_values])
+    
+    D = np.max(np.abs(F_y - F_phi))
+    return D
+
+def calculate_mse(sample_x, sample_y, alpha, beta):
+    """Вычисление среднего квадрата ошибки"""
+    n_quantiles = min(len(sample_x), len(sample_y))
+    quantiles = np.linspace(0.01, 0.99, n_quantiles)
+    
+    x_quantiles = np.quantile(sample_x, quantiles)
+    y_quantiles = np.quantile(sample_y, quantiles)
+    
+    y_pred = alpha * x_quantiles ** beta
+    mse = np.mean((y_quantiles - y_pred) ** 2)
+    return mse
+
+# Вычисление метрик для всех методов
+ks_mm = calculate_ks_statistic(xi1_test, alpha_mm, beta_mm, xi0_test)
+ks_ols = calculate_ks_statistic(xi1_test, alpha_ols, beta_ols, xi0_test)
+ks_nls = calculate_ks_statistic(xi1_test, alpha_nls, beta_nls, xi0_test)
+
+mse_mm = calculate_mse(xi0_test, xi1_test, alpha_mm, beta_mm)
+mse_ols = calculate_mse(xi0_test, xi1_test, alpha_ols, beta_ols)
+mse_nls = calculate_mse(xi0_test, xi1_test, alpha_nls, beta_nls)
+
+# Выбор наилучшего метода
+methods = [
+    ("Метод моментов", mse_mm, ks_mm, alpha_mm, beta_mm),
+    ("OLS", mse_ols, ks_ols, alpha_ols, beta_ols),
+    ("NLS", mse_nls, ks_nls, alpha_nls, beta_nls)
+]
+
+best_method = min(methods, key=lambda x: x[2])
+alpha, beta = best_method[3], best_method[4]
+
+# Построение функций распределения для выбранного метода
+values_xi0, probs_xi0 = empirical_distribution_function(xi0_test)
+values_xi1, probs_xi1 = empirical_distribution_function(xi1_test)
+
+phi_xi0 = alpha * xi0_test ** beta
+values_phi, probs_phi = empirical_distribution_function(phi_xi0)
+
+# Вычисление статистики Колмогорова-Смирнова
+D_n = best_method[2]
+alpha_level = 0.05
+K_alpha = np.sqrt(-0.5 * np.log((1 - alpha_level) / 2))
+
+print(f"Выбранный метод: {best_method[0]}")
+print(f"α = {alpha:.6f}, β = {beta:.6f}")
+print(f"Статистика Колмогорова-Смирнова: D_n = {D_n:.4f}")
+print(f"Критическое значение: K_alpha = {K_alpha:.4f}")
+print(f"Гипотеза {'принимается' if D_n < K_alpha else 'отвергается'}")
+\end{minted}
+\end{longlisting}
+
+%--------------------------------------------------------------------
+\section{Результаты}
+
+В результате выполнения программы были оценены параметры модели тремя методами. Наилучший метод выбран по минимальной статистике Колмогорова-Смирнова на контрольной выборке.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{methods_comparsion.png}
+  \caption{Сравнение методов оценки параметров}
+  \label{fig:methods_comparison}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Метод} & $\hat{\alpha}$ & $\hat{\beta}$ & MSE & $D_n$ \\
+\hline
+Метод моментов & 0.303030 & 1.306184 & 229.56 & 0.1100 \\
+\hline
+OLS (квантили) & 1.420479 & 0.979978 & 61.41 & 0.0993 \\
+\hline
+NLS (квантили) & 1.795230 & 0.930637 & 55.37 & 0.1204 \\
+\hline
+\end{tabular}
+\caption{Сравнение методов оценки параметров}
+\label{tab:methods_comparison}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{functions.png}
+  \caption{Функции распределения $\xi_0$ и $\xi_1$}
+  \label{fig:distributions}
+\end{figure}
+
+\vspace{-0.5cm}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{compare.png}
+  \caption{Сравнение $F(\xi_1)$ и $F(\varphi(\xi_0))$}
+  \label{fig:ks_comparison}
+\end{figure}
+
+%--------------------------------------------------------------------
+\section{Анализ модели и проверка качества}
+
+На основе полученных результатов проведён анализ качества модели.
+
+\textbf{Анализ параметров модели:}
+
+Выбранный метод OLS дал следующие оценки параметров: $\hat{\alpha} = 1.420479$, $\hat{\beta} = 0.979978$. 
+
+Интерпретация параметров:
+\begin{itemize}
+  \item Параметр $\hat{\alpha} = 1.420479$ определяет масштаб преобразования. Значение больше единицы указывает на то, что преобразованные значения $\varphi(\xi_0)$ в среднем выше исходных значений $\xi_0$.
+  \item Параметр $\hat{\beta} = 0.979978$ близок к единице, что означает почти линейную зависимость между уровнями глюкозы для пациентов с разными исходами заболевания. При $\hat{\beta} < 1$ зависимость замедляется с ростом $\xi_0$, но в данном случае замедление незначительно.
+\end{itemize}
+
+\textbf{Анализ функций распределения:}
+
+Сравнение функций распределения $F(\xi_1)$ и $F(\varphi(\xi_0))$ на графике показывает:
+\begin{itemize}
+  \item Визуально кривые близки друг к другу в диапазоне значений от 75 до 200 мг/дл
+  \item Максимальное расхождение наблюдается в области средних значений (около 120--150 мг/дл)
+  \item В целом распределения совпадают по форме, что указывает на адекватность модели
+\end{itemize}
+
+\textbf{Проверка гипотезы критерием Колмогорова-Смирнова:}
+
+Статистика критерия для выбранного метода OLS: $D_n = 0.0993$.
+
+Критическое значение при уровне значимости $\alpha = 0.05$: $K_{\alpha} = 0.6101$.
+
+\textbf{Вывод о качестве модели:}
+
+Поскольку $D_n = 0.0993 < K_{\alpha} = 0.6101$, гипотеза о соответствии распределений принимается на уровне значимости 0.05. Это означает, что модель адекватно описывает стохастическую зависимость между уровнями глюкозы для разных исходов заболевания.
+
+\textbf{Ограничения модели:}
+
+\begin{itemize}
+  \item Модель предполагает степенную зависимость, что может быть упрощением реальной связи
+  \item Объём выборки ограничен (768 наблюдений), что влияет на точность оценок
+  \item Модель не учитывает другие факторы, влияющие на уровень глюкозы
+  \item Разделение по Outcome может не отражать полную картину зависимости
+\end{itemize}
+
+%--------------------------------------------------------------------
+\section{Выводы}
+
+\begin{itemize}
+  \item Выполнена формализация задачи о стохастической зависимости между уровнями глюкозы для пациентов с разными исходами заболевания. Построена математическая модель на основе двупараметрической степенной функции связи $\xi_1 = \alpha \cdot \xi_0^{\beta}$, где $\xi_0$ и $\xi_1$ --- уровни глюкозы для пациентов с разными диагнозами.
+  
+  \item Решены вычислительные задачи: оценка параметров тремя методами (моментов, OLS, NLS) с использованием квантильного сопоставления распределений, построение эмпирических функций распределения, вычисление статистики критерия Колмогорова-Смирнова для выбора наилучшего метода и проверки гипотезы.
+  
+  \item Проведён анализ качества модели. Выбран наилучший метод оценки параметров по минимальной статистике Колмогорова-Смирнова. Проверена гипотеза о соответствии распределений $F(\xi_1)$ и $F(\varphi(\xi_0))$ с использованием критерия Колмогорова-Смирнова.
+  
+  \end{itemize}
+
+\end{document}

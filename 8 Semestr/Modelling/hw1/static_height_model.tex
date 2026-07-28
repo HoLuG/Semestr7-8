@@ -1,0 +1,893 @@
+\documentclass[a4paper, 14pt]{extarticle}
+
+% Поля
+%--------------------------------------
+\usepackage{geometry}
+\geometry{a4paper,tmargin=2cm,bmargin=2cm,lmargin=3cm,rmargin=1cm}
+%--------------------------------------
+
+
+%Russian-specific packages
+%--------------------------------------
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, main=russian]{babel}
+
+%--------------------------------------
+
+\usepackage{textcomp}
+
+% Красная строка
+%--------------------------------------
+\usepackage{indentfirst}               
+%--------------------------------------             
+
+
+%Graphics
+%--------------------------------------
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+\usepackage{float}%"Плавающие" картинки
+%--------------------------------------
+
+% Полуторный интервал
+%--------------------------------------
+\linespread{1.3}                    
+%--------------------------------------
+
+%Выравнивание и переносы
+%--------------------------------------
+% Избавляемся от переполнений
+\sloppy
+% Запрещаем разрыв страницы после первой строки абзаца
+\clubpenalty=10000
+% Запрещаем разрыв страницы после последней строки абзаца
+\widowpenalty=10000
+%--------------------------------------
+
+%Списки
+\usepackage{enumitem}
+
+\usepackage{minted}
+%Подписи
+\usepackage{caption} 
+
+%Гиперссылки
+% \usepackage{hyperref}
+
+\usepackage[colorlinks, urlcolor = blue, filecolor = blue, citecolor = blue, linkcolor = black]{hyperref}
+
+
+\hypersetup {
+unicode=true
+}
+
+%Рисунки
+%--------------------------------------
+\DeclareCaptionLabelSeparator*{emdash}{~--- }
+\captionsetup[figure]{labelsep=emdash,font=onehalfspacing,position=bottom}
+%--------------------------------------
+
+\usepackage{tempora}
+
+%Листинги
+%--------------------------------------
+%Листинги
+%--------------------------------------
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize, 
+  %basicstyle=\footnotesize\AnkaCoder,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks shoulbd only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=t,                    % sets the caption-position to bottom
+  inputencoding=utf8,
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\bf,       % keyword style
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  xleftmargin=25pt,
+  xrightmargin=25pt,
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  tabsize=2,                       % sets default tabsize to 8 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+%--------------------------------------
+
+%%% Математические пакеты %%%
+%--------------------------------------
+\usepackage{amsthm,amsfonts,amsmath,amssymb,amscd}  % Математические дополнения от AMS
+\usepackage{mathtools}                              % Добавляет окружение multlined
+\usepackage[perpage]{footmisc}
+
+
+% графики
+\usepackage{booktabs}        % Пакет для улучшенных таблиц
+\usepackage{pgfplots}        % Пакет для построения графиков
+\pgfplotsset{compat=1.17}    % Установка совместимости
+
+% Литература 
+
+% переименовываем  список литературы в "список используемой литературы"
+\addto\captionsrussian{\def\refname{Список литературы}}
+
+
+
+\captionsetup[figure]{name=Рисунок, labelsep=space}
+
+
+%--------------------------------------
+
+%--------------------------------------
+%			НАЧАЛО ДОКУМЕНТА
+%--------------------------------------
+
+\begin{document}
+
+%--------------------------------------
+%			ТИТУЛЬНЫЙ ЛИСТ
+%--------------------------------------
+\begin{titlepage}
+\thispagestyle{empty}
+\newpage
+
+
+%Шапка титульного листа
+%--------------------------------------
+\vspace*{-60pt}
+\hspace{-65pt}
+\begin{minipage}{0.3\textwidth}
+\hspace*{-20pt}\centering
+\includegraphics[width=\textwidth]{emblem}
+\end{minipage}
+\begin{minipage}{0.67\textwidth}\small \textbf{
+\vspace*{-0.7ex}
+\hspace*{-6pt}\centerline{Министерство науки и высшего образования Российской Федерации}
+\vspace*{-0.7ex}
+\centerline{Федеральное государственное автономное образовательное учреждение }
+\vspace*{-0.7ex}
+\centerline{высшего образования}
+\vspace*{-0.7ex}
+\centerline{<<Московский государственный технический университет}
+\vspace*{-0.7ex}
+\centerline{имени Н.Э. Баумана}
+\vspace*{-0.7ex}
+\centerline{(национальный исследовательский университет)>>}
+\vspace*{-0.7ex}
+\centerline{(МГТУ им. Н.Э. Баумана)}}
+\end{minipage}
+%--------------------------------------
+
+%Полосы
+%--------------------------------------
+\vspace{-25pt}
+\hspace{-35pt}\rule{\textwidth}{2.3pt}
+
+\vspace*{-20.3pt}
+\hspace{-35pt}\rule{\textwidth}{0.4pt}
+%--------------------------------------
+
+\vspace{1.5ex}
+\hspace{-35pt} \noindent \small ФАКУЛЬТЕТ\hspace{80pt} <<Информатика и системы управления>>
+
+\vspace*{-16pt}
+\hspace{47pt}\rule{0.83\textwidth}{0.4pt}
+
+\vspace{0.5ex}
+\hspace{-35pt} \noindent \small КАФЕДРА\hspace{50pt} <<Теоретическая информатика и компьютерные технологии>>
+
+\vspace*{-16pt}
+\hspace{30pt}\rule{0.866\textwidth}{0.4pt}
+
+\vspace{11em}
+
+\begin{center}
+\Large {\bf Лабораторная работа №1} \\ 
+\large <<Статическая модель сгущения сетки высот>> \\
+\large {по курсу <<Моделирование>>} \\
+
+\end{center}\normalsize
+
+\vspace{8em}
+
+\vbox{%
+\hfill%
+\vbox{%
+\hbox{Студент: Аринин М.А.}%
+\hbox{Группа: ИУ9-82Б}%
+\hbox{Преподаватель: Домрачева А.Б.}%
+}%
+} 
+
+\bigskip
+
+\vfill
+
+
+\begin{center}
+\textsl{Москва 2026}
+\end{center}
+\end{titlepage}
+%--------------------------------------
+%		КОНЕЦ ТИТУЛЬНОГО ЛИСТА
+%--------------------------------------
+
+
+\renewcommand{\ttdefault}{pcr}
+
+\setlength{\tabcolsep}{3pt}
+
+\newpage
+\setcounter{page}{2}
+
+\section{Постановка задачи}
+Рассматривается статическая задача о представлении поверхности в фиксированный момент времени $t_0$.
+
+Дана аналитическая функция:
+\[
+z = \sin\!\left(\sqrt{x^2 + y^2}\right),
+\]
+определённая на области $-3 \leq x \leq 3$, $-3 \leq y \leq 3$, с диапазоном значений $-1 \leq z \leq 1$.
+
+Функция табулируется на регулярной сетке $n \times n = 10 \times 10$ узлов. Координаты узлов:
+\[
+x_i = x_{\min} + i \cdot \frac{x_{\max} - x_{\min}}{n - 1}, \quad y_j = y_{\min} + j \cdot \frac{y_{\max} - y_{\min}}{n - 1}, \quad i, j = 0, 1, \ldots, n-1.
+\]
+
+Значения высот в узлах: $z_{ij} = \sin\!\left(\sqrt{x_i^2 + y_j^2}\right)$.
+
+Необходимо вычислить значения функции в $k \times k = (n-1) \times (n-1) = 9 \times 9 = 81$ точках --- серединах ячеек сетки:
+\[
+x'_{i} = \frac{x_i + x_{i+1}}{2}, \quad y'_{j} = \frac{y_j + y_{j+1}}{2}, \quad i, j = 0, 1, \ldots, n-2.
+\]
+
+Цель работы --- построение статической математической модели поверхности, формализация процесса интерполяции с использованием триангуляции Делоне, постановка и решение вычислительных задач для вычисления значений в серединах ячеек, а также оценка средней абсолютной погрешности интерполяции (с учётом погрешности в узловых точках).
+
+Необходимое условие для корректной постановки задачи: область определения сетки должна быть ограниченной и выпуклой, а значения высот в узлах сетки должны быть заданы для всех узлов.
+
+%--------------------------------------------------------------------
+\section{Построение математической модели}
+Построение математической модели представляет собой формализацию процесса описания поверхности на языке математических формул.
+
+Рассматривается поверхность в фиксированный момент времени $t_0$ при следующих допущениях:
+\begin{itemize}
+  \item поверхность описывается функцией $z = f(x, y) = \sin\!\left(\sqrt{x^2 + y^2}\right)$;
+  \item функция $f(x, y)$ непрерывна и дифференцируема в области определения;
+  \item значения высот в узлах исходной сетки известны точно (вычислены аналитически);
+  \item сетка регулярная: шаги $\Delta x = \frac{x_{\max} - x_{\min}}{n - 1}$ и $\Delta y = \frac{y_{\max} - y_{\min}}{n - 1}$ постоянны (метод также применим к псевдорегулярным сеткам с неравными интервалами).
+\end{itemize}
+
+Введём переменные состояния: координаты точки $(x, y)$ на плоскости и соответствующая высота $z = f(x, y)$.
+
+\subsection{Модель интерполяции поверхности на основе триангуляции Делоне}
+
+Пусть задана сетка с $n \times n$ узлами $(x_i, y_j)$, где $i = 0, 1, \ldots, n-1$, $j = 0, 1, \ldots, n-1$. Для каждого узла $(x_i, y_j)$ известно значение высоты $z_{ij} = f(x_i, y_j)$.
+
+В качестве метода интерполяции поверхности используется триангуляция Делоне~\cite{skvortsov2002, deberg2004}.
+
+\textbf{Определение триангуляции Делоне:}
+
+Триангуляцией Делоне называется такая триангуляция набора точек, при которой описанная окружность для каждого треугольника не содержит внутри себя ни одной точки набора~\cite{skvortsov2002}. Эта триангуляция хорошо сбалансирована в том смысле, что формируемые треугольники в предельном случае стремятся к равносторонним.
+
+\textbf{Алгоритм построения триангуляции Делоне:}
+
+Существует несколько подходов к построению триангуляции Делоне~\cite{deberg2004}. Один из классических --- рекурсивный алгоритм с классификацией рёбер на <<спящие>>, <<живые>> и <<мёртвые>>. Рёбра классифицируются следующим образом:
+\begin{itemize}
+  \item \textbf{<<Спящее>> ребро} --- ещё не обнаружено алгоритмом.
+  \item \textbf{<<Живое>> ребро} --- обнаружено, известна только одна примыкающая область.
+  \item \textbf{<<Мёртвое>> ребро} --- обнаружено и известны обе примыкающие области.
+\end{itemize}
+
+В данной работе для программной реализации используется инкрементальный алгоритм Боуэра---Уотсона~\cite{skvortsov2002}, который добавляет точки по одной, пересоздавая затронутые треугольники на каждом шаге:
+
+\textbf{Шаг 1: Инициализация.}
+
+Создаётся супер-треугольник, покрывающий все точки набора. Его вершины выбираются достаточно далеко от области данных.
+
+\textbf{Шаг 2: Инкрементальное добавление точек.}
+
+Для каждой новой точки $P$:
+\begin{enumerate}
+  \item Определяются все треугольники, для которых точка $P$ попадает внутрь описанной окружности (<<плохие>> треугольники). Это треугольники, нарушающие условие Делоне.
+  \item Формируется полигональная граница <<дырки>> --- множество рёбер, принадлежащих ровно одному <<плохому>> треугольнику.
+  \item <<Плохие>> треугольники удаляются из триангуляции.
+  \item От каждого граничного ребра к новой точке $P$ строится новый треугольник.
+\end{enumerate}
+
+\textbf{Шаг 3: Завершение.}
+
+Удаляются все треугольники, содержащие вершины супер-треугольника. Оставшиеся треугольники образуют триангуляцию Делоне исходного набора точек.
+
+\textbf{Интерполяция высот на основе триангуляции:}
+
+Для произвольной точки $(x, y)$ значение высоты определяется следующим образом:
+\begin{enumerate}
+  \item Находится треугольник триангуляции Делоне, содержащий точку $(x, y)$.
+  \item Используется барицентрическая интерполяция внутри треугольника.
+\end{enumerate}
+
+Пусть треугольник образован тремя вершинами $P_1 = (x_1, y_1, z_1)$, $P_2 = (x_2, y_2, z_2)$, $P_3 = (x_3, y_3, z_3)$. Барицентрические координаты точки $(x, y)$ относительно этого треугольника вычисляются по формулам:
+\[
+\begin{aligned}
+\lambda_1 &= \frac{(y_2 - y_3)(x - x_3) + (x_3 - x_2)(y - y_3)}{(y_2 - y_3)(x_1 - x_3) + (x_3 - x_2)(y_1 - y_3)},\\
+\lambda_2 &= \frac{(y_3 - y_1)(x - x_3) + (x_1 - x_3)(y - y_3)}{(y_2 - y_3)(x_1 - x_3) + (x_3 - x_2)(y_1 - y_3)},\\
+\lambda_3 &= 1 - \lambda_1 - \lambda_2.
+\end{aligned}
+\]
+
+Интерполированное значение высоты:
+\[
+z(x, y) = \lambda_1 z_1 + \lambda_2 z_2 + \lambda_3 z_3.
+\]
+
+\textbf{Свойства триангуляции Делоне:}
+\begin{itemize}
+  \item Интерполяция точно проходит через узлы сетки: $\hat{f}(x_i, y_j) = z_{ij}$.
+  \item Функция непрерывна на границах треугольников.
+  \item Внутри каждого треугольника функция является линейной (плоскость), то есть это \textbf{линейный алгоритм интерполяции} внутри треугольника.
+  \item Триангуляция Делоне обеспечивает оптимальную сбалансированность треугольников, минимизируя «худшие» треугольники (слишком вытянутые или слишком узкие)~\cite{deberg2004}.
+  \item Погрешность интерполяции для гладких функций составляет $O(h^2)$, где $h$ --- характерный размер треугольника~\cite{skvortsov2002}.
+  \item Метод устойчив к псевдорегулярности сетки: неравные промежутки и неоднозначность соответствия $x$ и $y$ не влияют на корректность построения триангуляции.
+\end{itemize}
+
+\textbf{Применимость к различным типам сеток:}
+
+Триангуляция Делоне применима как к регулярным, так и к псевдорегулярным сеткам~\cite{skvortsov2002}. В случае псевдорегулярной сетки координаты отсортированы по возрастанию, но интервалы между узлами не равны. Триангуляция Делоне строится по всем точкам $(x_i, y_j)$ независимо от их расположения, что позволяет корректно обрабатывать нерегулярные распределения точек.
+
+В данной работе используется регулярная сетка с равномерным шагом, однако метод без изменений применим и к сеткам с произвольным расположением узлов.
+
+\section{Решение вычислительных задач}
+После формализации математической модели необходимо поставить и решить вычислительные задачи для вычисления значений функции в серединах ячеек сетки.
+
+\subsection{Постановка задачи интерполяции}
+
+Задача интерполяции формулируется следующим образом: для заданной сетки $n \times n = 10 \times 10$ узлов с координатами $(x_i, y_j)$ и значениями $z_{ij} = \sin\!\left(\sqrt{x_i^2 + y_j^2}\right)$ необходимо построить функцию $\hat{f}(x, y)$, такую что:
+\[
+\hat{f}(x_i, y_j) = z_{ij}, \quad \forall\, i, j = 0, 1, \ldots, n-1,
+\]
+и вычислить значения $\hat{f}(x'_i, y'_j)$ в $k \times k = 9 \times 9 = 81$ серединах ячеек.
+
+Условие единственности решения: для триангуляции Делоне значение $z(x, y)$ внутри каждого треугольника определяется единственным образом по значениям в трёх вершинах треугольника через барицентрическую интерполяцию.
+
+\subsection{Вычисление координат середин ячеек}
+
+Сетка $n \times n = 10 \times 10$ узлов образует $(n-1) \times (n-1) = 9 \times 9$ ячеек. Координаты середин ячеек:
+\[
+x'_{i} = \frac{x_i + x_{i+1}}{2}, \quad y'_{j} = \frac{y_j + y_{j+1}}{2}, \quad i, j = 0, 1, \ldots, n-2.
+\]
+
+Для регулярной сетки на $[-3, 3] \times [-3, 3]$ с шагом $\Delta = \frac{6}{9} = \frac{2}{3} \approx 0.6\overline{6}$:
+\[
+x_i = -3 + i \cdot \frac{2}{3}, \quad y_j = -3 + j \cdot \frac{2}{3}, \quad i, j = 0, 1, \ldots, 9.
+\]
+
+Координаты середин:
+\[
+x'_i = -3 + \left(i + \frac{1}{2}\right) \cdot \frac{2}{3}, \quad y'_j = -3 + \left(j + \frac{1}{2}\right) \cdot \frac{2}{3}, \quad i, j = 0, 1, \ldots, 8.
+\]
+
+\subsection{Алгоритм вычисления значений в серединах ячеек}
+
+\textbf{Шаг 1: Табулирование функции в узлах сетки.}
+
+Вычисляются значения функции $z_{ij} = \sin\!\left(\sqrt{x_i^2 + y_j^2}\right)$ во всех $n^2 = 100$ узлах сетки.
+
+\textbf{Шаг 2: Построение триангуляции Делоне.}
+
+По всем $n^2 = 100$ точкам $(x_i, y_j)$ с известными значениями $z_{ij}$ строится триангуляция Делоне.
+
+\textbf{Шаг 3: Интерполяция в серединах ячеек.}
+
+Для каждой из $k^2 = 81$ точек $(x'_i, y'_j)$:
+\begin{enumerate}
+  \item Находится треугольник триангуляции Делоне, содержащий точку $(x'_i, y'_j)$.
+  \item Вычисляются барицентрические координаты $(\lambda_1, \lambda_2, \lambda_3)$ точки относительно этого треугольника.
+  \item Вычисляется интерполированное значение:
+  \[
+  \hat{f}(x'_i, y'_j) = \lambda_1 z_1 + \lambda_2 z_2 + \lambda_3 z_3,
+  \]
+  где $z_1$, $z_2$, $z_3$ --- значения функции в вершинах треугольника.
+\end{enumerate}
+
+\textbf{Шаг 4: Вычисление погрешности.}
+
+Погрешность в каждой точке середины ячейки:
+\[
+e^{\text{mid}}_{ij} = \left|\hat{f}(x'_i, y'_j) - f(x'_i, y'_j)\right| = \left|\hat{f}(x'_i, y'_j) - \sin\!\left(\sqrt{x'^2_i + y'^2_j}\right)\right|.
+\]
+
+\subsection{Оценка погрешности интерполяции}
+
+Погрешность интерполяции на основе триангуляции Делоне для функции $f(x, y)$ с непрерывными вторыми производными оценивается как:
+\[
+|f(x, y) - \hat{f}(x, y)| \leq C \cdot h^2 \cdot \max\left|\frac{\partial^2 f}{\partial x^2}\right|, \quad h = \max(\text{диаметр треугольника}),
+\]
+где $C$ --- константа, зависящая от формы треугольника, $h$ --- максимальный диаметр треугольника в триангуляции.
+
+Для функции $f(x,y) = \sin\!\left(\sqrt{x^2+y^2}\right)$ вторые производные ограничены на области $[-3,3]^2$, что гарантирует сходимость интерполяции при уменьшении шага сетки.
+
+\section{Анализ моделей и проверка качества}
+После построения математической модели и решения вычислительных задач необходимо проверить качество модели, проанализировать полученные результаты и оценить применимость модели.
+
+\subsection{Анализ решений}
+
+Математическая модель триангуляции Делоне позволяет проанализировать различные аспекты интерполяции поверхности $z = \sin\!\left(\sqrt{x^2 + y^2}\right)$.
+
+\textbf{Свойства интерполяции:}
+\begin{itemize}
+  \item Интерполяция точно проходит через узлы сетки: $\hat{f}(x_i, y_j) = z_{ij}$.
+  \item Функция $\hat{f}(x, y)$ непрерывна на границах треугольников.
+  \item Внутри каждого треугольника интерполяция линейная (плоскость).
+  \item Триангуляция Делоне обеспечивает оптимальное распределение треугольников, минимизируя «вырожденные» треугольники.
+\end{itemize}
+
+\subsection{Проверка качества модели}
+
+Для проверки качества модели вычислены погрешности интерполяции, сравнивая интерполированные значения с точными значениями аналитической функции.
+
+\textbf{1. Погрешность в узловых точках.}
+
+В узловых точках ($n \times n = 10 \times 10 = 100$ точек) значения табулированы аналитически, поэтому погрешность равна нулю:
+\[
+e^{\text{node}}_{ij} = |z_{ij} - f(x_i, y_j)| = 0, \quad \forall\, i, j.
+\]
+
+Средняя абсолютная погрешность в узлах:
+\[
+\text{MAE}_{\text{node}} = \frac{1}{n^2} \sum_{i=0}^{n-1} \sum_{j=0}^{n-1} e^{\text{node}}_{ij} = 0.
+\]
+
+\textit{Замечание:} нулевая погрешность в узлах объясняется тем, что значения вычислены аналитически. В реальных задачах здесь могла бы быть погрешность измерений.
+
+\textbf{2. Погрешность в серединах ячеек.}
+
+В серединах ячеек ($k \times k = 9 \times 9 = 81$ точка) вычислены следующие метрики погрешности:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Метрика} & \textbf{Значение} \\
+\hline
+Средняя абсолютная погрешность (MAE) & 0.05084292 \\
+\hline
+Среднеквадратичная погрешность (RMS) & 0.07206105 \\
+\hline
+\end{tabular}
+\caption{Погрешность интерполяции в серединах ячеек}
+\label{tab:error_midpoints}
+\end{table}
+
+Метрики вычислены по формулам:
+\[
+\text{MAE}_{\text{mid}} = \frac{1}{k^2} \sum_{i=0}^{k-1} \sum_{j=0}^{k-1} e^{\text{mid}}_{ij}, \quad \text{RMS}_{\text{mid}} = \sqrt{\frac{1}{k^2} \sum_{i=0}^{k-1} \sum_{j=0}^{k-1} \left(e^{\text{mid}}_{ij}\right)^2}.
+\]
+
+\textbf{3. Общая средняя абсолютная погрешность.}
+
+Общая средняя абсолютная погрешность с учётом всех точек (узловых и середин ячеек):
+\[
+\text{MAE}_{\text{all}} = \frac{N_{\text{node}} \cdot \text{MAE}_{\text{node}} + N_{\text{mid}} \cdot \text{MAE}_{\text{mid}}}{N_{\text{node}} + N_{\text{mid}}} =
+\]
+\[
+= \frac{100 \cdot 0 + 81 \cdot 0.05084292}{100 + 81} = \frac{4.11828}{181} \approx 0.02275.
+\]
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Тип точек} & \textbf{Количество} & \textbf{MAE} \\
+\hline
+Узловые точки ($n \times n$) & 100 & 0.0000 \\
+\hline
+Середины ячеек ($k \times k$) & 81 & 0.0508 \\
+\hline
+\textbf{Всего} & \textbf{181} & \textbf{0.0228} \\
+\hline
+\end{tabular}
+\caption{Сводная таблица погрешностей}
+\label{tab:error_summary}
+\end{table}
+
+\textbf{Качественный анализ погрешности:}
+
+\begin{itemize}
+  \item Средняя погрешность $0.051$ при диапазоне значений $[-1, 1]$ составляет около $2.5\%$ от размаха, что является приемлемым результатом для линейной интерполяции на сетке $10 \times 10$.
+  \item Погрешность $O(h^2)$ подтверждается: при шаге $h = 6/9 \approx 0.667$ ожидаемая погрешность пропорциональна $h^2 \approx 0.44$, что согласуется с порядком полученных значений.
+\end{itemize}
+
+Ограничения модели: триангуляция Делоне обеспечивает только непрерывность функции, но не её производных (поверхность кусочно-линейная). Для повышения точности можно увеличить количество узлов сетки или использовать интерполяцию более высокого порядка (например, кубическую на триангуляции).
+
+\section{Практическая реализация}
+
+\newenvironment{longlisting}{\captionsetup{type=listing}}{}
+\begin{longlisting}
+\caption{Модуль интерполяции на основе триангуляции Делоне}
+\begin{minted}[frame=single,fontsize = \footnotesize, linenos, xleftmargin = 1.5em, breaklines=true]{python}
+import numpy as np
+
+
+class GridRefinement:
+    def __init__(self, X=None, Y=None, Z=None):
+        if X is None:
+            X = []
+        if Y is None:
+            Y = []
+        if Z is None:
+            Z = np.array([[0]])
+
+        self.X = np.array(X, dtype=float)
+        self.Y = np.array(Y, dtype=float)
+        self.Z = np.array(Z, dtype=float)
+
+        if len(self.X) > 0 and len(self.Y) > 0:
+            if self.Z.shape != (len(self.X), len(self.Y)):
+                raise ValueError(
+                    f"Размерность Z должна быть ({len(self.X)}, {len(self.Y)}), "
+                    f"получено {self.Z.shape}"
+                )
+
+        self.N_x = max(0, len(self.X) - 1)
+        self.N_y = max(0, len(self.Y) - 1)
+
+        self.points = None
+        self.values = None
+        self.triangles = None
+
+    def _build_triangulation(self):
+        if self.triangles is not None:
+            return
+
+        if len(self.X) == 0 or len(self.Y) == 0:
+            return
+
+        pts = []
+        vals = []
+        for i in range(len(self.X)):
+            for j in range(len(self.Y)):
+                pts.append([self.X[i], self.Y[j]])
+                vals.append(self.Z[i, j])
+
+        self.points = np.array(pts, dtype=float)
+        self.values = np.array(vals, dtype=float)
+
+        self.triangles = self._bowyer_watson(self.points)
+
+    @staticmethod
+    def _circumcircle(p1, p2, p3):
+        ax, ay = p1
+        bx, by = p2
+        cx, cy = p3
+
+        D = 2.0 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by))
+
+        if abs(D) < 1e-12:
+            mid_x = (ax + bx + cx) / 3.0
+            mid_y = (ay + by + cy) / 3.0
+            return mid_x, mid_y, float('inf')
+
+        a_sq = ax * ax + ay * ay
+        b_sq = bx * bx + by * by
+        c_sq = cx * cx + cy * cy
+
+        ux = (a_sq * (by - cy) + b_sq * (cy - ay) + c_sq * (ay - by)) / D
+        uy = (a_sq * (cx - bx) + b_sq * (ax - cx) + c_sq * (bx - ax)) / D
+
+        r_sq = (ax - ux) ** 2 + (ay - uy) ** 2
+        return ux, uy, r_sq
+
+    @staticmethod
+    def _bowyer_watson(points):
+        n = len(points)
+        if n < 3:
+            return []
+
+        x_min = points[:, 0].min()
+        x_max = points[:, 0].max()
+        y_min = points[:, 1].min()
+        y_max = points[:, 1].max()
+
+        dx = x_max - x_min
+        dy = y_max - y_min
+        d_max = max(dx, dy, 1e-6)
+
+        mid_x = (x_min + x_max) / 2.0
+        mid_y = (y_min + y_max) / 2.0
+
+        p0 = [mid_x - 20.0 * d_max, mid_y - d_max]
+        p1 = [mid_x + 20.0 * d_max, mid_y - d_max]
+        p2 = [mid_x, mid_y + 20.0 * d_max]
+
+        all_points = list(points) + [p0, p1, p2]
+        all_points_arr = np.array(all_points, dtype=float)
+
+        triangles = {(n, n + 1, n + 2)}
+
+        cc_cache = {}
+        t0 = (n, n + 1, n + 2)
+        cc_cache[t0] = GridRefinement._circumcircle(
+            all_points_arr[t0[0]], all_points_arr[t0[1]], all_points_arr[t0[2]]
+        )
+
+        for idx in range(n):
+            px, py = all_points_arr[idx]
+
+            bad_triangles = set()
+            for tri in triangles:
+                cx, cy, r_sq = cc_cache[tri]
+                dist_sq = (px - cx) ** 2 + (py - cy) ** 2
+                if dist_sq < r_sq + 1e-10:
+                    bad_triangles.add(tri)
+
+            edge_count = {}
+            for tri in bad_triangles:
+                edges = [
+                    (tri[0], tri[1]),
+                    (tri[1], tri[2]),
+                    (tri[0], tri[2]),
+                ]
+                for e in edges:
+                    e_sorted = tuple(sorted(e))
+                    edge_count[e_sorted] = edge_count.get(e_sorted, 0) + 1
+
+            boundary_edges = [e for e, cnt in edge_count.items() if cnt == 1]
+
+            for tri in bad_triangles:
+                triangles.discard(tri)
+                cc_cache.pop(tri, None)
+
+            for e in boundary_edges:
+                new_tri = tuple(sorted((e[0], e[1], idx)))
+                triangles.add(new_tri)
+                cc_cache[new_tri] = GridRefinement._circumcircle(
+                    all_points_arr[new_tri[0]],
+                    all_points_arr[new_tri[1]],
+                    all_points_arr[new_tri[2]],
+                )
+
+        super_indices = {n, n + 1, n + 2}
+        result = []
+        for tri in triangles:
+            if super_indices.isdisjoint(tri):
+                result.append(tri)
+
+        return result
+
+    @staticmethod
+    def _barycentric_coords(px, py, x1, y1, x2, y2, x3, y3):
+        denom = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
+
+        if abs(denom) < 1e-14:
+            return -1.0, -1.0, -1.0
+
+        lam1 = ((y2 - y3) * (px - x3) + (x3 - x2) * (py - y3)) / denom
+        lam2 = ((y3 - y1) * (px - x3) + (x1 - x3) * (py - y3)) / denom
+        lam3 = 1.0 - lam1 - lam2
+
+        return lam1, lam2, lam3
+
+    def delaunay_interpolation(self, x, y):
+        if self.triangles is None:
+            self._build_triangulation()
+
+        if self.triangles is None or len(self.triangles) == 0:
+            return self.Z[0, 0] if self.Z.size > 0 else 0.0
+
+        eps = -1e-10
+
+        for tri in self.triangles:
+            i0, i1, i2 = tri
+            x1, y1 = self.points[i0]
+            x2, y2 = self.points[i1]
+            x3, y3 = self.points[i2]
+
+            lam1, lam2, lam3 = self._barycentric_coords(
+                x, y, x1, y1, x2, y2, x3, y3
+            )
+
+            if lam1 >= eps and lam2 >= eps and lam3 >= eps:
+                z = (lam1 * self.values[i0]
+                     + lam2 * self.values[i1]
+                     + lam3 * self.values[i2])
+                return z
+
+        dists = (self.points[:, 0] - x) ** 2 + (self.points[:, 1] - y) ** 2
+        nearest = np.argmin(dists)
+        return self.values[nearest]
+\end{minted}
+\end{longlisting}
+
+\begin{longlisting}
+\caption{Вычислительный скрипт с визуализацией}
+\begin{minted}[frame=single,fontsize = \footnotesize, linenos, xleftmargin = 1.5em, breaklines=true]{python}
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
+from grid_refinement import GridRefinement
+
+plt.rcParams['figure.figsize'] = (16, 8)
+plt.rcParams['font.size'] = 10
+
+def analytical_function(x, y):
+    r = np.sqrt(x**2 + y**2)
+    return np.sin(r)
+
+n = 10
+k = n - 1
+x_min, x_max = -3.0, 3.0
+y_min, y_max = -3.0, 3.0
+
+x_nodes = np.linspace(x_min, x_max, n)
+y_nodes = np.linspace(y_min, y_max, n)
+X_grid, Y_grid = np.meshgrid(x_nodes, y_nodes, indexing='ij')
+Z_nodes = analytical_function(X_grid, Y_grid)
+
+fig = plt.figure(figsize=(16, 6))
+ax1 = fig.add_subplot(121, projection='3d')
+surf = ax1.plot_surface(X_grid, Y_grid, Z_nodes, cmap=cm.viridis,
+                        alpha=0.9, linewidth=0.3, antialiased=True)
+ax1.set_xlabel('X')
+ax1.set_ylabel('Y')
+ax1.set_zlabel('Z')
+ax1.set_title(f'Исходная сетка {n}x{n} узлов')
+plt.colorbar(surf, ax=ax1, shrink=0.6, aspect=20)
+ax2 = fig.add_subplot(122)
+contour = ax2.contourf(X_grid, Y_grid, Z_nodes, levels=20, cmap=cm.viridis)
+ax2.set_xlabel('X')
+ax2.set_ylabel('Y')
+ax2.set_title('Контурная карта исходной сетки')
+ax2.set_aspect('equal')
+plt.colorbar(contour, ax=ax2, shrink=0.8)
+plt.tight_layout()
+plt.show()
+
+grid = GridRefinement(x_nodes.copy(), y_nodes.copy(), Z_nodes.copy())
+
+x_midpoints = [(x_nodes[i] + x_nodes[i+1]) / 2.0 for i in range(k)]
+y_midpoints = [(y_nodes[j] + y_nodes[j+1]) / 2.0 for j in range(k)]
+x_midpoints = np.array(x_midpoints)
+y_midpoints = np.array(y_midpoints)
+X_mid_grid, Y_mid_grid = np.meshgrid(x_midpoints, y_midpoints, indexing='ij')
+
+Z_midpoints_interp = np.zeros((k, k))
+for i in range(k):
+    for j in range(k):
+        Z_midpoints_interp[i, j] = grid.delaunay_interpolation(
+            X_mid_grid[i, j], Y_mid_grid[i, j])
+
+Z_midpoints_exact = analytical_function(X_mid_grid, Y_mid_grid)
+
+Z_nodes_exact = analytical_function(X_grid, Y_grid)
+error_nodes = np.abs(Z_nodes - Z_nodes_exact)
+mean_error_nodes = np.mean(error_nodes)
+max_error_nodes = np.max(error_nodes)
+
+error_midpoints = np.abs(Z_midpoints_interp - Z_midpoints_exact)
+mean_error_midpoints = np.mean(error_midpoints)
+max_error_midpoints = np.max(error_midpoints)
+rms_error_midpoints = np.sqrt(np.mean(error_midpoints**2))
+
+total_nodes = n * n
+total_midpoints = k * k
+total_points = total_nodes + total_midpoints
+total_mean_error = (mean_error_nodes * total_nodes +
+                    mean_error_midpoints * total_midpoints) / total_points
+
+fig = plt.figure(figsize=(18, 12))
+ax1 = fig.add_subplot(2, 3, 1)
+im1 = ax1.contourf(X_mid_grid, Y_mid_grid, Z_midpoints_interp,
+                    levels=20, cmap=cm.viridis)
+ax1.set_xlabel('X')
+ax1.set_ylabel('Y')
+ax1.set_title(f'Интерполированные значения ({k}x{k})')
+ax1.set_aspect('equal')
+plt.colorbar(im1, ax=ax1, shrink=0.8)
+ax2 = fig.add_subplot(2, 3, 2)
+im2 = ax2.contourf(X_mid_grid, Y_mid_grid, Z_midpoints_exact,
+                    levels=20, cmap=cm.viridis)
+ax2.set_xlabel('X')
+ax2.set_ylabel('Y')
+ax2.set_title(f'Точные значения ({k}x{k})')
+ax2.set_aspect('equal')
+plt.colorbar(im2, ax=ax2, shrink=0.8)
+ax3 = fig.add_subplot(2, 3, 3)
+im3 = ax3.contourf(X_mid_grid, Y_mid_grid, error_midpoints,
+                    levels=20, cmap=cm.Reds)
+ax3.set_xlabel('X')
+ax3.set_ylabel('Y')
+ax3.set_title(f'Погрешность (макс: {max_error_midpoints:.6f})')
+ax3.set_aspect('equal')
+plt.colorbar(im3, ax=ax3, shrink=0.8)
+ax4 = fig.add_subplot(2, 3, 4, projection='3d')
+ax4.plot_surface(X_mid_grid, Y_mid_grid, Z_midpoints_interp,
+                 cmap=cm.viridis, alpha=0.9, linewidth=0.3)
+ax4.set_xlabel('X')
+ax4.set_ylabel('Y')
+ax4.set_zlabel('Z')
+ax4.set_title('3D: Интерполированные')
+ax5 = fig.add_subplot(2, 3, 5, projection='3d')
+ax5.plot_surface(X_mid_grid, Y_mid_grid, Z_midpoints_exact,
+                 cmap=cm.viridis, alpha=0.9, linewidth=0.3)
+ax5.set_xlabel('X')
+ax5.set_ylabel('Y')
+ax5.set_zlabel('Z')
+ax5.set_title('3D: Точные')
+ax6 = fig.add_subplot(2, 3, 6)
+diff = Z_midpoints_interp - Z_midpoints_exact
+im6 = ax6.contourf(X_mid_grid, Y_mid_grid, diff,
+                    levels=20, cmap=cm.RdYlBu_r)
+ax6.set_xlabel('X')
+ax6.set_ylabel('Y')
+ax6.set_title(f'Разница (средняя: {np.mean(diff):.6f})')
+ax6.set_aspect('equal')
+plt.colorbar(im6, ax=ax6, shrink=0.8)
+plt.tight_layout()
+plt.show()
+
+print("=" * 60)
+print("СТАТИСТИКА ПОГРЕШНОСТЕЙ")
+print("=" * 60)
+print(f"\nУзловые точки ({n}x{n} = {total_nodes}):")
+print(f"  MAE: {mean_error_nodes:.10f}")
+print(f"  MAX: {max_error_nodes:.10f}")
+print(f"\nСередины ячеек ({k}x{k} = {total_midpoints}):")
+print(f"  MAE: {mean_error_midpoints:.8f}")
+print(f"  MAX: {max_error_midpoints:.8f}")
+print(f"  RMS: {rms_error_midpoints:.8f}")
+print(f"\n{'='*60}")
+print(f"ОБЩАЯ MAE ({total_points} точек): {total_mean_error:.8f}")
+print(f"{'='*60}")
+
+\end{minted}
+\end{longlisting}
+
+
+\section{Результаты}
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=1\textwidth]{image (1).png}
+    \label{fig:newton}
+\end{figure}
+В результате построения математической модели и решения вычислительных задач получены следующие результаты:
+
+\begin{itemize}
+  \item \textbf{Табулирование функции:} функция $z = \sin\!\left(\sqrt{x^2 + y^2}\right)$ табулирована на регулярной сетке $10 \times 10$ узлов в области $[-3, 3]^2$. Диапазон значений в узлах: от $-0.892$ до $0.992$.
+  
+  \item \textbf{Интерполяция в серединах ячеек:} с помощью триангуляции Делоне вычислены значения в $9 \times 9 = 81$ серединах ячеек. Диапазон интерполированных значений: от $-0.612$ до $0.990$.
+  
+  \item \textbf{Погрешность интерполяции:} средняя абсолютная погрешность в серединах ячеек составила $\text{MAE}_{\text{mid}} = 0.051$.
+  
+  \item \textbf{Общая погрешность:} с учётом нулевой погрешности в $100$ узловых точках и погрешности в $81$ середине ячейки, общая средняя абсолютная погрешность составила $\text{MAE}_{\text{all}} \approx 0.023$.
+  
+  \item \textbf{Относительная точность:} при диапазоне значений функции $[-1, 1]$ средняя погрешность $0.051$ составляет около $2.5\%$ от размаха, что является приемлемым результатом для линейной интерполяции.
+\end{itemize}
+
+\section{Выводы}
+\begin{itemize}
+  \item Выполнена формализация задачи интерполяции поверхности $z = \sin\!\left(\sqrt{x^2 + y^2}\right)$ на языке математических формул. Поверхность описана через триангуляцию Делоне~\cite{skvortsov2002} с барицентрической интерполяцией~\cite{deberg2004}, что является основой статической математической модели.
+  
+  \item Поставлены и решены вычислительные задачи: табулирование функции на сетке $10 \times 10$ узлов, построение триангуляции Делоне, вычисление интерполированных значений в $9 \times 9 = 81$ серединах ячеек, оценка погрешности интерполяции.
+  
+  \item Проведена проверка качества модели. Средняя абсолютная погрешность интерполяции в серединах ячеек: $\text{MAE}_{\text{mid}} = 0.051$. Общая средняя абсолютная погрешность (с учётом узловых точек): $\text{MAE}_{\text{all}} = 0.023$.
+  
+  \item Погрешность в узловых точках равна нулю, так как значения табулированы аналитически. В реальных задачах здесь могла бы быть погрешность измерений.
+  
+  \item Метод триангуляции Делоне устойчив и применим как к регулярным, так и к псевдорегулярным сеткам. Ограничения модели: интерполяция обеспечивает только непрерывность функции, но не её производных (поверхность кусочно-линейная).
+\end{itemize}
+
+\begin{thebibliography}{9}
+\bibitem{skvortsov2002}
+Скворцов~А.\,В. Триангуляция Делоне и её применение. --- Томск: Изд-во Том. ун-та, 2002. --- 128~с.
+
+\bibitem{deberg2004}
+Де~Берг~М., Ван~Кревельд~М., Овермарс~М., Шварцкопф~О. Вычислительная геометрия: алгоритмы и приложения / Пер. с англ. --- М.: ДМК Пресс, 2004. --- 352~с.
+\end{thebibliography}
+
+\end{document}
+

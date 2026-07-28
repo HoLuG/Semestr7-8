@@ -1,0 +1,98 @@
+*$FROM inifile
+$EXTERN LoadIniFile;
+
+*$FROM LibraryEx
+$EXTERN ArgList, Prout, Map, Fetch;
+
+$ENTRY Go {
+  = <Main <ArgList>>;
+}
+
+Main {
+  (e.ProgName)
+    = <Prout 'Usage: ' e.ProgName ' file1.ini file2.ini ...'>;
+
+  (e.ProgName) e.IniFiles
+    = <Map
+        {
+          (e.IniFile)
+            = <Prout 'Parse ' e.IniFile>
+              <Fetch
+                <LoadIniFile e.IniFile> {
+                  (e.IniContent)
+                    = <Prout 'In ' e.IniFile ' no parse errors'>
+                      <PrintIni (e.IniFile) e.IniContent>;
+
+                  (e.IniContent) e.Errors
+                    = <Prout 'Errors:'>
+                      <Map
+                        {
+                          (s.LineNumber BadLine)
+                            = <Prout
+                                '* Bad line at ' <Symb s.LineNumber>
+                              >;
+
+                          (s.LineNumber EmptyParameterName)
+                            = <Prout
+                                '* Expected parameter name before ''='' at '
+                                <Symb s.LineNumber>
+                              >;
+
+                          (s.LineNumber ReassignParameter e.Name)
+                            = <Prout
+                                '* Reassign parameter ' e.Name ' at '
+                                <Symb s.LineNumber>
+                                ', use last assigned value'
+                              >;
+                        }
+                        e.Errors
+                      >
+                      <PrintIni (e.IniFile) e.IniContent>;
+                }
+              >;
+        }
+        e.IniFiles
+      >;
+}
+
+WriteLineAt {
+  s.LineNumber e.Text
+    = <Prout <Symb s.LineNumber> ': ' e.Text>;
+}
+
+PrintIni {
+  (e.FileName) e.FileContent
+    = <Prout>
+      <Prout 'Content of ' e.FileName>
+      <Map
+        {
+          (s.SectionPos General)
+            = <Prout '(Default section) - empty'>;
+
+          (s.SectionPos General e.Parameters)
+            = <Prout '(Default section)'>
+              <PrintParameters e.Parameters>;
+
+          (s.SectionPos (e.Section))
+            = <Prout>
+              <WriteLineAt s.SectionPos '[' e.Section '] - empty'>;
+
+          (s.SectionPos (e.Section) e.Parameters)
+            = <Prout>
+              <WriteLineAt s.SectionPos '[' e.Section ']'>
+              <PrintParameters e.Parameters>;
+        }
+        e.FileContent
+      >;
+}
+
+PrintParameters {
+  e.Parameters
+    = <Map
+        {
+          (s.LineNumber (e.Name) e.Value)
+            = <WriteLineAt s.LineNumber e.Name ' = ' e.Value>;
+        }
+        e.Parameters
+      >;
+}

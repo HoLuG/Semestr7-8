@@ -1,0 +1,179 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{pandas}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{pd}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{numpy}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{np}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{matplotlib.pyplot}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{plt}
+\PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{sklearn.model\PYGZus{}selection}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{train\PYGZus{}test\PYGZus{}split}
+\PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{scipy.interpolate}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{interp1d}
+
+\PYG{c+c1}{\PYGZsh{} Загрузка данных}
+\PYG{n}{df} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{read\PYGZus{}csv}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}diabetes.csv\PYGZsq{}}\PYG{p}{)}
+
+\PYG{c+c1}{\PYGZsh{} Разделение данных по Outcome}
+\PYG{n}{xi0} \PYG{o}{=} \PYG{n}{df}\PYG{p}{[}\PYG{n}{df}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}Outcome\PYGZsq{}}\PYG{p}{]} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{][}\PYG{l+s+s1}{\PYGZsq{}Glucose\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{values}
+\PYG{n}{xi1} \PYG{o}{=} \PYG{n}{df}\PYG{p}{[}\PYG{n}{df}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}Outcome\PYGZsq{}}\PYG{p}{]} \PYG{o}{==} \PYG{l+m+mi}{1}\PYG{p}{][}\PYG{l+s+s1}{\PYGZsq{}Glucose\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{values}
+
+\PYG{c+c1}{\PYGZsh{} Корректировка данных для возможности логарифмирования}
+\PYG{n}{xi0\PYGZus{}corrected} \PYG{o}{=} \PYG{n}{xi0} \PYG{o}{+} \PYG{l+m+mi}{1}
+\PYG{n}{xi1\PYGZus{}corrected} \PYG{o}{=} \PYG{n}{xi1} \PYG{o}{+} \PYG{l+m+mi}{1}
+
+\PYG{c+c1}{\PYGZsh{} Разделение на рабочие и контрольные выборки}
+\PYG{n}{xi0\PYGZus{}train}\PYG{p}{,} \PYG{n}{xi0\PYGZus{}test} \PYG{o}{=} \PYG{n}{train\PYGZus{}test\PYGZus{}split}\PYG{p}{(}
+    \PYG{n}{xi0\PYGZus{}corrected}\PYG{p}{,} \PYG{n}{test\PYGZus{}size}\PYG{o}{=}\PYG{l+m+mf}{0.2}\PYG{p}{,} \PYG{n}{random\PYGZus{}state}\PYG{o}{=}\PYG{l+m+mi}{42}
+\PYG{p}{)}
+\PYG{n}{xi1\PYGZus{}train}\PYG{p}{,} \PYG{n}{xi1\PYGZus{}test} \PYG{o}{=} \PYG{n}{train\PYGZus{}test\PYGZus{}split}\PYG{p}{(}
+    \PYG{n}{xi1\PYGZus{}corrected}\PYG{p}{,} \PYG{n}{test\PYGZus{}size}\PYG{o}{=}\PYG{l+m+mf}{0.2}\PYG{p}{,} \PYG{n}{random\PYGZus{}state}\PYG{o}{=}\PYG{l+m+mi}{42}
+\PYG{p}{)}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{moment\PYGZus{}method}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{,} \PYG{n}{sample\PYGZus{}y}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Оценка параметров методом моментов\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{log\PYGZus{}x} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{log}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{)}
+    \PYG{n}{log\PYGZus{}y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{log}\PYG{p}{(}\PYG{n}{sample\PYGZus{}y}\PYG{p}{)}
+
+    \PYG{n}{E\PYGZus{}log\PYGZus{}x} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{log\PYGZus{}x}\PYG{p}{)}
+    \PYG{n}{E\PYGZus{}log\PYGZus{}y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{log\PYGZus{}y}\PYG{p}{)}
+    \PYG{n}{D\PYGZus{}log\PYGZus{}x} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{var}\PYG{p}{(}\PYG{n}{log\PYGZus{}x}\PYG{p}{,} \PYG{n}{ddof}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+    \PYG{n}{D\PYGZus{}log\PYGZus{}y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{var}\PYG{p}{(}\PYG{n}{log\PYGZus{}y}\PYG{p}{,} \PYG{n}{ddof}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+
+    \PYG{n}{beta} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{D\PYGZus{}log\PYGZus{}y} \PYG{o}{/} \PYG{n}{D\PYGZus{}log\PYGZus{}x}\PYG{p}{)}
+    \PYG{n}{ln\PYGZus{}alpha} \PYG{o}{=} \PYG{n}{E\PYGZus{}log\PYGZus{}y} \PYG{o}{\PYGZhy{}} \PYG{n}{beta} \PYG{o}{*} \PYG{n}{E\PYGZus{}log\PYGZus{}x}
+    \PYG{n}{alpha} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{exp}\PYG{p}{(}\PYG{n}{ln\PYGZus{}alpha}\PYG{p}{)}
+
+    \PYG{k}{return} \PYG{n}{alpha}\PYG{p}{,} \PYG{n}{beta}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{ols\PYGZus{}method}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{,} \PYG{n}{sample\PYGZus{}y}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Оценка параметров методом наименьших квадратов\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{n\PYGZus{}quantiles} \PYG{o}{=} \PYG{n+nb}{min}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{),} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{sample\PYGZus{}y}\PYG{p}{))}
+    \PYG{n}{quantiles} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mf}{0.01}\PYG{p}{,} \PYG{l+m+mf}{0.99}\PYG{p}{,} \PYG{n}{n\PYGZus{}quantiles}\PYG{p}{)}
+
+    \PYG{n}{x\PYGZus{}quantiles} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{,} \PYG{n}{quantiles}\PYG{p}{)}
+    \PYG{n}{y\PYGZus{}quantiles} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{sample\PYGZus{}y}\PYG{p}{,} \PYG{n}{quantiles}\PYG{p}{)}
+
+    \PYG{n}{log\PYGZus{}x} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{log}\PYG{p}{(}\PYG{n}{x\PYGZus{}quantiles}\PYG{p}{)}
+    \PYG{n}{log\PYGZus{}y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{log}\PYG{p}{(}\PYG{n}{y\PYGZus{}quantiles}\PYG{p}{)}
+
+    \PYG{n}{n} \PYG{o}{=} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{log\PYGZus{}x}\PYG{p}{)}
+    \PYG{n}{sum\PYGZus{}log\PYGZus{}x} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(}\PYG{n}{log\PYGZus{}x}\PYG{p}{)}
+    \PYG{n}{sum\PYGZus{}log\PYGZus{}y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(}\PYG{n}{log\PYGZus{}y}\PYG{p}{)}
+    \PYG{n}{sum\PYGZus{}log\PYGZus{}x\PYGZus{}sq} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(}\PYG{n}{log\PYGZus{}x} \PYG{o}{**} \PYG{l+m+mi}{2}\PYG{p}{)}
+    \PYG{n}{sum\PYGZus{}log\PYGZus{}xy} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(}\PYG{n}{log\PYGZus{}x} \PYG{o}{*} \PYG{n}{log\PYGZus{}y}\PYG{p}{)}
+
+    \PYG{n}{denominator} \PYG{o}{=} \PYG{n}{n} \PYG{o}{*} \PYG{n}{sum\PYGZus{}log\PYGZus{}x\PYGZus{}sq} \PYG{o}{\PYGZhy{}} \PYG{n}{sum\PYGZus{}log\PYGZus{}x} \PYG{o}{**} \PYG{l+m+mi}{2}
+    \PYG{k}{if} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{denominator}\PYG{p}{)} \PYG{o}{\PYGZlt{}} \PYG{l+m+mf}{1e\PYGZhy{}10}\PYG{p}{:}
+        \PYG{k}{return} \PYG{n}{moment\PYGZus{}method}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{,} \PYG{n}{sample\PYGZus{}y}\PYG{p}{)}
+
+    \PYG{n}{beta} \PYG{o}{=} \PYG{p}{(}\PYG{n}{n} \PYG{o}{*} \PYG{n}{sum\PYGZus{}log\PYGZus{}xy} \PYG{o}{\PYGZhy{}} \PYG{n}{sum\PYGZus{}log\PYGZus{}x} \PYG{o}{*} \PYG{n}{sum\PYGZus{}log\PYGZus{}y}\PYG{p}{)} \PYG{o}{/} \PYG{n}{denominator}
+    \PYG{n}{ln\PYGZus{}alpha} \PYG{o}{=} \PYG{p}{(}\PYG{n}{sum\PYGZus{}log\PYGZus{}y} \PYG{o}{\PYGZhy{}} \PYG{n}{beta} \PYG{o}{*} \PYG{n}{sum\PYGZus{}log\PYGZus{}x}\PYG{p}{)} \PYG{o}{/} \PYG{n}{n}
+    \PYG{n}{alpha} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{exp}\PYG{p}{(}\PYG{n}{ln\PYGZus{}alpha}\PYG{p}{)}
+
+    \PYG{k}{return} \PYG{n}{alpha}\PYG{p}{,} \PYG{n}{beta}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{nls\PYGZus{}method}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{,} \PYG{n}{sample\PYGZus{}y}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Оценка параметров нелинейным методом наименьших квадратов\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{scipy.optimize}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{minimize}
+
+    \PYG{n}{n\PYGZus{}quantiles} \PYG{o}{=} \PYG{n+nb}{min}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{),} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{sample\PYGZus{}y}\PYG{p}{))}
+    \PYG{n}{quantiles} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mf}{0.01}\PYG{p}{,} \PYG{l+m+mf}{0.99}\PYG{p}{,} \PYG{n}{n\PYGZus{}quantiles}\PYG{p}{)}
+
+    \PYG{n}{x\PYGZus{}quantiles} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{,} \PYG{n}{quantiles}\PYG{p}{)}
+    \PYG{n}{y\PYGZus{}quantiles} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{sample\PYGZus{}y}\PYG{p}{,} \PYG{n}{quantiles}\PYG{p}{)}
+
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{objective}\PYG{p}{(}\PYG{n}{params}\PYG{p}{):}
+        \PYG{n}{alpha}\PYG{p}{,} \PYG{n}{beta} \PYG{o}{=} \PYG{n}{params}
+        \PYG{n}{y\PYGZus{}pred} \PYG{o}{=} \PYG{n}{alpha} \PYG{o}{*} \PYG{n}{x\PYGZus{}quantiles} \PYG{o}{**} \PYG{n}{beta}
+        \PYG{k}{return} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{((}\PYG{n}{y\PYGZus{}quantiles} \PYG{o}{\PYGZhy{}} \PYG{n}{y\PYGZus{}pred}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2}\PYG{p}{)}
+
+    \PYG{k}{try}\PYG{p}{:}
+        \PYG{n}{alpha\PYGZus{}init}\PYG{p}{,} \PYG{n}{beta\PYGZus{}init} \PYG{o}{=} \PYG{n}{ols\PYGZus{}method}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{,} \PYG{n}{sample\PYGZus{}y}\PYG{p}{)}
+    \PYG{k}{except}\PYG{p}{:}
+        \PYG{n}{alpha\PYGZus{}init}\PYG{p}{,} \PYG{n}{beta\PYGZus{}init} \PYG{o}{=} \PYG{n}{moment\PYGZus{}method}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{,} \PYG{n}{sample\PYGZus{}y}\PYG{p}{)}
+
+    \PYG{n}{result} \PYG{o}{=} \PYG{n}{minimize}\PYG{p}{(}\PYG{n}{objective}\PYG{p}{,} \PYG{p}{[}\PYG{n}{alpha\PYGZus{}init}\PYG{p}{,} \PYG{n}{beta\PYGZus{}init}\PYG{p}{],} \PYG{n}{method}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}BFGS\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{alpha}\PYG{p}{,} \PYG{n}{beta} \PYG{o}{=} \PYG{n}{result}\PYG{o}{.}\PYG{n}{x}
+
+    \PYG{k}{return} \PYG{n}{alpha}\PYG{p}{,} \PYG{n}{beta}
+
+\PYG{c+c1}{\PYGZsh{} Оценка параметров тремя методами}
+\PYG{n}{alpha\PYGZus{}mm}\PYG{p}{,} \PYG{n}{beta\PYGZus{}mm} \PYG{o}{=} \PYG{n}{moment\PYGZus{}method}\PYG{p}{(}\PYG{n}{xi0\PYGZus{}train}\PYG{p}{,} \PYG{n}{xi1\PYGZus{}train}\PYG{p}{)}
+\PYG{n}{alpha\PYGZus{}ols}\PYG{p}{,} \PYG{n}{beta\PYGZus{}ols} \PYG{o}{=} \PYG{n}{ols\PYGZus{}method}\PYG{p}{(}\PYG{n}{xi0\PYGZus{}train}\PYG{p}{,} \PYG{n}{xi1\PYGZus{}train}\PYG{p}{)}
+\PYG{n}{alpha\PYGZus{}nls}\PYG{p}{,} \PYG{n}{beta\PYGZus{}nls} \PYG{o}{=} \PYG{n}{nls\PYGZus{}method}\PYG{p}{(}\PYG{n}{xi0\PYGZus{}train}\PYG{p}{,} \PYG{n}{xi1\PYGZus{}train}\PYG{p}{)}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{empirical\PYGZus{}distribution\PYGZus{}function}\PYG{p}{(}\PYG{n}{sample}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Построение эмпирической функции распределения\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{min\PYGZus{}value} \PYG{o}{=} \PYG{n}{sample}\PYG{o}{.}\PYG{n}{min}\PYG{p}{()}
+    \PYG{n}{max\PYGZus{}value} \PYG{o}{=} \PYG{n}{sample}\PYG{o}{.}\PYG{n}{max}\PYG{p}{()}
+    \PYG{n}{values} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n}{min\PYGZus{}value}\PYG{p}{,} \PYG{n}{max\PYGZus{}value}\PYG{p}{,} \PYG{l+m+mf}{0.2}\PYG{p}{)}
+    \PYG{n}{probs} \PYG{o}{=} \PYG{p}{[]}
+
+    \PYG{k}{for} \PYG{n}{value} \PYG{o+ow}{in} \PYG{n}{values}\PYG{p}{:}
+        \PYG{n}{prob} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(}\PYG{n}{sample} \PYG{o}{\PYGZlt{}=} \PYG{n}{value}\PYG{p}{)} \PYG{o}{/} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{sample}\PYG{p}{)}
+        \PYG{n}{probs}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{prob}\PYG{p}{)}
+
+    \PYG{k}{return} \PYG{n}{values}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{probs}\PYG{p}{)}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{calculate\PYGZus{}ks\PYGZus{}statistic}\PYG{p}{(}\PYG{n}{sample\PYGZus{}y}\PYG{p}{,} \PYG{n}{alpha}\PYG{p}{,} \PYG{n}{beta}\PYG{p}{,} \PYG{n}{sample\PYGZus{}x}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Вычисление статистики Колмогорова\PYGZhy{}Смирнова\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{phi\PYGZus{}x} \PYG{o}{=} \PYG{n}{alpha} \PYG{o}{*} \PYG{n}{sample\PYGZus{}x} \PYG{o}{**} \PYG{n}{beta}
+
+    \PYG{n}{y\PYGZus{}sorted} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sort}\PYG{p}{(}\PYG{n}{sample\PYGZus{}y}\PYG{p}{)}
+    \PYG{n}{phi\PYGZus{}sorted} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sort}\PYG{p}{(}\PYG{n}{phi\PYGZus{}x}\PYG{p}{)}
+
+    \PYG{n}{n\PYGZus{}y} \PYG{o}{=} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{y\PYGZus{}sorted}\PYG{p}{)}
+    \PYG{n}{n\PYGZus{}phi} \PYG{o}{=} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{phi\PYGZus{}sorted}\PYG{p}{)}
+
+    \PYG{n}{all\PYGZus{}values} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{unique}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{concatenate}\PYG{p}{([}\PYG{n}{y\PYGZus{}sorted}\PYG{p}{,} \PYG{n}{phi\PYGZus{}sorted}\PYG{p}{]))}
+
+    \PYG{n}{F\PYGZus{}y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{([}\PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(}\PYG{n}{y\PYGZus{}sorted} \PYG{o}{\PYGZlt{}=} \PYG{n}{val}\PYG{p}{)} \PYG{o}{/} \PYG{n}{n\PYGZus{}y} \PYG{k}{for} \PYG{n}{val} \PYG{o+ow}{in} \PYG{n}{all\PYGZus{}values}\PYG{p}{])}
+    \PYG{n}{F\PYGZus{}phi} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{([}\PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(}\PYG{n}{phi\PYGZus{}sorted} \PYG{o}{\PYGZlt{}=} \PYG{n}{val}\PYG{p}{)} \PYG{o}{/} \PYG{n}{n\PYGZus{}phi} \PYG{k}{for} \PYG{n}{val} \PYG{o+ow}{in} \PYG{n}{all\PYGZus{}values}\PYG{p}{])}
+
+    \PYG{n}{D} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{abs}\PYG{p}{(}\PYG{n}{F\PYGZus{}y} \PYG{o}{\PYGZhy{}} \PYG{n}{F\PYGZus{}phi}\PYG{p}{))}
+    \PYG{k}{return} \PYG{n}{D}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{calculate\PYGZus{}mse}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{,} \PYG{n}{sample\PYGZus{}y}\PYG{p}{,} \PYG{n}{alpha}\PYG{p}{,} \PYG{n}{beta}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Вычисление среднего квадрата ошибки\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{n}{n\PYGZus{}quantiles} \PYG{o}{=} \PYG{n+nb}{min}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{),} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{sample\PYGZus{}y}\PYG{p}{))}
+    \PYG{n}{quantiles} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mf}{0.01}\PYG{p}{,} \PYG{l+m+mf}{0.99}\PYG{p}{,} \PYG{n}{n\PYGZus{}quantiles}\PYG{p}{)}
+
+    \PYG{n}{x\PYGZus{}quantiles} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{sample\PYGZus{}x}\PYG{p}{,} \PYG{n}{quantiles}\PYG{p}{)}
+    \PYG{n}{y\PYGZus{}quantiles} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{sample\PYGZus{}y}\PYG{p}{,} \PYG{n}{quantiles}\PYG{p}{)}
+
+    \PYG{n}{y\PYGZus{}pred} \PYG{o}{=} \PYG{n}{alpha} \PYG{o}{*} \PYG{n}{x\PYGZus{}quantiles} \PYG{o}{**} \PYG{n}{beta}
+    \PYG{n}{mse} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{((}\PYG{n}{y\PYGZus{}quantiles} \PYG{o}{\PYGZhy{}} \PYG{n}{y\PYGZus{}pred}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2}\PYG{p}{)}
+    \PYG{k}{return} \PYG{n}{mse}
+
+\PYG{c+c1}{\PYGZsh{} Вычисление метрик для всех методов}
+\PYG{n}{ks\PYGZus{}mm} \PYG{o}{=} \PYG{n}{calculate\PYGZus{}ks\PYGZus{}statistic}\PYG{p}{(}\PYG{n}{xi1\PYGZus{}test}\PYG{p}{,} \PYG{n}{alpha\PYGZus{}mm}\PYG{p}{,} \PYG{n}{beta\PYGZus{}mm}\PYG{p}{,} \PYG{n}{xi0\PYGZus{}test}\PYG{p}{)}
+\PYG{n}{ks\PYGZus{}ols} \PYG{o}{=} \PYG{n}{calculate\PYGZus{}ks\PYGZus{}statistic}\PYG{p}{(}\PYG{n}{xi1\PYGZus{}test}\PYG{p}{,} \PYG{n}{alpha\PYGZus{}ols}\PYG{p}{,} \PYG{n}{beta\PYGZus{}ols}\PYG{p}{,} \PYG{n}{xi0\PYGZus{}test}\PYG{p}{)}
+\PYG{n}{ks\PYGZus{}nls} \PYG{o}{=} \PYG{n}{calculate\PYGZus{}ks\PYGZus{}statistic}\PYG{p}{(}\PYG{n}{xi1\PYGZus{}test}\PYG{p}{,} \PYG{n}{alpha\PYGZus{}nls}\PYG{p}{,} \PYG{n}{beta\PYGZus{}nls}\PYG{p}{,} \PYG{n}{xi0\PYGZus{}test}\PYG{p}{)}
+
+\PYG{n}{mse\PYGZus{}mm} \PYG{o}{=} \PYG{n}{calculate\PYGZus{}mse}\PYG{p}{(}\PYG{n}{xi0\PYGZus{}test}\PYG{p}{,} \PYG{n}{xi1\PYGZus{}test}\PYG{p}{,} \PYG{n}{alpha\PYGZus{}mm}\PYG{p}{,} \PYG{n}{beta\PYGZus{}mm}\PYG{p}{)}
+\PYG{n}{mse\PYGZus{}ols} \PYG{o}{=} \PYG{n}{calculate\PYGZus{}mse}\PYG{p}{(}\PYG{n}{xi0\PYGZus{}test}\PYG{p}{,} \PYG{n}{xi1\PYGZus{}test}\PYG{p}{,} \PYG{n}{alpha\PYGZus{}ols}\PYG{p}{,} \PYG{n}{beta\PYGZus{}ols}\PYG{p}{)}
+\PYG{n}{mse\PYGZus{}nls} \PYG{o}{=} \PYG{n}{calculate\PYGZus{}mse}\PYG{p}{(}\PYG{n}{xi0\PYGZus{}test}\PYG{p}{,} \PYG{n}{xi1\PYGZus{}test}\PYG{p}{,} \PYG{n}{alpha\PYGZus{}nls}\PYG{p}{,} \PYG{n}{beta\PYGZus{}nls}\PYG{p}{)}
+
+\PYG{c+c1}{\PYGZsh{} Выбор наилучшего метода}
+\PYG{n}{methods} \PYG{o}{=} \PYG{p}{[}
+    \PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Метод моментов\PYGZdq{}}\PYG{p}{,} \PYG{n}{mse\PYGZus{}mm}\PYG{p}{,} \PYG{n}{ks\PYGZus{}mm}\PYG{p}{,} \PYG{n}{alpha\PYGZus{}mm}\PYG{p}{,} \PYG{n}{beta\PYGZus{}mm}\PYG{p}{),}
+    \PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}OLS\PYGZdq{}}\PYG{p}{,} \PYG{n}{mse\PYGZus{}ols}\PYG{p}{,} \PYG{n}{ks\PYGZus{}ols}\PYG{p}{,} \PYG{n}{alpha\PYGZus{}ols}\PYG{p}{,} \PYG{n}{beta\PYGZus{}ols}\PYG{p}{),}
+    \PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}NLS\PYGZdq{}}\PYG{p}{,} \PYG{n}{mse\PYGZus{}nls}\PYG{p}{,} \PYG{n}{ks\PYGZus{}nls}\PYG{p}{,} \PYG{n}{alpha\PYGZus{}nls}\PYG{p}{,} \PYG{n}{beta\PYGZus{}nls}\PYG{p}{)}
+\PYG{p}{]}
+
+\PYG{n}{best\PYGZus{}method} \PYG{o}{=} \PYG{n+nb}{min}\PYG{p}{(}\PYG{n}{methods}\PYG{p}{,} \PYG{n}{key}\PYG{o}{=}\PYG{k}{lambda} \PYG{n}{x}\PYG{p}{:} \PYG{n}{x}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{])}
+\PYG{n}{alpha}\PYG{p}{,} \PYG{n}{beta} \PYG{o}{=} \PYG{n}{best\PYGZus{}method}\PYG{p}{[}\PYG{l+m+mi}{3}\PYG{p}{],} \PYG{n}{best\PYGZus{}method}\PYG{p}{[}\PYG{l+m+mi}{4}\PYG{p}{]}
+
+\PYG{c+c1}{\PYGZsh{} Построение функций распределения для выбранного метода}
+\PYG{n}{values\PYGZus{}xi0}\PYG{p}{,} \PYG{n}{probs\PYGZus{}xi0} \PYG{o}{=} \PYG{n}{empirical\PYGZus{}distribution\PYGZus{}function}\PYG{p}{(}\PYG{n}{xi0\PYGZus{}test}\PYG{p}{)}
+\PYG{n}{values\PYGZus{}xi1}\PYG{p}{,} \PYG{n}{probs\PYGZus{}xi1} \PYG{o}{=} \PYG{n}{empirical\PYGZus{}distribution\PYGZus{}function}\PYG{p}{(}\PYG{n}{xi1\PYGZus{}test}\PYG{p}{)}
+
+\PYG{n}{phi\PYGZus{}xi0} \PYG{o}{=} \PYG{n}{alpha} \PYG{o}{*} \PYG{n}{xi0\PYGZus{}test} \PYG{o}{**} \PYG{n}{beta}
+\PYG{n}{values\PYGZus{}phi}\PYG{p}{,} \PYG{n}{probs\PYGZus{}phi} \PYG{o}{=} \PYG{n}{empirical\PYGZus{}distribution\PYGZus{}function}\PYG{p}{(}\PYG{n}{phi\PYGZus{}xi0}\PYG{p}{)}
+
+\PYG{c+c1}{\PYGZsh{} Вычисление статистики Колмогорова\PYGZhy{}Смирнова}
+\PYG{n}{D\PYGZus{}n} \PYG{o}{=} \PYG{n}{best\PYGZus{}method}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{]}
+\PYG{n}{alpha\PYGZus{}level} \PYG{o}{=} \PYG{l+m+mf}{0.05}
+\PYG{n}{K\PYGZus{}alpha} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.5} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{log}\PYG{p}{((}\PYG{l+m+mi}{1} \PYG{o}{\PYGZhy{}} \PYG{n}{alpha\PYGZus{}level}\PYG{p}{)} \PYG{o}{/} \PYG{l+m+mi}{2}\PYG{p}{))}
+
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Выбранный метод: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{best\PYGZus{}method}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}α = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{alpha}\PYG{l+s+si}{:}\PYG{l+s+s2}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{, β = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{beta}\PYG{l+s+si}{:}\PYG{l+s+s2}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Статистика Колмогорова\PYGZhy{}Смирнова: D\PYGZus{}n = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{D\PYGZus{}n}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Критическое значение: K\PYGZus{}alpha = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{K\PYGZus{}alpha}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Гипотеза }\PYG{l+s+si}{\PYGZob{}}\PYG{l+s+s1}{\PYGZsq{}принимается\PYGZsq{}}\PYG{+w}{ }\PYG{k}{if}\PYG{+w}{ }\PYG{n}{D\PYGZus{}n}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{K\PYGZus{}alpha}\PYG{+w}{ }\PYG{k}{else}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}отвергается\PYGZsq{}}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+\end{MintedVerbatim}

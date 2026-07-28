@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{Rule}\PYG{+w}{ }\PYG{n+nf}{parseRule}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{pattern}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{parseUntilEqualsAsPattern}\PYG{p}{();}\PYG{+w}{ }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{n}{expect}\PYG{p}{(}\PYG{n}{EQUALS}\PYG{p}{);}\PYG{+w}{                                    }\PYG{c+c1}{// (2)}
+\PYG{+w}{    }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{result}\PYG{+w}{  }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{parseUntilSemiAsResult}\PYG{p}{();}\PYG{+w}{    }\PYG{c+c1}{// (3)}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{peek}\PYG{p}{().}\PYG{n+na}{type}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{n}{SEMI}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}\PYG{+w}{                   }\PYG{c+c1}{// (4)}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Rule}\PYG{p}{(}\PYG{n}{pattern}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{result}\PYG{p}{);}\PYG{+w}{                  }\PYG{c+c1}{// (5)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

@@ -1,0 +1,13 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{Token}\PYG{+w}{ }\PYG{n+nf}{peek}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{tokens}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{i}\PYG{p}{);}\PYG{+w}{   }\PYG{c+c1}{// текущий токен, не потребляем}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{Token}\PYG{+w}{ }\PYG{n+nf}{expect}\PYG{p}{(}\PYG{n}{TokenType}\PYG{+w}{ }\PYG{n}{type}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Token}\PYG{+w}{ }\PYG{n}{t}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{peek}\PYG{p}{();}\PYG{+w}{                          }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{t}\PYG{p}{.}\PYG{n+na}{type}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{n}{type}\PYG{p}{)}\PYG{+w}{                      }\PYG{c+c1}{// (2)}
+\PYG{+w}{        }\PYG{k}{throw}\PYG{+w}{ }\PYG{n}{err}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Expected \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{type}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{p}{...);}
+\PYG{+w}{    }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}\PYG{+w}{                                       }\PYG{c+c1}{// (3)}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{;}\PYG{+w}{                                  }\PYG{c+c1}{// (4)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

@@ -1,0 +1,3 @@
+$ENTRY Hello {
+  = 'Hello from lib';
+}

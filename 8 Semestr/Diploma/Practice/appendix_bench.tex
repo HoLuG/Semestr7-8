@@ -1,0 +1,212 @@
+% Приложения
+\clearpage
+\appendix
+\renewcommand{\thesection}{\Asbuk{section}}
+\setcounter{section}{0}
+% В приложении все \subsubsection* — без номера.
+% \titleformat* меняет только шрифт, но оставляет before-code (где лежит \thesubsubsection).
+% Нужно переопределить формат целиком, убрав счётчик из before-code:
+\titleformat{\subsubsection}[block]{\normalfont\large\bfseries\raggedright}{}{0em}{#1}
+
+\section{Исходный код бенчмарка Loop/Select}
+\label{app:bench-src}
+
+\lstset{language=Refal}
+\begin{lstlisting}[
+    caption={Бенчмарк Loop/Select (bench/loop-select.ref)},
+    label={lst:loop-select-src}]
+* Loop/Select benchmark - demonstrates O(N) for bootstrapped deque
+* Run: java -jar target/refal5q.jar bench/loop-select.ref 10000
+
+$ENTRY Go {
+  = <TimeElapsed 0>
+    <Loop Left () <Numb <Arg 1>>>
+    <Prout <TimeElapsed>>;
+}
+
+Loop {
+  s.Side (e.Acc) 0 = /* done */;
+  s.Side (e.Acc) s.Rest
+    = <Loop <Select s.Side (e.Acc A) (e.Acc B)> <- s.Rest 1>>;
+}
+
+Select {
+  Left  t.Left t.Right = Right t.Left;
+  Right t.Left t.Right = Left  t.Right;
+}
+\end{lstlisting}
+
+\section{Инструкция по воспроизведению измерений}
+\label{app:repro}
+
+\subsubsection*{Предварительные требования}
+
+\begin{itemize}
+  \item Java~25~LTS и Apache~Maven~3.9.x (должны быть доступны в PATH);
+  \item PowerShell~5.1 или новее;
+  \item для сравнения с Refal-5~PZ: дистрибутив Refal-5~PZ с исполняемыми
+        \prog{refc.exe} и \prog{refgo.exe};
+  \item для сравнения с Refal-5J: собранный \prog{r5jc.jar} и \prog{r5jrt.jar}.
+\end{itemize}
+
+\subsubsection*{Сборка интерпретатора}
+
+\begin{longlisting}
+\caption{Сборка и запуск бенчмарка}\label{lst:repro-build}
+\begin{minted}{bash}
+cd refal5j-impl
+mvn package -DskipTests
+
+# our implementation only:
+powershell -File bench\loop-select-bench.ps1
+
+# with Refal-5 PZ:
+powershell -File bench\loop-select-bench.ps1 -WithPZ
+
+# with all three:
+powershell -File bench\loop-select-bench.ps1 -WithPZ -WithR5J
+\end{minted}
+\end{longlisting}
+
+Результаты сохраняются в \prog{bench/loop-select-results.csv}.
+
+\subsubsection*{Построение графика}
+
+\begin{longlisting}
+\caption{Построение графика}\label{lst:repro-plot}
+\begin{minted}{bash}
+pip install matplotlib numpy
+python bench\plot-benchmark.py --out bench\loop-select-graph.pdf
+\end{minted}
+\end{longlisting}
+
+\subsubsection*{Настройка путей}
+
+Пути к исполняемым файлам Refal-5~PZ и Refal-5J задаются переменными
+\prog{\$Refal5}, \prog{\$R5JBin} и \prog{\$R5JLib} в начале файла
+\prog{bench/loop-select-bench.ps1}.
+
+\section{Реализация функций конкатенации}
+\label{app:concat-impl}
+
+Четыре вспомогательных метода класса \prog{ExprOps}, на которые
+опирается \prog{Expr.concat}. Каждый обрабатывает свою комбинацию
+типов операндов; диспетчер показан в листинге~\ref{lst:concat-cases}
+основного текста.
+
+\begin{longlisting}
+\caption{concatSS: оба операнда ShallowDeque}\label{lst:concat-ss}
+\begin{minted}{java}
+private static <T> Expr<T> concatSS(ShallowDeque<T> a, ShallowDeque<T> b) {
+    int total = a.size() + b.size();
+    if (total <= CAPACITY) {
+        ShallowDeque<T> r = a;
+        for (T x : iter(b)) {
+            r = r.pushBackTight(x);
+        }
+        return r;
+    }
+    // total > CAPACITY: один из буферов полный или почти полный;
+    // делаем новый Deep с пустой mid.
+    return DeepDeque.mkDeep(a, ShallowDeque.empty(), b, total);
+}
+\end{minted}
+\end{longlisting}
+
+\begin{longlisting}
+\caption{concatSD: ShallowDeque + DeepDeque}\label{lst:concat-sd}
+\begin{minted}{java}
+private static <T> Expr<T> concatSD(ShallowDeque<T> a, DeepDeque<T> b) {
+    ShallowDeque<T> bf = b.front();
+    int total = b.size() + a.size();
+    // Сливаем 'a' слева в b.front. Если итог влезает в один Shallow,
+    // он становится новым front; иначе расщепляем на два,
+    // второй идёт в начало mid.
+    int bfTotal = a.size() + bf.size();
+    if (bfTotal <= CAPACITY) {
+        ShallowDeque<T> mergedFront = ShallowDeque.empty();
+        for (T x : iter(a))  mergedFront = mergedFront.pushBackTight(x);
+        for (T x : iter(bf)) mergedFront = mergedFront.pushBackTight(x);
+        return DeepDeque.mkDeep(mergedFront, b.mid(), b.back(), total);
+    }
+    // Иначе формируем плоский массив и делим примерно пополам.
+    Object[] tmp = new Object[bfTotal];
+    int i = 0;
+    for (T x : iter(a))  tmp[i++] = x;
+    for (T x : iter(bf)) tmp[i++] = x;
+    int leftLen = bfTotal - CAPACITY;
+    if (leftLen < ShallowDeque.MIN_FILL) leftLen = ShallowDeque.MIN_FILL;
+    int rightLen = bfTotal - leftLen;
+    ShallowDeque<T> head = ShallowDeque.ofArray(tmp, 0, leftLen);
+    ShallowDeque<T> tail = ShallowDeque.ofArray(tmp, leftLen, rightLen);
+    // head становится новым front; tail - первым бакетом mid.
+    Expr<ShallowDeque<T>> newMid = b.mid().pushFront(tail);
+    return DeepDeque.mkDeep(head, newMid, b.back(), total);
+}
+\end{minted}
+\end{longlisting}
+
+\begin{longlisting}
+\caption{concatDS: DeepDeque + ShallowDeque}\label{lst:concat-ds}
+\begin{minted}{java}
+private static <T> Expr<T> concatDS(DeepDeque<T> a, ShallowDeque<T> b) {
+    ShallowDeque<T> ab = a.back();
+    int total = a.size() + b.size();
+    int abTotal = ab.size() + b.size();
+    if (abTotal <= CAPACITY) {
+        ShallowDeque<T> mergedBack = ShallowDeque.empty();
+        for (T x : iter(ab)) mergedBack = mergedBack.pushBackTight(x);
+        for (T x : iter(b))  mergedBack = mergedBack.pushBackTight(x);
+        return DeepDeque.mkDeep(a.front(), a.mid(), mergedBack, total);
+    }
+    Object[] tmp = new Object[abTotal];
+    int i = 0;
+    for (T x : iter(ab)) tmp[i++] = x;
+    for (T x : iter(b))  tmp[i++] = x;
+    int rightLen = abTotal - CAPACITY;
+    if (rightLen < ShallowDeque.MIN_FILL) rightLen = ShallowDeque.MIN_FILL;
+    int leftLen = abTotal - rightLen;
+    ShallowDeque<T> head = ShallowDeque.ofArray(tmp, 0, leftLen);
+    ShallowDeque<T> tail = ShallowDeque.ofArray(tmp, leftLen, rightLen);
+    Expr<ShallowDeque<T>> newMid = a.mid().pushBack(head);
+    return DeepDeque.mkDeep(a.front(), newMid, tail, total);
+}
+\end{minted}
+\end{longlisting}
+
+\begin{longlisting}
+\caption{concatDD: два DeepDeque --- ключевой случай O(1) аморт.}\label{lst:concat-dd}
+\begin{minted}{java}
+private static <T> Expr<T> concatDD(DeepDeque<T> a, DeepDeque<T> b) {
+    int total = a.size() + b.size();
+    ShallowDeque<T> ab = a.back();
+    ShallowDeque<T> bf = b.front();
+    int boundary = ab.size() + bf.size();
+
+    Expr<ShallowDeque<T>> aMidPlus = a.mid();
+    if (boundary == 0) {
+        // оба пограничных пусты - ничего не добавляем.
+    } else if (boundary <= CAPACITY) {
+        ShallowDeque<T> merged = ShallowDeque.empty();
+        for (T x : iter(ab)) merged = merged.pushBackTight(x);
+        for (T x : iter(bf)) merged = merged.pushBackTight(x);
+        aMidPlus = aMidPlus.pushBack(merged);
+    } else {
+        Object[] tmp = new Object[boundary];
+        int i = 0;
+        for (T x : iter(ab)) tmp[i++] = x;
+        for (T x : iter(bf)) tmp[i++] = x;
+        int rightLen = boundary - CAPACITY;
+        if (rightLen < ShallowDeque.MIN_FILL) rightLen = ShallowDeque.MIN_FILL;
+        int leftLen = boundary - rightLen;
+        ShallowDeque<T> m1 = ShallowDeque.ofArray(tmp, 0, leftLen);
+        ShallowDeque<T> m2 = ShallowDeque.ofArray(tmp, leftLen, rightLen);
+        aMidPlus = aMidPlus.pushBack(m1).pushBack(m2);
+    }
+
+    // Рекурсивное склеивание middle-очередей: O(1) аморт. по Окасаки.
+    Expr<ShallowDeque<T>> newMid = concat(aMidPlus, b.mid());
+    return DeepDeque.mkDeep(a.front(), newMid, b.back(), total);
+}
+\end{minted}
+\end{longlisting}

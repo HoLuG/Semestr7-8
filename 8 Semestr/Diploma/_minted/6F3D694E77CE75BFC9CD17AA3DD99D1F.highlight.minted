@@ -1,0 +1,13 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{n}{v}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{pollFirst}\PYG{p}{();}\PYG{+w}{              }\PYG{c+c1}{// (3)}
+\PYG{+w}{        }\PYG{k}{switch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{v}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{Passive}\PYG{+w}{ }\PYG{n}{p}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}
+\PYG{+w}{                }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{addLast}\PYG{p}{(}\PYG{n}{p}\PYG{p}{);}\PYG{+w}{                     }\PYG{c+c1}{// (4)}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{BulkPassive}\PYG{+w}{ }\PYG{n}{bp}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}
+\PYG{+w}{                }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{addLast}\PYG{p}{(}\PYG{n}{bp}\PYG{p}{);}\PYG{+w}{                    }\PYG{c+c1}{// (5)}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{AngOpen}\PYG{+w}{ }\PYG{n}{open}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}
+\PYG{+w}{                }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{addLast}\PYG{p}{(}\PYG{n}{open}\PYG{p}{);}\PYG{+w}{                  }\PYG{c+c1}{// (6)}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{ParenOpen}\PYG{+w}{ }\PYG{n}{open}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}
+\PYG{+w}{                }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{addLast}\PYG{p}{(}\PYG{n}{open}\PYG{p}{);}\PYG{+w}{                  }\PYG{c+c1}{// (7)}
+\end{MintedVerbatim}

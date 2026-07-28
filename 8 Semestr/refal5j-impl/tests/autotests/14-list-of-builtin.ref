@@ -1,0 +1,44 @@
+$ENTRY Go {
+  /* пусто */
+    = <Format <ListOfBuiltin>>
+      /* 04-br-dg-cp-rp.ref */
+      <Known Br Dg Cp Rp>
+      /* 06-arithm.ref */
+      <Known Add Sub Div Mod Divmod Mul Compare Numb Symb>
+      /* 07-arg.ref */
+      <Known Arg>
+      /* 08-implode-explode.ref */
+      <Known Implode Implode_Ext Explode Explode_Ext>
+      /* 09-1-mu-uses-all.ref, 09-2-mu.ref */
+      <Known Mu Residue Up Ev-met>
+      /* 10-getenv.ref */
+      <Known GetEnv>
+      /* 11-exist-file.ref */
+      <Known ExistFile>
+      /* 12-file-functions.ref */
+      <Known Card Prout Print Open Get Put Putout Write Close RemoveFile>
+      /* 13-type.ref */
+      <Known Type>
+      /* 14-list-of-builtin.ref */
+      <Known ListOfBuiltin>;
+}
+
+Format {
+  (s.No s.Name s.Type) e.RestFunctions
+    , <Type s.No> : 'N0' s.No
+    , <Type s.Name> : 'W' s.1 s.Name
+    , regular special : e.2 s.Type e.3
+    = <Format e.RestFunctions>;
+
+  /* пусто */ = /* пусто */;
+}
+
+Known {
+  e.Functions-B s.Function e.Functions-E
+    , <ListOfBuiltin> : e.Builtins-B (s.No s.Function s.Type) e.Builtins-E
+    = <Known e.Functions-B e.Functions-E>;
+
+  /* свалимся на неизвестных функциях */
+
+  /* пусто */ = /* пусто */;
+}

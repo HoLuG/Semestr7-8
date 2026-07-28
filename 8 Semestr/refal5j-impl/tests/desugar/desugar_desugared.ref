@@ -1,0 +1,87 @@
+*$FROM LibraryEx
+$EXTERN ArgList, SaveFile, Map;
+
+*$FROM R5FW-Parser
+$EXTERN Scan, Parse;
+
+*$FROM R5FW-Transformer
+$EXTERN Transform;
+
+*$FROM R5FW-Plainer
+$EXTERN Plain;
+
+$ENTRY Go {
+   = <Go0 <ArgList>>;
+}
+
+Go0 {
+  (e.ProgName) (e.Source) (e.Dest) e.Skipped = <Desugar (e.Source) (e.Dest)>;
+
+  (e.ProgName) (e.Source) = <Go0_check (e.ProgName) (e.Source) e.Source>;
+
+  e.Other = <Go0_cont e.Other>;
+}
+
+Go0_check {
+  (e.ProgName) (e.Source) e.Base '.' e.Ref
+    = <Go0_check0 (e.ProgName) (e.Source) (e.Base) (e.Ref) <Lower e.Ref>>;
+
+  e.Other = <Go0_cont0 e.Other>;
+}
+
+Go0_cont {
+  (e.ProgName)
+    = <Putout 0 'Command line error, use:'> <Putout 0>
+      <Putout 0 '    r5fw-format source [dest]'> <Exit 1>;
+}
+
+Go0_check0 {
+  (e.ProgName) (e.Source) (e.Base) (e.Ref) 'ref'
+    = <Desugar (e.Source) (e.Base '-out.' e.Ref)>;
+
+  (e.ProgName) (e.Source) (e.Base) (e.Ref) e.Other
+    = <Go0_forward (e.ProgName) (e.Source) (e.Base) '.' e.Ref>;
+}
+
+Go0_forward {
+  (e.ProgName) (e.Source) (e.Base_fix) t.Base_next e.Base_rest
+    = <Go0_next (e.ProgName) (e.Source) (e.Base_fix t.Base_next) e.Base_rest>;
+
+  (e.ProgName) (e.Source) (e.Base_fix)
+    = <Go0_cont0 (e.ProgName) (e.Source) e.Base_fix>;
+}
+
+Go0_next {
+  (e.ProgName) (e.Source) (e.Base_fix) e.Base_var '.' e.Ref
+    = <Go0_check0
+        (e.ProgName) (e.Source) (e.Base_fix e.Base_var) (e.Ref) <Lower e.Ref>
+      >;
+
+  (e.ProgName) (e.Source) (e.Base_fix) e.Base_rest
+    = <Go0_cont0 (e.ProgName) (e.Source) e.Base_fix e.Base_rest>;
+}
+
+Go0_cont0 {
+  (e.ProgName) (e.Source) e.Other = <Go0_cont (e.ProgName) (e.Source)>;
+}
+
+Desugar {
+  (e.Source) (e.Dest) = <Desugar0 (e.Source) (e.Dest) <Parse <Scan e.Source>>>;
+}
+
+Desugar0 {
+  (e.Source) (e.Dest) Success e.AST
+    = <SaveFile (e.Dest) <Plain <Transform e.AST>>>;
+
+  (e.Source) (e.Dest) Fails e.Errors
+    = <Putout 0 'Syntax errors are found:'> <Map format_Error e.Errors>
+      <Exit 1>;
+}
+
+$ENTRY format_Error {
+  ((s.Line s.Col e.FileName) e.Message)
+    = <Putout 0 e.FileName ':' <Symb s.Line> ':' <Symb s.Col> ':' e.Message>;
+
+   = ;
+}
+

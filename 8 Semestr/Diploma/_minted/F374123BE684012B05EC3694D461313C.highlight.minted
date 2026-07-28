@@ -1,0 +1,6 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{normalize}\PYG{p}{(}\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{ViewTerm}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{left}\PYG{+w}{  }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}\PYG{+w}{ }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{ViewTerm}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{right}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{t}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n}{flattenInto}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{right}\PYG{p}{);}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{   }\PYG{c+c1}{// (2)}
+\end{MintedVerbatim}

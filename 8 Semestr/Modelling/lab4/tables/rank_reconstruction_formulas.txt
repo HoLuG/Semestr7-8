@@ -1,0 +1,5 @@
+﻿y,formula,r2
+Age,r(Age) = 68.986887 + (0.070895)·r(DiabetesPedigreeFunction) + (0.253581)·r(BloodPressure) + (-0.064910)·r(SkinThickness) + (0.561014)·r(Pregnancies),0.4350644721981014
+Insulin,r(Insulin) = 194.934985 + (0.118807)·r(DiabetesPedigreeFunction) + (-0.060655)·r(BloodPressure) + (0.496367)·r(SkinThickness) + (-0.061502)·r(Pregnancies),0.3183701433678937
+BMI,r(BMI) = 114.563156 + (0.061194)·r(DiabetesPedigreeFunction) + (0.241979)·r(BloodPressure) + (0.406691)·r(SkinThickness) + (-0.007818)·r(Pregnancies),0.2574684718426594
+Glucose,r(Glucose) = 222.698678 + (0.084397)·r(DiabetesPedigreeFunction) + (0.211493)·r(BloodPressure) + (0.026736)·r(SkinThickness) + (0.098183)·r(Pregnancies),0.07172563485593919

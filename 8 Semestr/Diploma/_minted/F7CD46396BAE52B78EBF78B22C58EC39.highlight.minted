@@ -1,0 +1,15 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{SemanticInfo}\PYG{+w}{ }\PYG{n+nf}{check}\PYG{p}{(}\PYG{n}{Program}\PYG{+w}{ }\PYG{n}{prog}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n}{Optional}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{overrideEntry}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Set}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{builtinNames}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// 1. Duplicates: prog.duplicateFuncNames() collected by Builder}
+\PYG{+w}{    }\PYG{c+c1}{// 2. BUILTIN\PYGZus{}SHADOW: intersection of funcEnv.keySet() with builtinNames}
+\PYG{+w}{    }\PYG{c+c1}{// 3. callable = funcEnv.keySet() + externs + builtinNames}
+\PYG{+w}{    }\PYG{c+c1}{// 4. For each function, for each rule:}
+\PYG{+w}{    }\PYG{c+c1}{//    checkNoCallInPattern()   \PYGZhy{}\PYGZhy{} forbid \PYGZlt{}...\PYGZgt{} in Pattern}
+\PYG{+w}{    }\PYG{c+c1}{//    collectPatternVarKinds() \PYGZhy{}\PYGZhy{} map \PYGZdq{}e.X\PYGZdq{} \PYGZhy{}\PYGZgt{} \PYGZsq{}e\PYGZsq{}}
+\PYG{+w}{    }\PYG{c+c1}{//    checkResultVars()        \PYGZhy{}\PYGZhy{} each Var in Result must be in pattern map}
+\PYG{+w}{    }\PYG{c+c1}{//    checkCalls()             \PYGZhy{}\PYGZhy{} \PYGZlt{}Foo\PYGZgt{} must be in callable set}
+\PYG{+w}{    }\PYG{c+c1}{// 5. Entry resolution: overrideEntry or prog.entry() must exist in funcEnv}
+\PYG{p}{\PYGZcb{}}
+\PYG{c+c1}{// Result: SemanticInfo(funcEnv, externs, effectiveEntry, builtinNames)}
+\end{MintedVerbatim}

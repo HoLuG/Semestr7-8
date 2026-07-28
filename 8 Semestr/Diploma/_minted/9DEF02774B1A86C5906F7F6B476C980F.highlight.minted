@@ -1,0 +1,15 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{c+c1}{// Финальный сбор результата}
+\PYG{+w}{    }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{out}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{();}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{n}{v}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{left}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                    }\PYG{c+c1}{// (26)}
+\PYG{+w}{        }\PYG{k}{switch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{v}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{Passive}\PYG{+w}{ }\PYG{n}{p}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}
+\PYG{+w}{                }\PYG{n}{out}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{out}\PYG{p}{.}\PYG{n+na}{pushBack}\PYG{p}{(}\PYG{n}{p}\PYG{p}{.}\PYG{n+na}{term}\PYG{p}{());}\PYG{+w}{    }\PYG{c+c1}{// (27)}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{BulkPassive}\PYG{+w}{ }\PYG{n}{bp}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}
+\PYG{+w}{                }\PYG{n}{out}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{concat}\PYG{p}{(}\PYG{n}{out}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{bp}\PYG{p}{.}\PYG{n+na}{items}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// (28)}
+\PYG{+w}{            }\PYG{k}{default}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{RefalException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Leftover: \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{v}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{out}\PYG{p}{;}\PYG{+w}{                                  }\PYG{c+c1}{// (29)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

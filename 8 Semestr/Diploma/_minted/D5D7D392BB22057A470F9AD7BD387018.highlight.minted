@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{// Instead of expanding \PYGZhy{}\PYGZhy{} one BulkPassive:}
+\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{val}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{bindings}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{v}\PYG{p}{.}\PYG{n+na}{key}\PYG{p}{());}
+\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{val}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{addFirst}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{BulkPassive}\PYG{p}{(}\PYG{n}{val}\PYG{p}{));}\PYG{+w}{ }\PYG{c+c1}{// O(1)}
+\PYG{p}{\PYGZcb{}}
+\PYG{c+c1}{// At ParenClose: Expr.concat(bp.items(), brItems) = O(1) amortized}
+\PYG{c+c1}{// N iterations * O(1) = O(N)}
+\end{MintedVerbatim}

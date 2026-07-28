@@ -1,0 +1,13 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nb}{cd}\PYG{+w}{ }refal5j\PYGZhy{}impl
+mvn\PYG{+w}{ }package\PYG{+w}{ }\PYGZhy{}DskipTests
+
+\PYG{c+c1}{\PYGZsh{} our implementation only:}
+powershell\PYG{+w}{ }\PYGZhy{}File\PYG{+w}{ }bench\PYG{l+s+se}{\PYGZbs{}l}oop\PYGZhy{}select\PYGZhy{}bench.ps1
+
+\PYG{c+c1}{\PYGZsh{} with Refal\PYGZhy{}5 PZ:}
+powershell\PYG{+w}{ }\PYGZhy{}File\PYG{+w}{ }bench\PYG{l+s+se}{\PYGZbs{}l}oop\PYGZhy{}select\PYGZhy{}bench.ps1\PYG{+w}{ }\PYGZhy{}WithPZ
+
+\PYG{c+c1}{\PYGZsh{} with all three:}
+powershell\PYG{+w}{ }\PYGZhy{}File\PYG{+w}{ }bench\PYG{l+s+se}{\PYGZbs{}l}oop\PYGZhy{}select\PYGZhy{}bench.ps1\PYG{+w}{ }\PYGZhy{}WithPZ\PYG{+w}{ }\PYGZhy{}WithR5J
+\end{MintedVerbatim}

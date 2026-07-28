@@ -1,0 +1,16 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{leftEvar}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                             }\PYG{c+c1}{// (3)}
+\PYG{+w}{            }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{expr}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}
+\PYG{+w}{                }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// (4)}
+\PYG{+w}{            }\PYG{n}{PeekResult}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{pr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{.}\PYG{n+na}{separateFront}\PYG{p}{();}\PYG{+w}{ }\PYG{c+c1}{// (5)}
+\PYG{+w}{            }\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{consumed}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pr}\PYG{p}{.}\PYG{n+na}{term}\PYG{p}{();}
+\PYG{+w}{            }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{rest}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pr}\PYG{p}{.}\PYG{n+na}{rest}\PYG{p}{();}
+\PYG{+w}{            }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{newPi}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pi}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{finalPe}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pe}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{finalRest}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{rest}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k+kd}{final}\PYG{+w}{ }\PYG{n}{Function}\PYG{o}{\PYGZlt{}}\PYG{n}{Bindings}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{outerCont}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{matchSingleAll}\PYG{p}{(}\PYG{n}{left}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{consumed}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{env}\PYG{p}{,}
+\PYG{+w}{                }\PYG{n}{env1}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{More}\PYG{p}{(}\PYG{+w}{               }\PYG{c+c1}{// (6)}
+\PYG{+w}{                    }\PYG{p}{()}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{rec}\PYG{p}{(}\PYG{n}{pat}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{newPi}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{finalPe}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{finalRest}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{env1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{outerCont}\PYG{p}{)));}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

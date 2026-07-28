@@ -1,0 +1,53 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{normalize}\PYG{p}{(}\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{ViewTerm}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{left}\PYG{+w}{  }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}\PYG{+w}{ }\PYG{c+c1}{// passive terms}
+\PYG{+w}{    }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{ViewTerm}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{right}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}\PYG{+w}{ }\PYG{c+c1}{// to process}
+
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{t}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n}{flattenInto}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{right}\PYG{p}{);}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{c+c1}{// flatten AST to stack}
+
+\PYG{+w}{    }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{n}{v}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{pollFirst}\PYG{p}{();}
+\PYG{+w}{        }\PYG{k}{switch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{v}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{Passive}\PYG{+w}{ }\PYG{n}{p}\PYG{+w}{   }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{addLast}\PYG{p}{(}\PYG{n}{p}\PYG{p}{);}\PYG{+w}{    }\PYG{c+c1}{// passive \PYGZhy{}\PYGZgt{} left stack}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{BulkPassive}\PYG{+w}{ }\PYG{n}{bp}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{addLast}\PYG{p}{(}\PYG{n}{bp}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// bulk \PYGZhy{}\PYGZgt{} left stack}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{AngOpen}\PYG{+w}{ }\PYG{n}{open}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{addLast}\PYG{p}{(}\PYG{n}{open}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// marker \PYGZhy{}\PYGZgt{} left stack}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{ParenOpen}\PYG{+w}{ }\PYG{n}{open}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{addLast}\PYG{p}{(}\PYG{n}{open}\PYG{p}{);}
+
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{ParenClose}\PYG{+w}{ }\PYG{n}{ignored}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                }\PYG{c+c1}{// fold left stack elements up to ParenOpen into Br}
+\PYG{+w}{                }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{brItems}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{();}
+\PYG{+w}{                }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kc}{true}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                    }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{n}{top}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{pollLast}\PYG{p}{();}
+\PYG{+w}{                    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{top}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{ParenOpen}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{break}\PYG{p}{;}
+\PYG{+w}{                    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{top}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{Passive}\PYG{+w}{ }\PYG{n}{pt}\PYG{p}{)}
+\PYG{+w}{                        }\PYG{n}{brItems}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{brItems}\PYG{p}{.}\PYG{n+na}{pushFront}\PYG{p}{(}\PYG{n}{pt}\PYG{p}{.}\PYG{n+na}{term}\PYG{p}{());}
+\PYG{+w}{                    }\PYG{k}{else}\PYG{+w}{ }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{top}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{BulkPassive}\PYG{+w}{ }\PYG{n}{bp}\PYG{p}{)}
+\PYG{+w}{                        }\PYG{n}{brItems}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{concat}\PYG{p}{(}\PYG{n}{bp}\PYG{p}{.}\PYG{n+na}{items}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{brItems}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// O(1)}
+\PYG{+w}{                }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{                }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{addLast}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Passive}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Br}\PYG{p}{(}\PYG{n}{brItems}\PYG{p}{)));}
+\PYG{+w}{            }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{AngClose}\PYG{+w}{ }\PYG{n}{ignored}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                }\PYG{n}{bumpStep}\PYG{p}{();}\PYG{+w}{ }\PYG{c+c1}{// increment step counter, check limit}
+\PYG{+w}{                }\PYG{c+c1}{// collect args from left stack up to AngOpen(fn)}
+\PYG{+w}{                }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{argsExpr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{();}
+\PYG{+w}{                }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{fn}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{p}{;}
+\PYG{+w}{                }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kc}{true}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                    }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{n}{top}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{pollLast}\PYG{p}{();}
+\PYG{+w}{                    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{top}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{AngOpen}\PYG{+w}{ }\PYG{n}{ao}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n}{fn}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{ao}\PYG{p}{.}\PYG{n+na}{fn}\PYG{p}{();}\PYG{+w}{ }\PYG{k}{break}\PYG{p}{;}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{                    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{top}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{Passive}\PYG{+w}{ }\PYG{n}{pt}\PYG{p}{)}
+\PYG{+w}{                        }\PYG{n}{argsExpr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{argsExpr}\PYG{p}{.}\PYG{n+na}{pushFront}\PYG{p}{(}\PYG{n}{pt}\PYG{p}{.}\PYG{n+na}{term}\PYG{p}{());}
+\PYG{+w}{                    }\PYG{k}{else}\PYG{+w}{ }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{top}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{BulkPassive}\PYG{+w}{ }\PYG{n}{bp}\PYG{p}{)}
+\PYG{+w}{                        }\PYG{n}{argsExpr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{concat}\PYG{p}{(}\PYG{n}{bp}\PYG{p}{.}\PYG{n+na}{items}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{argsExpr}\PYG{p}{);}
+\PYG{+w}{                }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{                }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{builtins}\PYG{p}{.}\PYG{n+na}{containsKey}\PYG{p}{(}\PYG{n}{fn}\PYG{p}{))}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                    }\PYG{c+c1}{// builtin: flattenInto(result) \PYGZhy{}\PYGZgt{} right stack}
+\PYG{+w}{                }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{else}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                    }\PYG{c+c1}{// user func: Matcher.match \PYGZhy{}\PYGZgt{} pushResultToStack}
+\PYG{+w}{                }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{            }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{c+c1}{// collect left stack into Expr\PYGZlt{}Term\PYGZgt{} via concat}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

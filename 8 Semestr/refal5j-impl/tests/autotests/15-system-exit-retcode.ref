@@ -1,0 +1,47 @@
+* Тест позаимствован из репозитория Рефала-5λ и адаптирован для Java
+
+$ENTRY Go {
+  /* пусто */
+    , <ListOfBuiltin> : e.11 (s.12 System s.13) e.14
+    , <ListOfBuiltin> : e.21 (e.22 Exit e.23) e.24
+    = <Main <Arg 1>>;
+}
+
+Main {
+  '++exit'
+    = <Exit <Numb-Arg2>>;
+
+  e.Other
+    = <Eq (3) <System 'retcode 3'>>
+      <Retcode_-3 <System 'retcode -3'>>
+      <Eq (0) <System 'retcode 0'>>
+
+      <Eq (3) <System <Me> ' ++exit 3'>>
+      <Retcode_-3 <System <Me> ' ++exit _3'>>
+      <Eq (0) <System  <Me> ' ++exit 0'>>
+
+      <Eq (0) <System 'echo Hello> REFAL7.DAT'>>
+      /* Перед «>» на Windows пробела быть не должно */
+      <Eq ('Hello') <Get 7>>
+      <Eq (0) <Get 7>>
+      <Close 7>
+      <Eq (True ()) <RemoveFile 'REFAL7.DAT'>>;
+}
+
+Numb-Arg2 {
+  /* empty */
+    , <Arg 2>
+    : {
+        '_' e.Number = <Numb '-' e.Number>;
+            e.Number = <Numb     e.Number>;
+      }
+}
+
+Eq { (e.X) e.X = }
+
+Retcode_-3 {
+  '-' 3 = ;
+  253 = ;
+}
+
+Me { = 'java -classpath ../lib' <GetEnv 'PATH_SEP'> 'gen.@@@ ' <Arg 0> }

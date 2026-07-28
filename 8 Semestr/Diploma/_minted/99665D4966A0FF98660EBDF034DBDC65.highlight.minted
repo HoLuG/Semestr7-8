@@ -1,0 +1,11 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@Override}
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{PeekResult}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{separateBack}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{sz}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{IllegalStateException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}separateBack from empty\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{    }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{last}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{idx}\PYG{p}{(}\PYG{n}{sz}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{);}\PYG{+w}{                     }\PYG{c+c1}{// (1)}
+\PYG{+w}{    }\PYG{n}{T}\PYG{+w}{ }\PYG{n}{x}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{T}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{buf}\PYG{o}{[}\PYG{n}{last}\PYG{o}{]}\PYG{p}{;}
+\PYG{+w}{    }\PYG{n}{Object}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{nb}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{buf}\PYG{p}{.}\PYG{n+na}{clone}\PYG{p}{();}
+\PYG{+w}{    }\PYG{n}{nb}\PYG{o}{[}\PYG{n}{last}\PYG{o}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{PeekResult}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{x}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ShallowDeque}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{nb}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{head}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{sz}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{));}\PYG{+w}{ }\PYG{c+c1}{// (2)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

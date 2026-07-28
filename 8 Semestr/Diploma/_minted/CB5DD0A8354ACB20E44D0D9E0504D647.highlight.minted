@@ -1,0 +1,18 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{Program}\PYG{+w}{ }\PYG{n+nf}{parseProgram}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// Main loop: ENTRY\PYGZhy{}\PYGZgt{}parseEntry, EXTERN\PYGZhy{}\PYGZgt{}parseExtern, IDENT\PYGZhy{}\PYGZgt{}parseFuncBody}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{Func}\PYG{+w}{ }\PYG{n+nf}{parseFuncBody}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{name}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// Reads \PYGZob{} Rule+ \PYGZcb{}, at least one rule required (ParseException otherwise)}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{Rule}\PYG{+w}{ }\PYG{n+nf}{parseRule}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// Pattern until \PYGZsq{}=\PYGZsq{}, then Result until \PYGZsq{};\PYGZsq{} or \PYGZsq{}\PYGZcb{}\PYGZsq{}}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{Term}\PYG{+w}{ }\PYG{n+nf}{identToTerm}\PYG{p}{(}\PYG{n}{Token}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// \PYGZdq{}s.X\PYGZdq{} \PYGZhy{}\PYGZgt{} SVar(\PYGZdq{}X\PYGZdq{}), \PYGZdq{}t.Y\PYGZdq{} \PYGZhy{}\PYGZgt{} TVar(\PYGZdq{}Y\PYGZdq{}), \PYGZdq{}e.Z\PYGZdq{} \PYGZhy{}\PYGZgt{} EVar(\PYGZdq{}Z\PYGZdq{})}
+\PYG{+w}{    }\PYG{c+c1}{// Otherwise \PYGZhy{}\PYGZgt{} new Sym(name)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

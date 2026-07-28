@@ -1,0 +1,649 @@
+\documentclass[a4paper, 14pt]{extarticle}
+
+% Поля
+%--------------------------------------
+\usepackage{geometry}
+\geometry{a4paper,tmargin=2cm,bmargin=2cm,lmargin=3cm,rmargin=1cm}
+%--------------------------------------
+
+\usepackage{minted}
+
+%Russian-specific packages
+%--------------------------------------
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, main=russian]{babel}
+
+%--------------------------------------
+
+\usepackage{textcomp}
+
+% Красная строка
+%--------------------------------------
+\usepackage{indentfirst}               
+%--------------------------------------             
+
+
+%Graphics
+%--------------------------------------
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+\usepackage{float}%"Плавающие" картинки
+%--------------------------------------
+
+% Полуторный интервал
+%--------------------------------------
+\linespread{1.3}                    
+%--------------------------------------
+
+%Выравнивание и переносы
+%--------------------------------------
+% Избавляемся от переполнений
+\sloppy
+% Запрещаем разрыв страницы после первой строки абзаца
+\clubpenalty=10000
+% Запрещаем разрыв страницы после последней строки абзаца
+\widowpenalty=10000
+%--------------------------------------
+
+%Списки
+\usepackage{enumitem}
+
+\usepackage{minted}
+%Подписи
+\usepackage{caption} 
+
+%Гиперссылки
+% \usepackage{hyperref}
+
+\usepackage[colorlinks, urlcolor = blue, filecolor = blue, citecolor = blue, linkcolor = black]{hyperref}
+
+
+\hypersetup {
+unicode=true
+}
+
+%Рисунки
+%--------------------------------------
+\DeclareCaptionLabelSeparator*{emdash}{~--- }
+\captionsetup[figure]{labelsep=emdash,font=onehalfspacing,position=bottom}
+%--------------------------------------
+
+\usepackage{tempora}
+
+%Листинги
+%--------------------------------------
+%Листинги
+%--------------------------------------
+\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage{fvextra}
+\usepackage{adjustbox}
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  breakatwhitespace=false,
+  breaklines=false,
+  captionpos=t,
+  inputencoding=utf8,
+  frame=single,
+  keepspaces=true,
+  columns=fullflexible,
+  keywordstyle=\bfseries,
+  numbers=left,
+  numbersep=8pt,
+  xleftmargin=18pt,
+  xrightmargin=0pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  stepnumber=1,
+  tabsize=4,
+  title=\lstname
+}
+%--------------------------------------
+
+%%% Математические пакеты %%%
+%--------------------------------------
+\usepackage{amsthm,amsfonts,amsmath,amssymb,amscd}  % Математические дополнения от AMS
+\usepackage{mathtools}                              % Добавляет окружение multlined
+\usepackage[perpage]{footmisc}
+
+
+% графики
+\usepackage{booktabs}        % Пакет для улучшенных таблиц
+\usepackage{pgfplots}        % Пакет для построения графиков
+\pgfplotsset{compat=1.17}    % Установка совместимости
+\usepackage{tikz}            % Пакет для создания диаграмм
+\usetikzlibrary{arrows.meta, positioning, automata, decorations.pathreplacing, calc}
+
+% Литература 
+
+% переименовываем  список литературы в "список используемой литературы"
+\addto\captionsrussian{\def\refname{Список литературы}}
+
+
+
+\captionsetup[figure]{name=Рисунок, labelsep=space}
+
+
+%--------------------------------------
+
+%--------------------------------------
+%			НАЧАЛО ДОКУМЕНТА
+%--------------------------------------
+
+\begin{document}
+
+%--------------------------------------
+%			ТИТУЛЬНЫЙ ЛИСТ
+%--------------------------------------
+\begin{titlepage}
+\thispagestyle{empty}
+\newpage
+
+
+%Шапка титульного листа
+%--------------------------------------
+\vspace*{-60pt}
+\hspace{-65pt}
+\begin{minipage}{0.3\textwidth}
+\hspace*{-20pt}\centering
+\includegraphics[width=\textwidth]{emblem}
+\end{minipage}
+\begin{minipage}{0.67\textwidth}\small \textbf{
+\vspace*{-0.7ex}
+\hspace*{-6pt}\centerline{Министерство науки и высшего образования Российской Федерации}
+\vspace*{-0.7ex}
+\centerline{Федеральное государственное автономное образовательное учреждение }
+\vspace*{-0.7ex}
+\centerline{высшего образования}
+\vspace*{-0.7ex}
+\centerline{<<Московский государственный технический университет}
+\vspace*{-0.7ex}
+\centerline{имени Н.Э. Баумана}
+\vspace*{-0.7ex}
+\centerline{(национальный исследовательский университет)>>}
+\vspace*{-0.7ex}
+\centerline{(МГТУ им. Н.Э. Баумана)}}
+\end{minipage}
+%--------------------------------------
+
+%Полосы
+%--------------------------------------
+\vspace{-25pt}
+\hspace{-35pt}\rule{\textwidth}{2.3pt}
+
+\vspace*{-20.3pt}
+\hspace{-35pt}\rule{\textwidth}{0.4pt}
+%--------------------------------------
+
+\vspace{1.5ex}
+\hspace{-35pt} \noindent \small ФАКУЛЬТЕТ\hspace{80pt} <<Информатика и системы управления>>
+
+\vspace*{-16pt}
+\hspace{47pt}\rule{0.83\textwidth}{0.4pt}
+
+\vspace{0.5ex}
+\hspace{-35pt} \noindent \small КАФЕДРА\hspace{50pt} <<Теоретическая информатика и компьютерные технологии>>
+
+\vspace*{-16pt}
+\hspace{30pt}\rule{0.866\textwidth}{0.4pt}
+
+\vspace{11em}
+
+\begin{center}
+\Large {\bf Домашнее задание №1} \\ 
+\large <<Имитационное моделирование систем массового обслуживания>> \\
+\large {по курсу <<Моделирование>>} \\
+
+\end{center}\normalsize
+
+\vspace{8em}
+
+\vbox{%
+\hfill%
+\vbox{%
+\hbox{Студент: Аринин М.А.}%
+\hbox{Группа: ИУ9-82Б}%
+\hbox{Преподаватель: Домрачева А.Б.}%
+}%
+} 
+
+\bigskip
+
+\vfill
+
+
+\begin{center}
+\textsl{Москва 2026}
+\end{center}
+\end{titlepage}
+%--------------------------------------
+%		КОНЕЦ ТИТУЛЬНОГО ЛИСТА
+%--------------------------------------
+
+
+%\renewcommand{\ttdefault}{pcr}
+
+\setlength{\tabcolsep}{3pt}
+
+\newpage
+\setcounter{page}{2}
+
+\section{Постановка задачи}
+Рассматривается задача имитационного моделирования процесса сдачи зачёта студентами первого курса вуза. Каждый студент имеет три попытки для сдачи зачёта по информатике с различными вероятностями успеха:
+\begin{itemize}
+  \item вероятность сдать с первой попытки: $p_1 = 0.6$;
+  \item вероятность сдать со второй попытки: $p_2 = 0.25$;
+  \item вероятность сдать с третьей попытки: $p_3 = 0.1$.
+\end{itemize}
+
+\textbf{Ограничения системы:}
+\begin{itemize}
+  \item между двумя попытками сдачи должно пройти не менее 1 дня;
+  \item зачётная неделя длится 6 рабочих дней;
+  \item в каждый из 6 рабочих дней может быть обслужено не более 20 попыток сдачи (остальные ждут в очереди).
+\end{itemize}
+
+\textbf{Цель работы:} провести вычислительный эксперимент с целью оценки количества студентов, успешно сдавших зачёт за 6 рабочих дней зачётной недели, для различных значений общего числа студентов ($N = 60, 80, 100$), используя систему имитационного моделирования GPSS.
+
+%--------------------------------------------------------------------
+\section{Построение математической модели}
+Задача моделирования процесса сдачи зачёта может быть представлена как система массового обслуживания (СМО) с ограниченной пропускной способностью и вероятностными переходами между состояниями.
+
+\subsection{Блок-схема процесса сдачи}
+Каждый студент проходит через не более чем три попытки. После каждой неудачи студент возвращается в очередь на пересдачу через минимум 1 рабочий день, пока выполняются условия:
+\begin{itemize}
+  \item число попыток не превышает 3;
+  \item попытка выполняется не позднее 6-го рабочего дня зачётной недели.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  >=Stealth,
+  every node/.style={font=\small},
+  box/.style={draw, rectangle, rounded corners, align=center},
+  queueBox/.style={draw, rectangle, dashed, align=center, minimum width=3.9cm, minimum height=1.2cm},
+  teacherBox/.style={draw, rectangle, align=center, minimum width=3.8cm, minimum height=1.3cm},
+  successBox/.style={draw, rectangle, rounded corners, align=center, fill=green!18, minimum width=4.8cm, minimum height=0.9cm},
+  fail3Box/.style={draw, rectangle, rounded corners, align=center, fill=red!12, text=red!60!black, minimum width=4.8cm, minimum height=0.9cm},
+  failTimeBox/.style={draw, rectangle, rounded corners, align=center, fill=red!12, text=red!60!black, minimum width=4.8cm, minimum height=0.9cm},
+  arr/.style={->, thick}
+]
+  % Блок: поступление студентов
+  \node[box, minimum width=4.4cm, minimum height=1.1cm] (enter) at (0,0) {Входной поток\\студенты};
+
+  % Очередь с "слотами"
+  \node[queueBox] (queue) at (4.8,0) {};
+  \node[font=\small] at ([yshift=0.24cm]queue.north) {Очередь};
+  \node[font=\scriptsize] at ([yshift=-0.24cm]queue.south) {20 мест в день};
+  % Рисуем условные слоты (просто чтобы визуально было как на скриншоте)
+  \foreach \i in {0,...,4}{
+    \draw[thick] (queue.south west) ++(0.55+\i*0.66,0.20) rectangle ++(0.40,0.60);
+  }
+
+  % Преподаватель
+  \node[teacherBox] (teacher) at (10.05,0) {Преподаватель};
+
+  % Ветки-результаты
+  \node[successBox] (succ) at (14.85,1.4) {Успешная сдача};
+  \node[fail3Box] (fail3) at (14.85,0.0) {Несдача за 3 попытки};
+  \node[failTimeBox] (failTime) at (14.85,-1.45) {Не успели за 6 дней\\потратить 3 попытки};
+
+  % Основные связи
+  \draw[arr] (enter.east) -- (queue.west);
+  \draw[arr] (queue.east) -- node[midway, above, font=\scriptsize] {сдача} (teacher.west);
+
+  % Успех/неуспех
+  \draw[arr] (teacher.east) -- (succ.west);
+  \draw[arr] (teacher.east) -- (fail3.west);
+
+  % Возврат на пересдачу (через преподавателя, как в схеме)
+  \draw[arr] (teacher.south) to[bend left=35] node[midway, below=0pt, align=center] {Пересдача\\(число попыток $<3$)} (queue.south east);
+
+
+
+  % Стрелка по ограничению времени от входного потока:
+  % строго: вниз -> по низу вправо -> вверх в нижнюю грань блока "Не успели..."
+  \coordinate (lateDown) at ($(enter.south)+(0,-2.05)$);
+  \coordinate (lateTurn) at ($(failTime.south)+(0,-0.22)$);
+  \draw[dashed, thick, ->]
+    (enter.south) -- (lateDown)
+    -- (lateDown -| lateTurn)
+    -- (lateTurn)
+    -- (failTime.south);
+
+  % Прямая "скобка" под 90 градусов для выходных данных
+  \coordinate (brTop) at ([xshift=0.45cm]succ.north east);
+  \coordinate (brBot) at ([xshift=0.45cm]failTime.south east);
+  \draw[thick] (brTop) -- ++(0.22,0);
+  \draw[thick] ([xshift=0.22cm]brTop) -- ([xshift=0.22cm]brBot);
+  \draw[thick] (brBot) -- ++(0.22,0);
+  \node[align=left] at ([xshift=1.55cm]$(brTop)!0.5!(brBot)$) {Выходные\\данные};
+
+\end{tikzpicture}
+}
+\caption{Схема процесса сдачи зачёта с очередью, пересдачами и ограничением времени}
+\label{fig:flow}
+\end{figure}
+
+\subsection{Описание системы}
+Система представляет собой СМО с следующими характеристиками:
+\begin{itemize}
+  \item \textbf{Входной поток:} студенты первого курса рассматриваются как транзакты модели. В базовом сценарии все студенты поступают в систему в день 1 и формируют общий поток заявок на сдачу.
+  \item \textbf{Канал обслуживания:} обслуживание выполняет один преподаватель. За один рабочий день может быть обслужено не более 20 попыток сдачи, после достижения лимита оставшиеся транзакты переносятся на следующий день.
+  \item \textbf{Время обслуживания:} длительность одной попытки в модели принимается пренебрежимо малой (результат попытки фиксируется мгновенно), однако между попытками одного и того же студента обязателен интервал не менее 1 рабочего дня.
+  \item \textbf{Очередь:} очередь не ограничена по длине и формируется из студентов, ожидающих первую попытку, и студентов, направленных на пересдачу после неуспешной попытки.
+  \item \textbf{Дисциплина обслуживания:} заявки из очереди обслуживаются по порядку поступления; повторная попытка добавляется в очередь как новая заявка после выдержки временного интервала.
+  \item \textbf{Логика выхода из системы:} студент покидает систему либо при успешной сдаче, либо после трёх неуспешных попыток, либо при невозможности израсходовать все попытки в пределах 6 рабочих дней.
+\end{itemize}
+
+
+\subsection{Математическая модель вероятностей}
+Для одного студента вероятность успешной сдачи зачёта вычисляется по формуле полной вероятности:
+\[
+P_{\text{успех}} = p_1 + (1-p_1) \cdot p_2 + (1-p_1) \cdot (1-p_2) \cdot p_3.
+\]
+
+Подставляя значения вероятностей:
+\[
+P_{\text{успех}} = 0.6 + 0.4 \cdot 0.25 + 0.4 \cdot 0.75 \cdot 0.1 = 0.6 + 0.1 + 0.03 = 0.73.
+\]
+
+Вероятность неуспешной сдачи:
+\[
+P_{\text{неуспех}} = (1-p_1) \cdot (1-p_2) \cdot (1-p_3) = 0.4 \cdot 0.75 \cdot 0.9 = 0.27.
+\]
+
+\subsection{Ограничения модели}
+В реальной системе из-за ограничения в 6 дней и пропускной способности 20 попыток в день не все студенты могут использовать все три попытки. Это приводит к тому, что фактическая вероятность успеха может отличаться от теоретической $0.73$ из-за:
+\begin{itemize}
+  \item ограниченного времени (6 дней);
+  \item ограниченной пропускной способности (20 попыток в день);
+  \item зависимость результата от того, на какой день попадает очередная попытка (минимум 1 рабочий день между попытками).
+\end{itemize}
+
+\section{Решение вычислительных задач}
+\label{sec:computational}
+
+\subsection{Аналитическое решение (упрощенная модель)}
+В упрощенной модели без учета временных и пропускных ограничений математическое ожидание количества успешно сдавших студентов для $N$ студентов:
+\[
+E[X] = N \cdot P_{\text{успех}} = N \cdot 0.73.
+\]
+
+Дисперсия количества успешно сдавших студентов (биномиальное распределение):
+\[
+\text{Var}[X] = N \cdot P_{\text{успех}} \cdot (1 - P_{\text{успех}}) = N \cdot 0.73 \cdot 0.27.
+\]
+
+Стандартное отклонение:
+\[
+\sigma = \sqrt{\text{Var}[X]} = \sqrt{N \cdot 0.73 \cdot 0.27}.
+\]
+
+\subsection{Учет ограничений системы}
+В реальной системе с ограничениями необходимо учитывать:
+\begin{enumerate}
+  \item \textbf{Ограничение по времени:} студенты, начавшие сдавать в 3, 4, 5 и 6, не успевают сделать все три попытки.
+  \item \textbf{Ограничение по пропускной способности:} если в день уже запланировано 20 попыток, новые студенты не могут попасть в этот день.
+\end{enumerate}
+
+Для точного аналитического решения с учетом всех ограничений требуется более сложный анализ, включающий:
+\begin{itemize}
+  \item распределение студентов по дням первой попытки;
+  \item вероятности попадания на повторные попытки с учетом ограничений;
+\end{itemize}
+
+В данной работе для получения точной оценки используется имитационное моделирование в GPSS.
+
+\section{Практическая реализация}
+Модель реализована в системе имитационного моделирования GPSS World Student Version 5.2.
+\subsection{Соответствие элементов модели операторам GPSS}
+\begin{itemize}
+  \item \textbf{Входной поток студентов:} оператор \texttt{GENERATE} в блоке \texttt{NEW\_ALL} формирует $N$ транзактов в момент времени $t=0$.
+  \item \textbf{Параметры студента:} оператор \texttt{ASSIGN} использует \texttt{P1} для номера попытки и \texttt{P2} для дня первой попытки.
+  \item \textbf{Ограничение 20 попыток в день:} проверка \texttt{TEST} по \texttt{X\$DAYUSED} и инкремент счётчика через \texttt{SAVEVALUE DAYUSED+,1}.
+  \item \textbf{Смена дня и календарь:} блок \texttt{DAY\_START} обновляет \texttt{CURDAY} и сбрасывает \texttt{DAYUSED}.
+  \item \textbf{Очередь FIFO без приоритета:} все транзакты (новые и на пересдачу) возвращаются в один и тот же блок \texttt{WAIT\_SLOT}.
+  \item \textbf{Вероятностный исход попытки:} оператор \texttt{TRANSFER} реализует вероятности успеха $0.6/0.25/0.1$ для 1-й, 2-й и 3-й попыток.
+  \item \textbf{Интервал между попытками:} оператор \texttt{ADVANCE 1.01} обеспечивает минимум 1 рабочий день между пересдачами.
+  \item \textbf{Итоговые счётчики:} \texttt{SAVEVALUE PASSED} фиксирует число успешно сдавших, завершение моделирования задаётся блоком \texttt{END\_SIM}.
+\end{itemize}
+\newenvironment{longlisting}{\captionsetup{type=listing}}{}
+\begin{longlisting}
+\caption{Модель сдачи зачёта студентами в GPSS}
+\begin{minted}[frame=single,fontsize = \footnotesize, linenos, xleftmargin = 1.5em, breaklines=true]{text}
+NSTUD      EQU 60
+DAYCAP     EQU 20
+MAXDAY     EQU 6
+
+SIMULATE
+
+INIT        GENERATE 0,0,0,1
+            SAVEVALUE PASSED,0
+            SAVEVALUE DAYUSED,0
+            SAVEVALUE CURDAY,1
+            TERMINATE
+
+NEW_ALL     GENERATE 0,0,0,NSTUD
+            ASSIGN 1,1
+            ASSIGN 2,0
+            TRANSFER ,WAIT_SLOT
+
+WAIT_SLOT   TEST LE X$CURDAY,MAXDAY,TIME_OVER
+            TEST L X$DAYUSED,DAYCAP,WAIT_NEXT
+            TRANSFER ,ENTER_EXAM
+
+WAIT_NEXT   ADVANCE 0.01
+            TRANSFER ,WAIT_SLOT
+
+ENTER_EXAM  SAVEVALUE DAYUSED+,1
+            TEST E P2,0,NOT_FIRST
+
+FIRST_ATT   ASSIGN 2,X$CURDAY
+            TRANSFER ,ATTEMPT_1
+
+NOT_FIRST   TEST E P1,2,CHECK_ATT_3
+            TRANSFER ,ATTEMPT_2
+
+CHECK_ATT_3 TEST E P1,3,BAD_ATTEMPT
+            TRANSFER ,ATTEMPT_3
+
+BAD_ATTEMPT TERMINATE
+
+ATTEMPT_1   TRANSFER 0.6,FAILED_1,PASSED_OK
+ATTEMPT_2   TRANSFER 0.25,FAILED_2,PASSED_OK
+ATTEMPT_3   TRANSFER 0.1,FINAL_FAIL,PASSED_OK
+
+PASSED_OK   SAVEVALUE PASSED+,1
+            TERMINATE
+
+FAILED_1    TEST L X$CURDAY,MAXDAY,NO_RETRY_2
+            ASSIGN 1,2
+            ADVANCE 1.01
+            TRANSFER ,WAIT_SLOT
+
+NO_RETRY_2  TERMINATE
+
+FAILED_2    TEST L X$CURDAY,MAXDAY,NO_RETRY_3
+            ASSIGN 1,3
+            ADVANCE 1.01
+            TRANSFER ,WAIT_SLOT
+
+NO_RETRY_3  TERMINATE
+
+FINAL_FAIL  TERMINATE
+TIME_OVER   TERMINATE
+
+DAY_START   GENERATE 1,0,1,5
+            SAVEVALUE DAYUSED,0
+            SAVEVALUE CURDAY+,1
+            TERMINATE
+
+END_SIM     GENERATE 0,0,MAXDAY,1
+            TERMINATE 1
+\end{minted}
+\end{longlisting}
+
+\section{Результаты}
+Для иллюстрации приведен полный фрагмент отчета GPSS World для эксперимента с $N=60$:
+
+\begin{longlisting}
+\caption{Отчет GPSS World Simulation Report для эксперимента $N=60$}
+\begin{minted}[frame=single,fontsize = \footnotesize, linenos, xleftmargin = 1.5em, breaklines=true]{text}
+START TIME           END TIME  BLOCKS  FACILITIES  STORAGES
+     0.000              6.000    46        0          0
+
+NAME                       VALUE  
+ATTEMPT_1                  24.000
+ATTEMPT_2                  25.000
+ATTEMPT_3                  26.000
+BAD_ATTEMPT                23.000
+CHECK_ATT_3                21.000
+CURDAY                  10005.000
+DAYCAP                     20.000
+DAYUSED                 10004.000
+DAY_START                  41.000
+END_SIM                    45.000
+ENTER_EXAM                 15.000
+FAILED_1                   29.000
+FAILED_2                   34.000
+FINAL_FAIL                 39.000
+FIRST_ATT                  17.000
+INIT                        1.000
+MAXDAY                      6.000
+NEW_ALL                     6.000
+NOT_FIRST                  19.000
+NO_RETRY_2                 33.000
+NO_RETRY_3                 38.000
+NSTUD                      60.000
+PASSED                  10003.000
+PASSED_OK                  27.000
+TIME_OVER                  40.000
+WAIT_NEXT                  13.000
+WAIT_SLOT                  10.000
+
+LABEL              LOC  BLOCK TYPE     ENTRY COUNT CURRENT COUNT RETRY
+INIT                1    GENERATE             1             0       0
+                    2    SAVEVALUE            1             0       0
+                    3    SAVEVALUE            1             0       0
+                    4    SAVEVALUE            1             0       0
+                    5    TERMINATE            1             0       0
+NEW_ALL             6    GENERATE            60             0       0
+                    7    ASSIGN              60             0       0
+                    8    ASSIGN              60             0       0
+                    9    TRANSFER            60             0       0
+WAIT_SLOT          10    TEST              8098             0       0
+                   11    TEST              8098             0       0
+                   12    TRANSFER            98             0       0
+WAIT_NEXT          13    ADVANCE           8000             0       0
+                   14    TRANSFER          8000             0       0
+ENTER_EXAM         15    SAVEVALUE           98             0       0
+                   16    TEST                98             0       0
+FIRST_ATT          17    ASSIGN              60             0       0
+                   18    TRANSFER            60             0       0
+NOT_FIRST          19    TEST                38             0       0
+                   20    TRANSFER            20             0       0
+CHECK_ATT_3        21    TEST                18             0       0
+                   22    TRANSFER            18             0       0
+BAD_ATTEMPT        23    TERMINATE            0             0       0
+ATTEMPT_1          24    TRANSFER            60             0       0
+ATTEMPT_2          25    TRANSFER            20             0       0
+ATTEMPT_3          26    TRANSFER            18             0       0
+PASSED_OK          27    SAVEVALUE           43             0       0
+                   28    TERMINATE           43             0       0
+FAILED_1           29    TEST                20             0       0
+                   30    ASSIGN              20             0       0
+                   31    ADVANCE             20             0       0
+                   32    TRANSFER            20             0       0
+NO_RETRY_2         33    TERMINATE            0             0       0
+FAILED_2           34    TEST                18             0       0
+                   35    ASSIGN              18             0       0
+                   36    ADVANCE             18             0       0
+                   37    TRANSFER            18             0       0
+NO_RETRY_3         38    TERMINATE            0             0       0
+FINAL_FAIL         39    TERMINATE           17             0       0
+TIME_OVER          40    TERMINATE            0             0       0
+DAY_START          41    GENERATE             5             0       0
+                   42    SAVEVALUE            5             0       0
+                   43    SAVEVALUE            5             0       0
+                   44    TERMINATE            5             0       0
+END_SIM            45    GENERATE             1             0       0
+                   46    TERMINATE            1             0       0
+
+SAVEVALUE               RETRY       VALUE
+ PASSED                   0         43.000                            
+ DAYUSED                  0              0                            
+ CURDAY                   0          6.000                            
+\end{minted}
+\end{longlisting}
+
+\section{Анализ модели и проверка качества}
+\subsection{Анализ результатов}
+По результатам трех запусков модели (для $N=60, 80, 100$) получены следующие агрегированные показатели.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{$N$} & \textbf{ATTEMPT\_1} & \textbf{ATTEMPT\_2} & \textbf{ATTEMPT\_3} & \textbf{PASSED} \\
+\hline
+60 & 60 & 20 & 18 & 43 \\
+\hline
+80 & 80 & 30 & 10 & 52 \\
+\hline
+100 & 100 & 11 & 9 & 60 \\
+\hline
+\end{tabular}
+\caption{Сводные результаты экспериментов}
+\label{tab:results}
+\end{table}
+
+\textbf{Наблюдения по сериям экспериментов:}
+\begin{itemize}
+  \item Для $N=60$ система не насыщается по лимиту 120 попыток: выполнено 98 попыток, из них 43 успешные сдачи.
+  \item Для $N=80$ суммарно выполнено 120 попыток, дневной лимит исчерпывается, часть студентов не успевает дойти до повторных попыток.
+  \item Для $N=100$ также достигается верхний предел 120 попыток, при этом число вторых и третьих попыток снижается из-за роста очереди.
+\end{itemize}
+
+\textbf{Доли успешно сдавших по экспериментам:}
+\begin{itemize}
+  \item $N=60$: $\frac{43}{60}\approx 71.7\%$;
+  \item $N=80$: $\frac{52}{80}=65.0\%$;
+  \item $N=100$: $\frac{60}{100}=60.0\%$.
+\end{itemize}
+
+\subsection{Проверка качества модели}
+\textbf{Проверка соответствия постановке задачи:}
+\begin{itemize}
+  \item Вероятности исходов по попыткам соответствуют условию: $0.6$, $0.25$, $0.1$.
+  \item В модели реализовано ограничение не более 20 попыток в день (по счётчику \texttt{DAYUSED}).
+  \item Между попытками одного студента соблюдается интервал не менее 1 дня (\texttt{ADVANCE 1.01}).
+  \item Поведение очереди соответствует FIFO без приоритета пересдач.
+\end{itemize}
+
+\textbf{Проверка на граничных режимах:}
+\begin{itemize}
+  \item Для $N=60$ лимит 120 попыток не исчерпывается (выполнено 98 попыток).
+  \item Для $N=80$ и $N=100$ достигается верхняя граница 120 попыток, что подтверждает корректную работу ограничения по дневной пропускной способности.
+  \item Наличие значений в \texttt{NO\_RETRY\_2}, \texttt{NO\_RETRY\_3} и очереди на конец недели согласуется с ограничением в 6 рабочих дней.
+\end{itemize}
+
+
+\section{Выводы}
+\begin{itemize}
+  \item Выполнена формализация задачи имитационного моделирования процесса сдачи зачёта студентами как системы массового обслуживания с ограниченной пропускной способностью и вероятностными переходами между состояниями.
+  
+  \item Построена и реализована модель GPSS с общей FIFO-очередью без приоритета пересдач, с ограничением не более 20 попыток в день и минимальным интервалом 1 рабочий день между попытками одного студента.
+  
+  \item Проведены вычислительные эксперименты для $N=60$, $N=80$ и $N=100$ студентов; получены значения успешно сдавших 43, 52 и 60 соответственно.
+  
+  \item Сопоставление с упрощенной аналитической оценкой $E[X]=0.73N$ показало, что ограничение по числу попыток в день и конечная длительность зачётной недели существенно влияют на итоговый результат, особенно при росте входного потока.
+  
+\end{itemize}
+
+\end{document}
+

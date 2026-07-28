@@ -1,0 +1,7 @@
+$ENTRY Go {
+  /* пусто */
+    = <Eq True <ExistFile '11-exist-file.ref'>>
+      <Eq False <ExistFile 'not-exist.txt'>>;
+}
+
+Eq { s.X s.X = }

@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Lexer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.lexer</a> &gt; <span class="el_source">Lexer.java</span></div><h1>Lexer.java</h1><pre class="source lang-java linenums">package refal.lexer;
+
+import java.util.ArrayList;
+import java.util.List;
+
+// Лексер Рефала-5.
+public final class Lexer {
+
+    private final String src;
+    private int i;
+<span class="fc" id="L11">    private int line = 1;</span>
+<span class="fc" id="L12">    private int col = 1;</span>
+    // '*' трактуется как комментарий до конца строки только в начале строки;
+    // в середине строки — это идентификатор-оператор умножения.
+<span class="fc" id="L15">    private boolean atLineStart = true;</span>
+
+<span class="fc" id="L17">    public Lexer(String src) {</span>
+<span class="fc" id="L18">        this.src = src;</span>
+<span class="fc" id="L19">    }</span>
+
+    // Токенизировать строку; последний токен всегда EOF.
+    public static List&lt;Token&gt; tokenize(String src) {
+<span class="fc" id="L23">        return new Lexer(src).run();</span>
+    }
+
+    private List&lt;Token&gt; run() {
+<span class="fc" id="L27">        List&lt;Token&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        while (i &lt; src.length()) {</span>
+<span class="fc" id="L29">            int startLine = line;</span>
+<span class="fc" id="L30">            int startCol = col;</span>
+<span class="fc" id="L31">            char c = src.charAt(i);</span>
+
+<span class="fc bfc" id="L33" title="All 2 branches covered.">            if (c == '\n') {</span>
+<span class="fc" id="L34">                i++;</span>
+<span class="fc" id="L35">                line++;</span>
+<span class="fc" id="L36">                col = 1;</span>
+<span class="fc" id="L37">                atLineStart = true;</span>
+<span class="fc" id="L38">                continue;</span>
+            }
+<span class="fc bfc" id="L40" title="All 2 branches covered.">            if (Character.isWhitespace(c)) {</span>
+<span class="fc" id="L41">                advance();</span>
+<span class="fc" id="L42">                continue;</span>
+            }
+<span class="fc bfc" id="L44" title="All 4 branches covered.">            if (c == '*' &amp;&amp; atLineStart) {</span>
+<span class="fc" id="L45">                skipLineComment();</span>
+<span class="fc" id="L46">                continue;</span>
+            }
+            // Блочные комментарии в стиле C: /* ... */
+<span class="pc bpc" id="L49" title="1 of 6 branches missed.">            if (c == '/' &amp;&amp; i + 1 &lt; src.length() &amp;&amp; src.charAt(i + 1) == '*') {</span>
+<span class="fc" id="L50">                skipBlockComment();</span>
+<span class="fc" id="L51">                continue;</span>
+            }
+            // Строчные комментарии в стиле C: //...
+<span class="pc bpc" id="L54" title="2 of 6 branches missed.">            if (c == '/' &amp;&amp; i + 1 &lt; src.length() &amp;&amp; src.charAt(i + 1) == '/') {</span>
+<span class="nc" id="L55">                skipLineComment();</span>
+<span class="nc" id="L56">                continue;</span>
+            }
+<span class="fc bfc" id="L58" title="All 4 branches covered.">            if (c == '\'' || c == '&quot;') {</span>
+<span class="fc" id="L59">                readString(c, startLine, startCol, out);</span>
+<span class="fc" id="L60">                atLineStart = false;</span>
+<span class="fc" id="L61">                continue;</span>
+            }
+<span class="pc bpc" id="L63" title="1 of 6 branches missed.">            if (Character.isDigit(c) || (c == '-' &amp;&amp; i + 1 &lt; src.length()</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">                    &amp;&amp; Character.isDigit(src.charAt(i + 1)))) {</span>
+<span class="fc" id="L65">                out.add(readInt(startLine, startCol));</span>
+<span class="fc" id="L66">                atLineStart = false;</span>
+<span class="fc" id="L67">                continue;</span>
+            }
+<span class="fc bfc" id="L69" title="All 2 branches covered.">            if (isIdentStart(c)) {</span>
+<span class="fc" id="L70">                out.add(readIdentLike(startLine, startCol));</span>
+<span class="fc" id="L71">                atLineStart = false;</span>
+<span class="fc" id="L72">                continue;</span>
+            }
+<span class="fc" id="L74">            Token punct = readPunct(c, startLine, startCol);</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">            if (punct != null) {</span>
+<span class="fc" id="L76">                out.add(punct);</span>
+<span class="fc" id="L77">                atLineStart = false;</span>
+<span class="fc" id="L78">                continue;</span>
+            }
+            // Односимвольные идентификаторы-операторы: +, -, *, /, %, ?
+            // (используются в Рефале-5/refal-5-lambda как имена функций
+            //  '+', '-', и т.д., а также в дополнительных встроенных)
+<span class="fc bfc" id="L83" title="All 2 branches covered.">            if (isOperatorIdent(c)) {</span>
+<span class="fc" id="L84">                out.add(new Token(TokenType.IDENT, String.valueOf(c), startLine, startCol));</span>
+<span class="fc" id="L85">                advance();</span>
+<span class="fc" id="L86">                atLineStart = false;</span>
+<span class="fc" id="L87">                continue;</span>
+            }
+<span class="fc" id="L89">            throw new LexException(</span>
+<span class="fc" id="L90">                    &quot;Unexpected character '&quot; + c + &quot;' (U+&quot; + Integer.toHexString(c) + &quot;)&quot;,</span>
+                    line, col);
+        }
+<span class="fc" id="L93">        out.add(new Token(TokenType.EOF, &quot;&quot;, line, col));</span>
+<span class="fc" id="L94">        return out;</span>
+    }
+
+    private void advance() {
+        // Сюда попадает любой пробельный символ, кроме перевода строки;
+<span class="fc" id="L99">        i++;</span>
+<span class="fc" id="L100">        col++;</span>
+<span class="fc" id="L101">    }</span>
+
+    private void skipLineComment() {
+<span class="pc bpc" id="L104" title="1 of 4 branches missed.">        while (i &lt; src.length() &amp;&amp; src.charAt(i) != '\n') {</span>
+<span class="fc" id="L105">            i++;</span>
+<span class="fc" id="L106">            col++;</span>
+        }
+<span class="fc" id="L108">    }</span>
+
+    private void skipBlockComment() {
+        // Пропускаем начальный «/*»
+<span class="fc" id="L112">        i += 2;</span>
+<span class="fc" id="L113">        col += 2;</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        while (i &lt; src.length()) {</span>
+<span class="fc" id="L115">            char ch = src.charAt(i);</span>
+<span class="pc bpc" id="L116" title="2 of 6 branches missed.">            if (ch == '*' &amp;&amp; i + 1 &lt; src.length() &amp;&amp; src.charAt(i + 1) == '/') {</span>
+<span class="fc" id="L117">                i += 2;</span>
+<span class="fc" id="L118">                col += 2;</span>
+<span class="fc" id="L119">                return;</span>
+            }
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">            if (ch == '\n') {</span>
+<span class="nc" id="L122">                i++;</span>
+<span class="nc" id="L123">                line++;</span>
+<span class="nc" id="L124">                col = 1;</span>
+            } else {
+<span class="fc" id="L126">                i++;</span>
+<span class="fc" id="L127">                col++;</span>
+            }
+<span class="fc" id="L129">        }</span>
+<span class="nc" id="L130">        throw new LexException(&quot;Unterminated block comment&quot;, line, col);</span>
+    }
+
+    // Читает строковый литерал в кавычках с обработкой escape-последовательностей.
+    // Для одинарных кавычек ('abc') классический Рефал-5 трактует каждую букву
+    // как отдельный односимвольный терм — поэтому в out добавляется по токену
+    // STRING на каждый символ. Для двойных кавычек (&quot;abc&quot;) — один STRING целиком.
+    private void readString(char quote, int startLine, int startCol, List&lt;Token&gt; out) {
+<span class="fc" id="L138">        int openLine = line;</span>
+<span class="fc" id="L139">        int openCol = col;</span>
+<span class="fc" id="L140">        advance();</span>
+<span class="fc" id="L141">        StringBuilder sb = new StringBuilder();</span>
+        // Запоминаем стартовые позиции каждого символа, чтобы выдавать
+        // токены с правильными координатами при одинарной кавычке.
+<span class="fc" id="L144">        List&lt;int[]&gt; charPositions = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L145" title="All 4 branches covered.">        while (i &lt; src.length() &amp;&amp; src.charAt(i) != quote) {</span>
+<span class="fc" id="L146">            int charLine = line;</span>
+<span class="fc" id="L147">            int charCol = col;</span>
+<span class="fc" id="L148">            char ch = src.charAt(i);</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">            if (ch == '\\') {</span>
+<span class="fc" id="L150">                int escLine = line;</span>
+<span class="fc" id="L151">                int escCol = col;</span>
+<span class="fc" id="L152">                advance();</span>
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">                if (i &gt;= src.length()) {</span>
+<span class="nc" id="L154">                    throw new LexException(</span>
+                            &quot;Unterminated escape sequence&quot;, escLine, escCol);
+                }
+<span class="fc" id="L157">                char esc = src.charAt(i);</span>
+                char decoded;
+<span class="pc bpc" id="L159" title="5 of 13 branches missed.">                switch (esc) {</span>
+<span class="fc" id="L160">                    case 'n' -&gt; decoded = '\n';</span>
+<span class="fc" id="L161">                    case 't' -&gt; decoded = '\t';</span>
+<span class="fc" id="L162">                    case 'r' -&gt; decoded = '\r';</span>
+<span class="fc" id="L163">                    case '\\' -&gt; decoded = '\\';</span>
+<span class="fc" id="L164">                    case '\'' -&gt; decoded = '\'';</span>
+<span class="fc" id="L165">                    case '&quot;' -&gt; decoded = '&quot;';</span>
+<span class="nc" id="L166">                    case '&lt;' -&gt; decoded = '&lt;';</span>
+<span class="nc" id="L167">                    case '&gt;' -&gt; decoded = '&gt;';</span>
+<span class="fc" id="L168">                    case '(' -&gt; decoded = '(';</span>
+<span class="nc" id="L169">                    case ')' -&gt; decoded = ')';</span>
+<span class="nc" id="L170">                    case '0' -&gt; decoded = '\0';</span>
+                    case 'x', 'X' -&gt; {
+<span class="fc" id="L172">                        advance();</span>
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">                        if (i + 1 &gt;= src.length()) {</span>
+<span class="nc" id="L174">                            throw new LexException(</span>
+                                    &quot;Truncated \\x escape&quot;, escLine, escCol);
+                        }
+<span class="fc" id="L177">                        char h1 = src.charAt(i);</span>
+<span class="fc" id="L178">                        char h2 = src.charAt(i + 1);</span>
+<span class="fc" id="L179">                        int v1 = hexDigit(h1);</span>
+<span class="fc" id="L180">                        int v2 = hexDigit(h2);</span>
+<span class="pc bpc" id="L181" title="2 of 4 branches missed.">                        if (v1 &lt; 0 || v2 &lt; 0) {</span>
+<span class="nc" id="L182">                            throw new LexException(</span>
+                                    &quot;Bad \\x escape: \\x&quot; + h1 + h2, escLine, escCol);
+                        }
+<span class="fc" id="L185">                        decoded = (char) (v1 * 16 + v2);</span>
+<span class="fc" id="L186">                        advance(); // h1</span>
+<span class="fc" id="L187">                        i++;</span>
+<span class="fc" id="L188">                        col++;     // h2</span>
+<span class="fc" id="L189">                        sb.append(decoded);</span>
+<span class="fc" id="L190">                        charPositions.add(new int[]{charLine, charCol});</span>
+<span class="fc" id="L191">                        continue;</span>
+                    }
+<span class="nc" id="L193">                    default -&gt; throw new LexException(</span>
+                            &quot;Unknown escape sequence \\&quot; + esc, escLine, escCol);
+                }
+<span class="fc" id="L196">                advance();</span>
+<span class="fc" id="L197">                sb.append(decoded);</span>
+<span class="fc" id="L198">                charPositions.add(new int[]{charLine, charCol});</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">            } else if (ch == '\n') {</span>
+<span class="fc" id="L200">                sb.append(ch);</span>
+<span class="fc" id="L201">                charPositions.add(new int[]{charLine, charCol});</span>
+<span class="fc" id="L202">                i++;</span>
+<span class="fc" id="L203">                line++;</span>
+<span class="fc" id="L204">                col = 1;</span>
+            } else {
+<span class="fc" id="L206">                sb.append(ch);</span>
+<span class="fc" id="L207">                charPositions.add(new int[]{charLine, charCol});</span>
+<span class="fc" id="L208">                advance();</span>
+            }
+<span class="fc" id="L210">        }</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        if (i &gt;= src.length()) {</span>
+<span class="fc" id="L212">            throw new LexException(</span>
+                    &quot;Unterminated string literal (started at &quot; + openLine + &quot;:&quot; + openCol + &quot;)&quot;,
+                    line, col);
+        }
+<span class="fc" id="L216">        advance(); // закрывающая кавычка</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">        if (quote == '\'') {</span>
+            // Каждый символ — отдельный односимвольный STRING-токен.
+<span class="fc" id="L219">            String text = sb.toString();</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">            if (text.isEmpty()) {</span>
+                // Пустые одинарные кавычки не порождают ни одного терма;
+                // вставляем один пустой STRING чтобы синтаксис не «съел» позицию.
+<span class="nc" id="L223">                out.add(new Token(TokenType.STRING, &quot;&quot;, startLine, startCol));</span>
+            } else {
+<span class="fc bfc" id="L225" title="All 2 branches covered.">                for (int k = 0; k &lt; text.length(); k++) {</span>
+<span class="fc" id="L226">                    int[] pos = charPositions.get(k);</span>
+<span class="fc" id="L227">                    out.add(new Token(TokenType.STRING,</span>
+<span class="fc" id="L228">                            String.valueOf(text.charAt(k)), pos[0], pos[1]));</span>
+                }
+            }
+<span class="fc" id="L231">        } else {</span>
+            // Двойные кавычки — составной символ (Sym): &quot;abc def&quot; → один символ.
+            // Соответствует семантике refgo и нужно для Implode/Implode_Ext.
+<span class="fc" id="L234">            out.add(new Token(TokenType.QSYM, sb.toString(), startLine, startCol));</span>
+        }
+<span class="fc" id="L236">    }</span>
+
+    private static int hexDigit(char c) {
+<span class="pc bpc" id="L239" title="1 of 4 branches missed.">        if (c &gt;= '0' &amp;&amp; c &lt;= '9') {</span>
+<span class="fc" id="L240">            return c - '0';</span>
+        }
+<span class="pc bpc" id="L242" title="2 of 4 branches missed.">        if (c &gt;= 'a' &amp;&amp; c &lt;= 'f') {</span>
+<span class="fc" id="L243">            return 10 + (c - 'a');</span>
+        }
+<span class="nc bnc" id="L245" title="All 4 branches missed.">        if (c &gt;= 'A' &amp;&amp; c &lt;= 'F') {</span>
+<span class="nc" id="L246">            return 10 + (c - 'A');</span>
+        }
+<span class="nc" id="L248">        return -1;</span>
+    }
+
+    private Token readInt(int startLine, int startCol) {
+<span class="fc" id="L252">        int j = i;</span>
+<span class="fc bfc" id="L253" title="All 2 branches covered.">        if (src.charAt(j) == '-') {</span>
+<span class="fc" id="L254">            j++;</span>
+        }
+<span class="fc bfc" id="L256" title="All 4 branches covered.">        while (j &lt; src.length() &amp;&amp; Character.isDigit(src.charAt(j))) {</span>
+<span class="fc" id="L257">            j++;</span>
+        }
+<span class="fc" id="L259">        String s = src.substring(i, j);</span>
+<span class="fc" id="L260">        col += s.length();</span>
+<span class="fc" id="L261">        i = j;</span>
+<span class="fc" id="L262">        return new Token(TokenType.INT, s, startLine, startCol);</span>
+    }
+
+    private Token readIdentLike(int startLine, int startCol) {
+<span class="fc" id="L266">        int j = i + 1;</span>
+<span class="fc bfc" id="L267" title="All 4 branches covered.">        while (j &lt; src.length() &amp;&amp; isIdentCont(src.charAt(j))) {</span>
+<span class="fc" id="L268">            j++;</span>
+        }
+<span class="fc" id="L270">        String s = src.substring(i, j);</span>
+<span class="fc" id="L271">        col += s.length();</span>
+<span class="fc" id="L272">        i = j;</span>
+<span class="fc bfc" id="L273" title="All 3 branches covered.">        return switch (s) {</span>
+<span class="fc" id="L274">            case &quot;$ENTRY&quot; -&gt; new Token(TokenType.ENTRY, s, startLine, startCol);</span>
+<span class="fc" id="L275">            case &quot;$EXTERN&quot; -&gt; new Token(TokenType.EXTERN, s, startLine, startCol);</span>
+<span class="fc" id="L276">            default -&gt; new Token(TokenType.IDENT, s, startLine, startCol);</span>
+        };
+    }
+
+    private Token readPunct(char c, int startLine, int startCol) {
+<span class="fc bfc" id="L281" title="All 10 branches covered.">        TokenType t = switch (c) {</span>
+<span class="fc" id="L282">            case '{' -&gt; TokenType.LBRACE;</span>
+<span class="fc" id="L283">            case '}' -&gt; TokenType.RBRACE;</span>
+<span class="fc" id="L284">            case '(' -&gt; TokenType.LPAREN;</span>
+<span class="fc" id="L285">            case ')' -&gt; TokenType.RPAREN;</span>
+<span class="fc" id="L286">            case '&lt;' -&gt; TokenType.LANGLE;</span>
+<span class="fc" id="L287">            case '&gt;' -&gt; TokenType.RANGLE;</span>
+<span class="fc" id="L288">            case '=' -&gt; TokenType.EQUALS;</span>
+<span class="fc" id="L289">            case ';' -&gt; TokenType.SEMI;</span>
+<span class="fc" id="L290">            case ',' -&gt; TokenType.COMMA;</span>
+<span class="fc" id="L291">            default -&gt; null;</span>
+<span class="fc" id="L292">        };</span>
+<span class="fc bfc" id="L293" title="All 2 branches covered.">        if (t == null) {</span>
+<span class="fc" id="L294">            return null;</span>
+        }
+<span class="fc" id="L296">        advance();</span>
+<span class="fc" id="L297">        return new Token(t, String.valueOf(c), startLine, startCol);</span>
+    }
+
+    private static boolean isIdentStart(char c) {
+<span class="pc bpc" id="L301" title="2 of 8 branches missed.">        return Character.isLetter(c) || c == '_' || c == '.' || c == '$';</span>
+    }
+
+    private static boolean isIdentCont(char c) {
+<span class="pc bpc" id="L305" title="1 of 10 branches missed.">        return Character.isLetterOrDigit(c) || c == '_' || c == '.' || c == '$' || c == '-';</span>
+    }
+
+    private static boolean isOperatorIdent(char c) {
+<span class="fc bfc" id="L309" title="All 12 branches covered.">        return c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '?';</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

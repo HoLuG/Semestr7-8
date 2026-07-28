@@ -1,0 +1,7 @@
+$ENTRY Main;
+
+* Demonstrates s./t./e.-variables in one rule.
+* Input: A (B C) D E F  ->  result reorders the parts.
+Main {
+  s.First t.Second e.Rest = e.Rest t.Second s.First;
+}

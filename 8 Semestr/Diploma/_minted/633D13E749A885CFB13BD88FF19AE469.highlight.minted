@@ -1,0 +1,18 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@Override}
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{pushBack}\PYG{p}{(}\PYG{n}{T}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{isFull}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                              }\PYG{c+c1}{// (1)}
+\PYG{+w}{        }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{split}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{DeepDeque}\PYG{p}{.}\PYG{n+na}{splitForPushBack}\PYG{p}{(}\PYG{k}{this}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{);}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{DeepDeque}\PYG{p}{.}\PYG{n+na}{mkDeep}\PYG{p}{(}\PYG{+w}{                }\PYG{c+c1}{// (2)}
+\PYG{+w}{            }\PYG{n}{split}\PYG{p}{.}\PYG{n+na}{head}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{split}\PYG{p}{.}\PYG{n+na}{tail}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{CAPACITY}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{pushBackTight}\PYG{p}{(}\PYG{n}{x}\PYG{p}{);}\PYG{+w}{                    }\PYG{c+c1}{// (3)}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{n}{ShallowDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{pushBackTight}\PYG{p}{(}\PYG{n}{T}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{isFull}\PYG{p}{())}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{IllegalStateException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}overflow\PYGZdq{}}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (4)}
+\PYG{+w}{    }\PYG{n}{Object}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{nb}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{buf}\PYG{p}{.}\PYG{n+na}{clone}\PYG{p}{();}\PYG{+w}{                  }\PYG{c+c1}{// (5)}
+\PYG{+w}{    }\PYG{n}{nb}\PYG{o}{[}\PYG{n}{idx}\PYG{p}{(}\PYG{n}{sz}\PYG{p}{)}\PYG{o}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{;}\PYG{+w}{                           }\PYG{c+c1}{// (6)}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ShallowDeque}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{nb}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{head}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{sz}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (7)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

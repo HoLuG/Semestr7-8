@@ -1,0 +1,613 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{math}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{os}
+\PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{pathlib}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{Path}
+
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{numpy}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{np}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{pandas}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{pd}
+
+\PYG{n}{DIR} \PYG{o}{=} \PYG{n}{Path}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}.\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ALPHA} \PYG{o}{=} \PYG{l+m+mf}{0.05}
+\PYG{n}{RANDOM\PYGZus{}SEED} \PYG{o}{=} \PYG{l+m+mi}{42}
+
+
+\PYG{n}{TEST\PYGZus{}SIZE} \PYG{o}{=} \PYG{l+m+mf}{0.5}
+
+\PYG{n}{os}\PYG{o}{.}\PYG{n}{makedirs}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables\PYGZdq{}}\PYG{p}{,} \PYG{n}{exist\PYGZus{}ok}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+\PYG{n}{os}\PYG{o}{.}\PYG{n}{makedirs}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}images\PYGZdq{}}\PYG{p}{,} \PYG{n}{exist\PYGZus{}ok}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+
+
+\PYG{n}{\PYGZus{}df} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{read\PYGZus{}csv}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}diabetes.csv\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{Y\PYGZus{}NAME} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}Glucose\PYGZdq{}}
+\PYG{n}{DROP} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}Outcome\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}Insulin\PYGZdq{}}\PYG{p}{\PYGZcb{}}
+\PYG{n}{X\PYGZus{}NAMES} \PYG{o}{=} \PYG{p}{[}\PYG{n}{c} \PYG{k}{for} \PYG{n}{c} \PYG{o+ow}{in} \PYG{n}{\PYGZus{}df}\PYG{o}{.}\PYG{n}{columns} \PYG{k}{if} \PYG{n}{c} \PYG{o+ow}{not} \PYG{o+ow}{in} \PYG{n}{DROP} \PYG{o+ow}{and} \PYG{n}{c} \PYG{o}{!=} \PYG{n}{Y\PYGZus{}NAME}\PYG{p}{]}
+
+\PYG{n}{Y} \PYG{o}{=} \PYG{n}{\PYGZus{}df}\PYG{p}{[}\PYG{n}{Y\PYGZus{}NAME}\PYG{p}{]}\PYG{o}{.}\PYG{n}{astype}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)}
+\PYG{n}{X} \PYG{o}{=} \PYG{n}{\PYGZus{}df}\PYG{p}{[}\PYG{n}{X\PYGZus{}NAMES}\PYG{p}{]}\PYG{o}{.}\PYG{n}{astype}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)}
+
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Y =\PYGZdq{}}\PYG{p}{,} \PYG{n}{Y\PYGZus{}NAME}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}X columns (after dropping Outcome, Insulin):\PYGZdq{}}\PYG{p}{,} \PYG{n}{X\PYGZus{}NAMES}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}n =\PYGZdq{}}\PYG{p}{,} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{\PYGZus{}df}\PYG{p}{))}
+
+\PYG{n}{ZERO\PYGZus{}AS\PYGZus{}MISSING} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}BloodPressure\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}SkinThickness\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}BMI\PYGZdq{}}\PYG{p}{\PYGZcb{}}
+
+\PYG{n}{zero\PYGZus{}counts} \PYG{o}{=} \PYG{p}{(}\PYG{n}{X} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{)}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{()}\PYG{o}{.}\PYG{n}{sort\PYGZus{}values}\PYG{p}{(}\PYG{n}{ascending}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Zero counts in columns:\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{display}\PYG{p}{(}\PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{(\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}zeros\PYGZdq{}}\PYG{p}{:} \PYG{n}{zero\PYGZus{}counts}\PYG{p}{\PYGZcb{}))}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}ZERO\PYGZus{}AS\PYGZus{}MISSING used:\PYGZdq{}}\PYG{p}{,} \PYG{n+nb}{sorted}\PYG{p}{(}\PYG{n}{ZERO\PYGZus{}AS\PYGZus{}MISSING}\PYG{p}{))}
+
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{quantile\PYGZus{}outlier\PYGZus{}summary}\PYG{p}{(}\PYG{n}{df}\PYG{p}{:} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{,} \PYG{n}{ratio\PYGZus{}lo}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{ratio\PYGZus{}hi}\PYG{o}{=}\PYG{l+m+mf}{2.0}\PYG{p}{):}
+    \PYG{n}{rows} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{k}{for} \PYG{n}{c} \PYG{o+ow}{in} \PYG{n}{df}\PYG{o}{.}\PYG{n}{columns}\PYG{p}{:}
+        \PYG{n}{s} \PYG{o}{=} \PYG{n}{df}\PYG{p}{[}\PYG{n}{c}\PYG{p}{]}\PYG{o}{.}\PYG{n}{astype}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)}\PYG{o}{.}\PYG{n}{copy}\PYG{p}{()}
+
+        \PYG{k}{if} \PYG{n}{c} \PYG{o+ow}{in} \PYG{n}{ZERO\PYGZus{}AS\PYGZus{}MISSING}\PYG{p}{:}
+            \PYG{n}{s} \PYG{o}{=} \PYG{n}{s}\PYG{o}{.}\PYG{n}{replace}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{nan}\PYG{p}{)}
+        \PYG{n}{s} \PYG{o}{=} \PYG{n}{s}\PYG{o}{.}\PYG{n}{dropna}\PYG{p}{()}
+        \PYG{n}{q1} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{s}\PYG{p}{,} \PYG{l+m+mf}{0.25}\PYG{p}{))}
+        \PYG{n}{q2} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{s}\PYG{p}{,} \PYG{l+m+mf}{0.50}\PYG{p}{))}
+        \PYG{n}{q3} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{s}\PYG{p}{,} \PYG{l+m+mf}{0.75}\PYG{p}{))}
+        \PYG{n}{dL} \PYG{o}{=} \PYG{n}{q2} \PYG{o}{\PYGZhy{}} \PYG{n}{q1}
+        \PYG{n}{dR} \PYG{o}{=} \PYG{n}{q3} \PYG{o}{\PYGZhy{}} \PYG{n}{q2}
+        \PYG{n}{iqr} \PYG{o}{=} \PYG{n}{q3} \PYG{o}{\PYGZhy{}} \PYG{n}{q1}
+        \PYG{n}{ratio} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{dR} \PYG{o}{/} \PYG{n}{dL}\PYG{p}{)} \PYG{k}{if} \PYG{n}{dL} \PYG{o}{!=} \PYG{l+m+mi}{0} \PYG{k}{else} \PYG{n+nb}{float}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}inf\PYGZdq{}}\PYG{p}{)}
+        \PYG{n}{flag} \PYG{o}{=} \PYG{p}{(}\PYG{n}{ratio} \PYG{o}{\PYGZlt{}} \PYG{n}{ratio\PYGZus{}lo}\PYG{p}{)} \PYG{o+ow}{or} \PYG{p}{(}\PYG{n}{ratio} \PYG{o}{\PYGZgt{}} \PYG{n}{ratio\PYGZus{}hi}\PYG{p}{)}
+        \PYG{n}{rows}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}
+            \PYG{p}{\PYGZob{}}
+                \PYG{l+s+s2}{\PYGZdq{}feature\PYGZdq{}}\PYG{p}{:} \PYG{n}{c}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}Q1\PYGZdq{}}\PYG{p}{:} \PYG{n}{q1}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}Q2(median)\PYGZdq{}}\PYG{p}{:} \PYG{n}{q2}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}Q3\PYGZdq{}}\PYG{p}{:} \PYG{n}{q3}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}dL=Q2\PYGZhy{}Q1\PYGZdq{}}\PYG{p}{:} \PYG{n}{dL}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}dR=Q3\PYGZhy{}Q2\PYGZdq{}}\PYG{p}{:} \PYG{n}{dR}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}ratio=dR/dL\PYGZdq{}}\PYG{p}{:} \PYG{n}{ratio}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}IQR\PYGZdq{}}\PYG{p}{:} \PYG{n}{iqr}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}asymmetry\PYGZus{}flag\PYGZdq{}}\PYG{p}{:} \PYG{n}{flag}\PYG{p}{,}
+            \PYG{p}{\PYGZcb{}}
+        \PYG{p}{)}
+    \PYG{k}{return} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{(}\PYG{n}{rows}\PYG{p}{)}\PYG{o}{.}\PYG{n}{sort\PYGZus{}values}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}asymmetry\PYGZus{}flag\PYGZdq{}}\PYG{p}{,} \PYG{n}{ascending}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{)}
+
+\PYG{n}{outlier\PYGZus{}tbl} \PYG{o}{=} \PYG{n}{quantile\PYGZus{}outlier\PYGZus{}summary}\PYG{p}{(}\PYG{n}{X}\PYG{p}{)}
+\PYG{n}{display}\PYG{p}{(}\PYG{n}{outlier\PYGZus{}tbl}\PYG{p}{)}
+
+\PYG{n}{n\PYGZus{}flag} \PYG{o}{=} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{outlier\PYGZus{}tbl}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}asymmetry\PYGZus{}flag\PYGZdq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{())}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Asymmetry flags: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{n\PYGZus{}flag}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ / }\PYG{l+s+si}{\PYGZob{}}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{outlier\PYGZus{}tbl}\PYG{p}{)}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ features\PYGZdq{}}\PYG{p}{)}
+
+\PYG{n}{IQR\PYGZus{}MAX} \PYG{o}{=} \PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{k}{if} \PYG{n}{IQR\PYGZus{}MAX}\PYG{p}{:}
+    \PYG{n}{outlier\PYGZus{}tbl}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}IQR\PYGZus{}max\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{n}{outlier\PYGZus{}tbl}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}feature\PYGZdq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{map}\PYG{p}{(}\PYG{n}{IQR\PYGZus{}MAX}\PYG{p}{)}
+    \PYG{n}{outlier\PYGZus{}tbl}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}IQR\PYGZus{}exceeds\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{n}{outlier\PYGZus{}tbl}\PYG{o}{.}\PYG{n}{apply}\PYG{p}{(}
+        \PYG{k}{lambda} \PYG{n}{r}\PYG{p}{:} \PYG{p}{(}\PYG{n}{r}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}IQR\PYGZdq{}}\PYG{p}{]} \PYG{o}{\PYGZgt{}} \PYG{n}{r}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}IQR\PYGZus{}max\PYGZdq{}}\PYG{p}{])} \PYG{k}{if} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{notna}\PYG{p}{(}\PYG{n}{r}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}IQR\PYGZus{}max\PYGZdq{}}\PYG{p}{])} \PYG{k}{else} \PYG{k+kc}{False}\PYG{p}{,}
+        \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,}
+    \PYG{p}{)}
+    \PYG{n}{display}\PYG{p}{(}\PYG{n}{outlier\PYGZus{}tbl}\PYG{p}{[[}\PYG{l+s+s2}{\PYGZdq{}feature\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}IQR\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}IQR\PYGZus{}max\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}IQR\PYGZus{}exceeds\PYGZdq{}}\PYG{p}{]])}
+\PYG{k}{else}\PYG{p}{:}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}IQR\PYGZus{}MAX not set.\PYGZdq{}}\PYG{p}{)}
+
+
+    \PYG{n}{rho\PYGZus{}y} \PYG{o}{=} \PYG{n}{X}\PYG{o}{.}\PYG{n}{corrwith}\PYG{p}{(}\PYG{n}{Y}\PYG{p}{,} \PYG{n}{method}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}spearman\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{n} \PYG{o}{=} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{Y}\PYG{p}{)}
+\PYG{n}{K} \PYG{o}{=} \PYG{n}{n} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{2}  \PYG{c+c1}{\PYGZsh{} число степеней свободы}
+\PYG{n}{rho\PYGZus{}vals} \PYG{o}{=} \PYG{n}{rho\PYGZus{}y}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)}
+
+\PYG{c+c1}{\PYGZsh{} t\PYGZhy{}статистика значимости}
+\PYG{n}{t\PYGZus{}calc} \PYG{o}{=} \PYG{n}{rho\PYGZus{}vals} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{K} \PYG{o}{/} \PYG{n}{np}\PYG{o}{.}\PYG{n}{maximum}\PYG{p}{(}\PYG{l+m+mf}{1e\PYGZhy{}12}\PYG{p}{,} \PYG{l+m+mf}{1.0} \PYG{o}{\PYGZhy{}} \PYG{n}{rho\PYGZus{}vals}\PYG{o}{**}\PYG{l+m+mi}{2}\PYG{p}{))}
+
+\PYG{k}{try}\PYG{p}{:}
+    \PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{scipy.stats}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{t} \PYG{k}{as} \PYG{n}{student\PYGZus{}t}
+
+    \PYG{n}{t\PYGZus{}crit} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{student\PYGZus{}t}\PYG{o}{.}\PYG{n}{ppf}\PYG{p}{(}\PYG{l+m+mi}{1} \PYG{o}{\PYGZhy{}} \PYG{n}{ALPHA} \PYG{o}{/} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{K}\PYG{p}{))}
+\PYG{k}{except} \PYG{n+ne}{Exception}\PYG{p}{:}
+    \PYG{n}{t\PYGZus{}crit} \PYG{o}{=} \PYG{l+m+mf}{1.959964}
+
+\PYG{c+c1}{\PYGZsh{} Критическая точка по |rho\PYGZus{}S| через t\PYGZus{}crit:}
+\PYG{c+c1}{\PYGZsh{} rho\PYGZus{}crit = t\PYGZus{}crit / sqrt(t\PYGZus{}crit\PYGZca{}2 + K)}
+\PYG{n}{rho\PYGZus{}crit} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{t\PYGZus{}crit} \PYG{o}{/} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{t\PYGZus{}crit}\PYG{o}{**}\PYG{l+m+mi}{2} \PYG{o}{+} \PYG{n}{K}\PYG{p}{))}
+
+\PYG{n}{spearman\PYGZus{}signif} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{(}
+    \PYG{p}{\PYGZob{}}
+        \PYG{l+s+s2}{\PYGZdq{}Xj\PYGZdq{}}\PYG{p}{:} \PYG{n}{rho\PYGZus{}y}\PYG{o}{.}\PYG{n}{index}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}rho\PYGZus{}S\PYGZdq{}}\PYG{p}{:} \PYG{n}{rho\PYGZus{}vals}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}n\PYGZdq{}}\PYG{p}{:} \PYG{n}{n}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}K\PYGZdq{}}\PYG{p}{:} \PYG{n}{K}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}alpha\PYGZdq{}}\PYG{p}{:} \PYG{n}{ALPHA}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}t\PYGZus{}crit\PYGZdq{}}\PYG{p}{:} \PYG{n}{t\PYGZus{}crit}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}t\PYGZus{}calc\PYGZdq{}}\PYG{p}{:} \PYG{n}{t\PYGZus{}calc}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}rho\PYGZus{}crit\PYGZdq{}}\PYG{p}{:} \PYG{n}{rho\PYGZus{}crit}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}decision\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}
+            \PYG{l+s+s2}{\PYGZdq{}reject H0\PYGZdq{}} \PYG{k}{if} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{r}\PYG{p}{)} \PYG{o}{\PYGZgt{}=} \PYG{n}{rho\PYGZus{}crit} \PYG{k}{else} \PYG{l+s+s2}{\PYGZdq{}fail to reject H0\PYGZdq{}} \PYG{k}{for} \PYG{n}{r} \PYG{o+ow}{in} \PYG{n}{rho\PYGZus{}vals}
+        \PYG{p}{],}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{)}\PYG{o}{.}\PYG{n}{sort\PYGZus{}values}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}rho\PYGZus{}S\PYGZdq{}}\PYG{p}{,} \PYG{n}{key}\PYG{o}{=}\PYG{k}{lambda} \PYG{n}{s}\PYG{p}{:} \PYG{n}{s}\PYG{o}{.}\PYG{n}{abs}\PYG{p}{(),} \PYG{n}{ascending}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{)}
+
+\PYG{n}{spearman\PYGZus{}signif}
+
+\PYG{n}{spearman\PYGZus{}signif}\PYG{o}{.}\PYG{n}{to\PYGZus{}csv}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}spearman\PYGZus{}yx\PYGZus{}significance.csv\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{encoding}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}utf\PYGZhy{}8\PYGZhy{}sig\PYGZdq{}}\PYG{p}{)}
+\PYG{k}{try}\PYG{p}{:}
+    \PYG{n}{spearman\PYGZus{}signif\PYGZus{}round} \PYG{o}{=} \PYG{n}{spearman\PYGZus{}signif}\PYG{o}{.}\PYG{n}{copy}\PYG{p}{()}
+    \PYG{k}{for} \PYG{n}{c} \PYG{o+ow}{in} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}rho\PYGZus{}S\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}t\PYGZus{}calc\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}t\PYGZus{}crit\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}rho\PYGZus{}crit\PYGZdq{}}\PYG{p}{]:}
+        \PYG{n}{spearman\PYGZus{}signif\PYGZus{}round}\PYG{p}{[}\PYG{n}{c}\PYG{p}{]} \PYG{o}{=} \PYG{n}{spearman\PYGZus{}signif\PYGZus{}round}\PYG{p}{[}\PYG{n}{c}\PYG{p}{]}\PYG{o}{.}\PYG{n}{astype}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)}\PYG{o}{.}\PYG{n}{round}\PYG{p}{(}\PYG{l+m+mi}{6}\PYG{p}{)}
+    \PYG{n}{spearman\PYGZus{}signif\PYGZus{}round} \PYG{o}{=} \PYG{n}{spearman\PYGZus{}signif\PYGZus{}round}\PYG{o}{.}\PYG{n}{rename}\PYG{p}{(}
+        \PYG{n}{columns}\PYG{o}{=}\PYG{p}{\PYGZob{}}
+            \PYG{l+s+s2}{\PYGZdq{}rho\PYGZus{}S\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{rho\PYGZus{}S\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}t\PYGZus{}crit\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}t\PYGZus{}}\PYG{l+s+si}{\PYGZob{}crit\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}t\PYGZus{}calc\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}t\PYGZus{}}\PYG{l+s+si}{\PYGZob{}calc\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}rho\PYGZus{}crit\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{rho\PYGZus{}}\PYG{l+s+si}{\PYGZob{}crit\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}alpha\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{alpha\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}K\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}K\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+        \PYG{p}{\PYGZcb{}}
+    \PYG{p}{)}
+    \PYG{n}{spearman\PYGZus{}signif\PYGZus{}round}\PYG{o}{.}\PYG{n}{to\PYGZus{}latex}\PYG{p}{(}
+        \PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}spearman\PYGZus{}yx\PYGZus{}significance.tex\PYGZdq{}}\PYG{p}{,}
+        \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,}
+        \PYG{n}{escape}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,}
+    \PYG{p}{)}
+\PYG{k}{except} \PYG{n+ne}{Exception} \PYG{k}{as} \PYG{n}{e}\PYG{p}{:}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}LaTeX export failed:\PYGZdq{}}\PYG{p}{,} \PYG{n+nb}{repr}\PYG{p}{(}\PYG{n}{e}\PYG{p}{))}
+
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Saved tables/lab4\PYGZus{}spearman\PYGZus{}yx\PYGZus{}significance.csv and .tex\PYGZdq{}}\PYG{p}{)}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{train\PYGZus{}test\PYGZus{}split\PYGZus{}idx}\PYG{p}{(}\PYG{n}{n}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{test\PYGZus{}size}\PYG{p}{:} \PYG{n+nb}{float}\PYG{p}{,} \PYG{n}{seed}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{):}
+    \PYG{n}{rng} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{random}\PYG{o}{.}\PYG{n}{default\PYGZus{}rng}\PYG{p}{(}\PYG{n}{seed}\PYG{p}{)}
+    \PYG{n}{idx} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n}{n}\PYG{p}{)}
+    \PYG{n}{rng}\PYG{o}{.}\PYG{n}{shuffle}\PYG{p}{(}\PYG{n}{idx}\PYG{p}{)}
+    \PYG{n}{m} \PYG{o}{=} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n+nb}{round}\PYG{p}{(}\PYG{n}{n} \PYG{o}{*} \PYG{n}{test\PYGZus{}size}\PYG{p}{))}
+    \PYG{n}{test} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sort}\PYG{p}{(}\PYG{n}{idx}\PYG{p}{[:}\PYG{n}{m}\PYG{p}{])}
+    \PYG{n}{train} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sort}\PYG{p}{(}\PYG{n}{idx}\PYG{p}{[}\PYG{n}{m}\PYG{p}{:])}
+    \PYG{k}{return} \PYG{n}{train}\PYG{p}{,} \PYG{n}{test}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{median\PYGZus{}impute\PYGZus{}fit}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{):}
+    \PYG{n}{med} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{nanmedian}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+    \PYG{k}{return} \PYG{n}{med}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{median\PYGZus{}impute\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n}{med}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{):}
+    \PYG{n}{Xm2} \PYG{o}{=} \PYG{n}{Xm}\PYG{o}{.}\PYG{n}{copy}\PYG{p}{()}
+    \PYG{n}{mask} \PYG{o}{=} \PYG{o}{\PYGZti{}}\PYG{n}{np}\PYG{o}{.}\PYG{n}{isfinite}\PYG{p}{(}\PYG{n}{Xm2}\PYG{p}{)}
+    \PYG{k}{if} \PYG{n}{np}\PYG{o}{.}\PYG{n}{any}\PYG{p}{(}\PYG{n}{mask}\PYG{p}{):}
+        \PYG{n}{Xm2}\PYG{p}{[}\PYG{n}{mask}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{take}\PYG{p}{(}\PYG{n}{med}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{where}\PYG{p}{(}\PYG{n}{mask}\PYG{p}{)[}\PYG{l+m+mi}{1}\PYG{p}{])}
+    \PYG{k}{return} \PYG{n}{Xm2}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{iqr\PYGZus{}clip\PYGZus{}fit}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n}{k}\PYG{p}{:} \PYG{n+nb}{float} \PYG{o}{=} \PYG{l+m+mf}{1.5}\PYG{p}{):}
+    \PYG{n}{q1} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{,} \PYG{l+m+mf}{0.25}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+    \PYG{n}{q3} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{,} \PYG{l+m+mf}{0.75}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+    \PYG{n}{iqr} \PYG{o}{=} \PYG{n}{q3} \PYG{o}{\PYGZhy{}} \PYG{n}{q1}
+    \PYG{n}{lo} \PYG{o}{=} \PYG{n}{q1} \PYG{o}{\PYGZhy{}} \PYG{n}{k} \PYG{o}{*} \PYG{n}{iqr}
+    \PYG{n}{hi} \PYG{o}{=} \PYG{n}{q3} \PYG{o}{+} \PYG{n}{k} \PYG{o}{*} \PYG{n}{iqr}
+    \PYG{k}{return} \PYG{n}{lo}\PYG{p}{,} \PYG{n}{hi}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{iqr\PYGZus{}clip\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n}{lo}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n}{hi}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{):}
+    \PYG{k}{return} \PYG{n}{np}\PYG{o}{.}\PYG{n}{clip}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{,} \PYG{n}{lo}\PYG{p}{,} \PYG{n}{hi}\PYG{p}{)}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{robust\PYGZus{}scale\PYGZus{}fit}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{):}
+    \PYG{n}{center} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{median}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+    \PYG{n}{q1} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{,} \PYG{l+m+mf}{0.25}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+    \PYG{n}{q3} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{quantile}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{,} \PYG{l+m+mf}{0.75}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+    \PYG{n}{scale} \PYG{o}{=} \PYG{n}{q3} \PYG{o}{\PYGZhy{}} \PYG{n}{q1}
+    \PYG{n}{scale} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{where}\PYG{p}{(}\PYG{n}{scale} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{n}{scale}\PYG{p}{)}
+    \PYG{k}{return} \PYG{n}{center}\PYG{p}{,} \PYG{n}{scale}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{robust\PYGZus{}scale\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xm}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n}{center}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n}{scale}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{):}
+    \PYG{k}{return} \PYG{p}{(}\PYG{n}{Xm} \PYG{o}{\PYGZhy{}} \PYG{n}{center}\PYG{p}{)} \PYG{o}{/} \PYG{n}{scale}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{mom\PYGZus{}beta}\PYG{p}{(}\PYG{n}{Z}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n}{y}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n}{ridge}\PYG{p}{:} \PYG{n+nb}{float} \PYG{o}{=} \PYG{l+m+mf}{1e\PYGZhy{}10}\PYG{p}{):}
+    \PYG{n}{A} \PYG{o}{=} \PYG{n}{Z}\PYG{o}{.}\PYG{n}{T} \PYG{o}{@} \PYG{n}{Z} \PYG{o}{+} \PYG{n}{ridge} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{eye}\PYG{p}{(}\PYG{n}{Z}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{])}
+    \PYG{n}{b} \PYG{o}{=} \PYG{n}{Z}\PYG{o}{.}\PYG{n}{T} \PYG{o}{@} \PYG{n}{y}
+    \PYG{k}{return} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linalg}\PYG{o}{.}\PYG{n}{solve}\PYG{p}{(}\PYG{n}{A}\PYG{p}{,} \PYG{n}{b}\PYG{p}{)}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{metrics}\PYG{p}{(}\PYG{n}{y}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n}{yhat}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{):}
+    \PYG{n}{y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{asarray}\PYG{p}{(}\PYG{n}{y}\PYG{p}{,} \PYG{n+nb}{float}\PYG{p}{)}
+    \PYG{n}{yhat} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{asarray}\PYG{p}{(}\PYG{n}{yhat}\PYG{p}{,} \PYG{n+nb}{float}\PYG{p}{)}
+    \PYG{n}{mse} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{((}\PYG{n}{y} \PYG{o}{\PYGZhy{}} \PYG{n}{yhat}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2}\PYG{p}{))}
+    \PYG{n}{rmse} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{mse}\PYG{p}{))}
+    \PYG{n}{mae} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{abs}\PYG{p}{(}\PYG{n}{y} \PYG{o}{\PYGZhy{}} \PYG{n}{yhat}\PYG{p}{)))}
+    \PYG{n}{ss\PYGZus{}res} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{((}\PYG{n}{y} \PYG{o}{\PYGZhy{}} \PYG{n}{yhat}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2}\PYG{p}{))}
+    \PYG{n}{ss\PYGZus{}tot} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{((}\PYG{n}{y} \PYG{o}{\PYGZhy{}} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{y}\PYG{p}{)))} \PYG{o}{**} \PYG{l+m+mi}{2}\PYG{p}{))}
+    \PYG{n}{r2} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{l+m+mf}{1.0} \PYG{o}{\PYGZhy{}} \PYG{n}{ss\PYGZus{}res} \PYG{o}{/} \PYG{n}{ss\PYGZus{}tot}\PYG{p}{)} \PYG{k}{if} \PYG{n}{ss\PYGZus{}tot} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{k}{else} \PYG{n+nb}{float}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}nan\PYGZdq{}}\PYG{p}{)}
+    \PYG{k}{return} \PYG{n}{mse}\PYG{p}{,} \PYG{n}{rmse}\PYG{p}{,} \PYG{n}{mae}\PYG{p}{,} \PYG{n}{r2}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{adjusted\PYGZus{}r2}\PYG{p}{(}\PYG{n}{r2}\PYG{p}{:} \PYG{n+nb}{float}\PYG{p}{,} \PYG{n}{n}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{p}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{):}
+    \PYG{k}{if} \PYG{o+ow}{not} \PYG{n}{np}\PYG{o}{.}\PYG{n}{isfinite}\PYG{p}{(}\PYG{n}{r2}\PYG{p}{)} \PYG{o+ow}{or} \PYG{n}{n} \PYG{o}{\PYGZhy{}} \PYG{n}{p} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1} \PYG{o}{\PYGZlt{}=} \PYG{l+m+mi}{0}\PYG{p}{:}
+        \PYG{k}{return} \PYG{n+nb}{float}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}nan\PYGZdq{}}\PYG{p}{)}
+    \PYG{k}{return} \PYG{n+nb}{float}\PYG{p}{(}\PYG{l+m+mf}{1.0} \PYG{o}{\PYGZhy{}} \PYG{p}{(}\PYG{l+m+mf}{1.0} \PYG{o}{\PYGZhy{}} \PYG{n}{r2}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{n} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{)} \PYG{o}{/} \PYG{p}{(}\PYG{n}{n} \PYG{o}{\PYGZhy{}} \PYG{n}{p} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{))}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{vif\PYGZus{}from\PYGZus{}corr}\PYG{p}{(}\PYG{n}{corr}\PYG{p}{:} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{):}
+    \PYG{n}{R} \PYG{o}{=} \PYG{n}{corr}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)}
+    \PYG{n}{R} \PYG{o}{=} \PYG{n}{R} \PYG{o}{+} \PYG{l+m+mf}{1e\PYGZhy{}12} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{eye}\PYG{p}{(}\PYG{n}{R}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{])}
+    \PYG{n}{inv} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linalg}\PYG{o}{.}\PYG{n}{inv}\PYG{p}{(}\PYG{n}{R}\PYG{p}{)}
+    \PYG{k}{return} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{Series}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{diag}\PYG{p}{(}\PYG{n}{inv}\PYG{p}{),} \PYG{n}{index}\PYG{o}{=}\PYG{n}{corr}\PYG{o}{.}\PYG{n}{index}\PYG{p}{)}
+
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{greedy\PYGZus{}by\PYGZus{}rho\PYGZus{}and\PYGZus{}redundancy}\PYG{p}{(}
+    \PYG{n}{ordered\PYGZus{}feats}\PYG{p}{:} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n+nb}{str}\PYG{p}{],} \PYG{n}{abs\PYGZus{}rho\PYGZus{}xx}\PYG{p}{:} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{,} \PYG{n}{k}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n}{max\PYGZus{}pair\PYGZus{}abs\PYGZus{}rho}\PYG{p}{:} \PYG{n+nb}{float}
+\PYG{p}{):}
+    \PYG{n}{selected}\PYG{p}{:} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n+nb}{str}\PYG{p}{]} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{k}{for} \PYG{n}{f} \PYG{o+ow}{in} \PYG{n}{ordered\PYGZus{}feats}\PYG{p}{:}
+        \PYG{k}{if} \PYG{o+ow}{not} \PYG{n}{selected}\PYG{p}{:}
+            \PYG{n}{selected}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{f}\PYG{p}{)}
+            \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{selected}\PYG{p}{)} \PYG{o}{\PYGZgt{}=} \PYG{n}{k}\PYG{p}{:}
+                \PYG{k}{break}
+            \PYG{k}{continue}
+        \PYG{n}{mx} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{abs\PYGZus{}rho\PYGZus{}xx}\PYG{o}{.}\PYG{n}{loc}\PYG{p}{[}\PYG{n}{f}\PYG{p}{,} \PYG{n}{selected}\PYG{p}{]}\PYG{o}{.}\PYG{n}{max}\PYG{p}{())}
+        \PYG{k}{if} \PYG{n}{mx} \PYG{o}{\PYGZlt{}=} \PYG{n}{max\PYGZus{}pair\PYGZus{}abs\PYGZus{}rho}\PYG{p}{:}
+            \PYG{n}{selected}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{f}\PYG{p}{)}
+            \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{selected}\PYG{p}{)} \PYG{o}{\PYGZgt{}=} \PYG{n}{k}\PYG{p}{:}
+                \PYG{k}{break}
+    \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{selected}\PYG{p}{)} \PYG{o}{\PYGZlt{}} \PYG{n}{k}\PYG{p}{:}
+        \PYG{k}{for} \PYG{n}{f} \PYG{o+ow}{in} \PYG{n}{ordered\PYGZus{}feats}\PYG{p}{:}
+            \PYG{k}{if} \PYG{n}{f} \PYG{o+ow}{not} \PYG{o+ow}{in} \PYG{n}{selected}\PYG{p}{:}
+                \PYG{n}{selected}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{f}\PYG{p}{)}
+            \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{selected}\PYG{p}{)} \PYG{o}{\PYGZgt{}=} \PYG{n}{k}\PYG{p}{:}
+                \PYG{k}{break}
+    \PYG{k}{return} \PYG{n}{selected}
+
+
+\PYG{n}{n} \PYG{o}{=} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{Y}\PYG{p}{)}
+\PYG{n}{tr\PYGZus{}idx}\PYG{p}{,} \PYG{n}{te\PYGZus{}idx} \PYG{o}{=} \PYG{n}{train\PYGZus{}test\PYGZus{}split\PYGZus{}idx}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{TEST\PYGZus{}SIZE}\PYG{p}{,} \PYG{n}{RANDOM\PYGZus{}SEED}\PYG{p}{)}
+\PYG{n}{abs\PYGZus{}rho\PYGZus{}xx} \PYG{o}{=} \PYG{n}{X}\PYG{o}{.}\PYG{n}{corr}\PYG{p}{(}\PYG{n}{method}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}spearman\PYGZdq{}}\PYG{p}{)}\PYG{o}{.}\PYG{n}{abs}\PYG{p}{()}
+\PYG{n}{ordered} \PYG{o}{=} \PYG{n}{rho\PYGZus{}y}\PYG{o}{.}\PYG{n}{abs}\PYG{p}{()}\PYG{o}{.}\PYG{n}{sort\PYGZus{}values}\PYG{p}{(}\PYG{n}{ascending}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{)}\PYG{o}{.}\PYG{n}{index}\PYG{o}{.}\PYG{n}{tolist}\PYG{p}{()}
+
+\PYG{n}{rows} \PYG{o}{=} \PYG{p}{[]}
+\PYG{n}{solutions} \PYG{o}{=} \PYG{p}{\PYGZob{}\PYGZcb{}}
+
+\PYG{k}{for} \PYG{n}{p} \PYG{o+ow}{in} \PYG{p}{[}\PYG{l+m+mi}{4}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{]:}
+    \PYG{n}{best} \PYG{o}{=} \PYG{k+kc}{None}
+    \PYG{n}{best\PYGZus{}key} \PYG{o}{=} \PYG{k+kc}{None}
+    \PYG{k}{for} \PYG{n}{thr} \PYG{o+ow}{in} \PYG{p}{[}\PYG{l+m+mf}{0.40}\PYG{p}{,} \PYG{l+m+mf}{0.50}\PYG{p}{,} \PYG{l+m+mf}{0.60}\PYG{p}{,} \PYG{l+m+mf}{0.70}\PYG{p}{,} \PYG{l+m+mf}{0.80}\PYG{p}{,} \PYG{l+m+mf}{1.00}\PYG{p}{]:}
+        \PYG{n}{sel} \PYG{o}{=} \PYG{n}{greedy\PYGZus{}by\PYGZus{}rho\PYGZus{}and\PYGZus{}redundancy}\PYG{p}{(}\PYG{n}{ordered}\PYG{p}{,} \PYG{n}{abs\PYGZus{}rho\PYGZus{}xx}\PYG{p}{,} \PYG{n}{k}\PYG{o}{=}\PYG{n}{p}\PYG{p}{,} \PYG{n}{max\PYGZus{}pair\PYGZus{}abs\PYGZus{}rho}\PYG{o}{=}\PYG{n}{thr}\PYG{p}{)}
+
+        \PYG{n}{Xm} \PYG{o}{=} \PYG{n}{X}\PYG{p}{[}\PYG{n}{sel}\PYG{p}{]}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)}
+        \PYG{n}{Xtr}\PYG{p}{,} \PYG{n}{Xte} \PYG{o}{=} \PYG{n}{Xm}\PYG{p}{[}\PYG{n}{tr\PYGZus{}idx}\PYG{p}{],} \PYG{n}{Xm}\PYG{p}{[}\PYG{n}{te\PYGZus{}idx}\PYG{p}{]}
+        \PYG{n}{ytr}\PYG{p}{,} \PYG{n}{yte} \PYG{o}{=} \PYG{n}{Y}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)[}\PYG{n}{tr\PYGZus{}idx}\PYG{p}{],} \PYG{n}{Y}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)[}\PYG{n}{te\PYGZus{}idx}\PYG{p}{]}
+
+        \PYG{n}{ZERO\PYGZus{}AS\PYGZus{}MISSING} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}BloodPressure\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}SkinThickness\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}BMI\PYGZdq{}}\PYG{p}{\PYGZcb{}}
+        \PYG{n}{Xtr0} \PYG{o}{=} \PYG{n}{Xtr}\PYG{o}{.}\PYG{n}{copy}\PYG{p}{()}
+        \PYG{n}{Xte0} \PYG{o}{=} \PYG{n}{Xte}\PYG{o}{.}\PYG{n}{copy}\PYG{p}{()}
+        \PYG{k}{for} \PYG{n}{j}\PYG{p}{,} \PYG{n}{name} \PYG{o+ow}{in} \PYG{n+nb}{enumerate}\PYG{p}{(}\PYG{n}{sel}\PYG{p}{):}
+            \PYG{k}{if} \PYG{n}{name} \PYG{o+ow}{in} \PYG{n}{ZERO\PYGZus{}AS\PYGZus{}MISSING}\PYG{p}{:}
+                \PYG{n}{Xtr0}\PYG{p}{[}\PYG{n}{Xtr0}\PYG{p}{[:,} \PYG{n}{j}\PYG{p}{]} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{j}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{nan}
+                \PYG{n}{Xte0}\PYG{p}{[}\PYG{n}{Xte0}\PYG{p}{[:,} \PYG{n}{j}\PYG{p}{]} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{j}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{nan}
+
+        \PYG{n}{med} \PYG{o}{=} \PYG{n}{median\PYGZus{}impute\PYGZus{}fit}\PYG{p}{(}\PYG{n}{Xtr0}\PYG{p}{)}
+        \PYG{n}{Xtr1} \PYG{o}{=} \PYG{n}{median\PYGZus{}impute\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xtr0}\PYG{p}{,} \PYG{n}{med}\PYG{p}{)}
+        \PYG{n}{Xte1} \PYG{o}{=} \PYG{n}{median\PYGZus{}impute\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xte0}\PYG{p}{,} \PYG{n}{med}\PYG{p}{)}
+
+        \PYG{n}{center}\PYG{p}{,} \PYG{n}{scale} \PYG{o}{=} \PYG{n}{robust\PYGZus{}scale\PYGZus{}fit}\PYG{p}{(}\PYG{n}{Xtr1}\PYG{p}{)}
+        \PYG{n}{Xtr\PYGZus{}s} \PYG{o}{=} \PYG{n}{robust\PYGZus{}scale\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xtr1}\PYG{p}{,} \PYG{n}{center}\PYG{p}{,} \PYG{n}{scale}\PYG{p}{)}
+        \PYG{n}{Xte\PYGZus{}s} \PYG{o}{=} \PYG{n}{robust\PYGZus{}scale\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xte1}\PYG{p}{,} \PYG{n}{center}\PYG{p}{,} \PYG{n}{scale}\PYG{p}{)}
+
+        \PYG{n}{Ztr} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{column\PYGZus{}stack}\PYG{p}{([}\PYG{n}{np}\PYG{o}{.}\PYG{n}{ones}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{tr\PYGZus{}idx}\PYG{p}{)),} \PYG{n}{Xtr\PYGZus{}s}\PYG{p}{])}
+        \PYG{n}{Zte} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{column\PYGZus{}stack}\PYG{p}{([}\PYG{n}{np}\PYG{o}{.}\PYG{n}{ones}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{te\PYGZus{}idx}\PYG{p}{)),} \PYG{n}{Xte\PYGZus{}s}\PYG{p}{])}
+
+        \PYG{n}{beta} \PYG{o}{=} \PYG{n}{mom\PYGZus{}beta}\PYG{p}{(}\PYG{n}{Ztr}\PYG{p}{,} \PYG{n}{ytr}\PYG{p}{)}
+        \PYG{n}{yhat\PYGZus{}tr} \PYG{o}{=} \PYG{n}{Ztr} \PYG{o}{@} \PYG{n}{beta}
+        \PYG{n}{yhat\PYGZus{}te} \PYG{o}{=} \PYG{n}{Zte} \PYG{o}{@} \PYG{n}{beta}
+
+        \PYG{n}{mse\PYGZus{}tr}\PYG{p}{,} \PYG{n}{rmse\PYGZus{}tr}\PYG{p}{,} \PYG{n}{mae\PYGZus{}tr}\PYG{p}{,} \PYG{n}{r2\PYGZus{}tr} \PYG{o}{=} \PYG{n}{metrics}\PYG{p}{(}\PYG{n}{ytr}\PYG{p}{,} \PYG{n}{yhat\PYGZus{}tr}\PYG{p}{)}
+        \PYG{n}{mse\PYGZus{}te}\PYG{p}{,} \PYG{n}{rmse\PYGZus{}te}\PYG{p}{,} \PYG{n}{mae\PYGZus{}te}\PYG{p}{,} \PYG{n}{r2\PYGZus{}te} \PYG{o}{=} \PYG{n}{metrics}\PYG{p}{(}\PYG{n}{yte}\PYG{p}{,} \PYG{n}{yhat\PYGZus{}te}\PYG{p}{)}
+        \PYG{n}{adj\PYGZus{}te} \PYG{o}{=} \PYG{n}{adjusted\PYGZus{}r2}\PYG{p}{(}\PYG{n}{r2\PYGZus{}te}\PYG{p}{,} \PYG{n}{n}\PYG{o}{=}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{te\PYGZus{}idx}\PYG{p}{),} \PYG{n}{p}\PYG{o}{=}\PYG{n}{p}\PYG{p}{)}
+
+        \PYG{n}{cond} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{linalg}\PYG{o}{.}\PYG{n}{cond}\PYG{p}{(}\PYG{n}{Ztr}\PYG{o}{.}\PYG{n}{T} \PYG{o}{@} \PYG{n}{Ztr}\PYG{p}{))}
+        \PYG{n}{vif} \PYG{o}{=} \PYG{n}{vif\PYGZus{}from\PYGZus{}corr}\PYG{p}{(}\PYG{n}{X}\PYG{p}{[}\PYG{n}{sel}\PYG{p}{]}\PYG{o}{.}\PYG{n}{corr}\PYG{p}{()}\PYG{o}{.}\PYG{n}{fillna}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{))}
+        \PYG{n}{vif\PYGZus{}max} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{vif}\PYG{o}{.}\PYG{n}{max}\PYG{p}{())}
+
+        \PYG{n}{cand} \PYG{o}{=} \PYG{p}{\PYGZob{}}
+            \PYG{l+s+s2}{\PYGZdq{}p\PYGZdq{}}\PYG{p}{:} \PYG{n}{p}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}thr\PYGZdq{}}\PYG{p}{:} \PYG{n}{thr}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}selected\PYGZdq{}}\PYG{p}{:} \PYG{n}{sel}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}mse\PYGZus{}test\PYGZdq{}}\PYG{p}{:} \PYG{n}{mse\PYGZus{}te}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}rmse\PYGZus{}test\PYGZdq{}}\PYG{p}{:} \PYG{n}{rmse\PYGZus{}te}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}mae\PYGZus{}test\PYGZdq{}}\PYG{p}{:} \PYG{n}{mae\PYGZus{}te}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}r2\PYGZus{}test\PYGZdq{}}\PYG{p}{:} \PYG{n}{r2\PYGZus{}te}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}adj\PYGZus{}r2\PYGZus{}test\PYGZdq{}}\PYG{p}{:} \PYG{n}{adj\PYGZus{}te}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}cond\PYGZus{}ZtZ\PYGZdq{}}\PYG{p}{:} \PYG{n}{cond}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}vif\PYGZus{}max\PYGZdq{}}\PYG{p}{:} \PYG{n}{vif\PYGZus{}max}\PYG{p}{,}
+        \PYG{p}{\PYGZcb{}}
+
+        \PYG{k}{if} \PYG{n}{best} \PYG{o+ow}{is} \PYG{k+kc}{None} \PYG{o+ow}{or} \PYG{n}{cand}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}mse\PYGZus{}test\PYGZdq{}}\PYG{p}{]} \PYG{o}{\PYGZlt{}} \PYG{n}{best}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}mse\PYGZus{}test\PYGZdq{}}\PYG{p}{]:}
+            \PYG{n}{best} \PYG{o}{=} \PYG{n}{cand}
+            \PYG{n}{best\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{p}\PYG{p}{,} \PYG{n}{thr}\PYG{p}{)}
+            \PYG{n}{solutions}\PYG{p}{[}\PYG{n}{best\PYGZus{}key}\PYG{p}{]} \PYG{o}{=} \PYG{p}{\PYGZob{}}
+                \PYG{o}{**}\PYG{n}{cand}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}beta\PYGZdq{}}\PYG{p}{:} \PYG{n}{beta}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}med\PYGZdq{}}\PYG{p}{:} \PYG{n}{med}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}center\PYGZdq{}}\PYG{p}{:} \PYG{n}{center}\PYG{p}{,}
+                \PYG{l+s+s2}{\PYGZdq{}scale\PYGZdq{}}\PYG{p}{:} \PYG{n}{scale}\PYG{p}{,}
+            \PYG{p}{\PYGZcb{}}
+    \PYG{n}{rows}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{best}\PYG{p}{)}
+\PYG{n}{sweep\PYGZus{}df} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{(}\PYG{n}{rows}\PYG{p}{)}
+
+\PYG{n}{best\PYGZus{}mse} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{sweep\PYGZus{}df}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}mse\PYGZus{}test\PYGZdq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{min}\PYG{p}{())}
+\PYG{n}{within} \PYG{o}{=} \PYG{n}{sweep\PYGZus{}df}\PYG{p}{[}\PYG{n}{sweep\PYGZus{}df}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}mse\PYGZus{}test\PYGZdq{}}\PYG{p}{]} \PYG{o}{\PYGZlt{}=} \PYG{l+m+mf}{1.02} \PYG{o}{*} \PYG{n}{best\PYGZus{}mse}\PYG{p}{]}\PYG{o}{.}\PYG{n}{sort\PYGZus{}values}\PYG{p}{([}\PYG{l+s+s2}{\PYGZdq{}p\PYGZdq{}}\PYG{p}{])}
+\PYG{n}{final\PYGZus{}row} \PYG{o}{=} \PYG{n}{within}\PYG{o}{.}\PYG{n}{iloc}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}
+\PYG{n}{final\PYGZus{}p} \PYG{o}{=} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{final\PYGZus{}row}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}p\PYGZdq{}}\PYG{p}{])}
+\PYG{n}{final\PYGZus{}thr} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{final\PYGZus{}row}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}thr\PYGZdq{}}\PYG{p}{])}
+\PYG{n}{final\PYGZus{}selected} \PYG{o}{=} \PYG{n+nb}{list}\PYG{p}{(}\PYG{n}{final\PYGZus{}row}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}selected\PYGZdq{}}\PYG{p}{])}
+
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Sweep (best thr per p):\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{display}\PYG{p}{(}\PYG{n}{sweep\PYGZus{}df}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{Final choice by parsimony:\PYGZdq{}}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}p=\PYGZdq{}}\PYG{p}{,} \PYG{n}{final\PYGZus{}p}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}thr=\PYGZdq{}}\PYG{p}{,} \PYG{n}{final\PYGZus{}thr}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}selected:\PYGZdq{}}\PYG{p}{,} \PYG{n}{final\PYGZus{}selected}\PYG{p}{)}
+
+
+\PYG{n}{sweep\PYGZus{}df}\PYG{o}{.}\PYG{n}{to\PYGZus{}csv}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}feature\PYGZus{}sweep\PYGZus{}p4\PYGZus{}6.csv\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{encoding}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}utf\PYGZhy{}8\PYGZhy{}sig\PYGZdq{}}\PYG{p}{)}
+\PYG{k}{try}\PYG{p}{:}
+    \PYG{n}{sweep\PYGZus{}tex} \PYG{o}{=} \PYG{n}{sweep\PYGZus{}df}\PYG{o}{.}\PYG{n}{copy}\PYG{p}{()}
+    \PYG{n}{sweep\PYGZus{}tex} \PYG{o}{=} \PYG{n}{sweep\PYGZus{}tex}\PYG{o}{.}\PYG{n}{rename}\PYG{p}{(}
+        \PYG{n}{columns}\PYG{o}{=}\PYG{p}{\PYGZob{}}
+            \PYG{l+s+s2}{\PYGZdq{}mse\PYGZus{}test\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{mathrm}\PYG{l+s+si}{\PYGZob{}MSE\PYGZcb{}}\PYG{l+s+s2}{\PYGZus{}}\PYG{l+s+si}{\PYGZob{}test\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}rmse\PYGZus{}test\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{mathrm}\PYG{l+s+si}{\PYGZob{}RMSE\PYGZcb{}}\PYG{l+s+s2}{\PYGZus{}}\PYG{l+s+si}{\PYGZob{}test\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}mae\PYGZus{}test\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{mathrm}\PYG{l+s+si}{\PYGZob{}MAE\PYGZcb{}}\PYG{l+s+s2}{\PYGZus{}}\PYG{l+s+si}{\PYGZob{}test\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}r2\PYGZus{}test\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}R\PYGZca{}2\PYGZus{}}\PYG{l+s+si}{\PYGZob{}test\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}adj\PYGZus{}r2\PYGZus{}test\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{overline}\PYG{l+s+si}{\PYGZob{}R\PYGZcb{}}\PYG{l+s+s2}{\PYGZca{}2\PYGZus{}}\PYG{l+s+si}{\PYGZob{}test\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}cond\PYGZus{}ZtZ\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{mathrm}\PYG{l+s+si}{\PYGZob{}cond\PYGZcb{}}\PYG{l+s+s2}{(Z\PYGZca{}T Z)\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}vif\PYGZus{}max\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{max}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{,VIF\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+        \PYG{p}{\PYGZcb{}}
+    \PYG{p}{)}
+    \PYG{n}{sweep\PYGZus{}tex}\PYG{o}{.}\PYG{n}{to\PYGZus{}latex}\PYG{p}{(}
+        \PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}feature\PYGZus{}sweep\PYGZus{}p4\PYGZus{}6.tex\PYGZdq{}}\PYG{p}{,}
+        \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,}
+        \PYG{n}{escape}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,}
+    \PYG{p}{)}
+\PYG{k}{except} \PYG{n+ne}{Exception}\PYG{p}{:}
+    \PYG{k}{pass}
+
+\PYG{n}{final\PYGZus{}choice} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{(\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}selected\PYGZdq{}}\PYG{p}{:} \PYG{n}{final\PYGZus{}selected}\PYG{p}{\PYGZcb{})}
+\PYG{n}{final\PYGZus{}choice}\PYG{o}{.}\PYG{n}{to\PYGZus{}csv}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}final\PYGZus{}selected\PYGZus{}features.csv\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{encoding}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}utf\PYGZhy{}8\PYGZhy{}sig\PYGZdq{}}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Saved tables/lab4\PYGZus{}feature\PYGZus{}sweep\PYGZus{}p4\PYGZus{}6.csv and lab4\PYGZus{}final\PYGZus{}selected\PYGZus{}features.csv\PYGZdq{}}\PYG{p}{)}
+
+\PYG{n}{sol} \PYG{o}{=} \PYG{n}{solutions}\PYG{p}{[(}\PYG{n}{final\PYGZus{}p}\PYG{p}{,} \PYG{n}{final\PYGZus{}thr}\PYG{p}{)]}
+
+\PYG{n}{Xm} \PYG{o}{=} \PYG{n}{X}\PYG{p}{[}\PYG{n}{final\PYGZus{}selected}\PYG{p}{]}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)}
+\PYG{n}{Xtr}\PYG{p}{,} \PYG{n}{Xte} \PYG{o}{=} \PYG{n}{Xm}\PYG{p}{[}\PYG{n}{tr\PYGZus{}idx}\PYG{p}{],} \PYG{n}{Xm}\PYG{p}{[}\PYG{n}{te\PYGZus{}idx}\PYG{p}{]}
+\PYG{n}{ytr}\PYG{p}{,} \PYG{n}{yte} \PYG{o}{=} \PYG{n}{Y}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)[}\PYG{n}{tr\PYGZus{}idx}\PYG{p}{],} \PYG{n}{Y}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{(}\PYG{n+nb}{float}\PYG{p}{)[}\PYG{n}{te\PYGZus{}idx}\PYG{p}{]}
+
+\PYG{n}{ZERO\PYGZus{}AS\PYGZus{}MISSING} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}BloodPressure\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}SkinThickness\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}BMI\PYGZdq{}}\PYG{p}{\PYGZcb{}}
+\PYG{n}{Xtr0} \PYG{o}{=} \PYG{n}{Xtr}\PYG{o}{.}\PYG{n}{copy}\PYG{p}{()}
+\PYG{n}{Xte0} \PYG{o}{=} \PYG{n}{Xte}\PYG{o}{.}\PYG{n}{copy}\PYG{p}{()}
+\PYG{k}{for} \PYG{n}{j}\PYG{p}{,} \PYG{n}{name} \PYG{o+ow}{in} \PYG{n+nb}{enumerate}\PYG{p}{(}\PYG{n}{final\PYGZus{}selected}\PYG{p}{):}
+    \PYG{k}{if} \PYG{n}{name} \PYG{o+ow}{in} \PYG{n}{ZERO\PYGZus{}AS\PYGZus{}MISSING}\PYG{p}{:}
+        \PYG{n}{Xtr0}\PYG{p}{[}\PYG{n}{Xtr0}\PYG{p}{[:,} \PYG{n}{j}\PYG{p}{]} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{j}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{nan}
+        \PYG{n}{Xte0}\PYG{p}{[}\PYG{n}{Xte0}\PYG{p}{[:,} \PYG{n}{j}\PYG{p}{]} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{j}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{nan}
+
+\PYG{n}{med} \PYG{o}{=} \PYG{n}{sol}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}med\PYGZdq{}}\PYG{p}{]}
+\PYG{n}{Xtr1} \PYG{o}{=} \PYG{n}{median\PYGZus{}impute\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xtr0}\PYG{p}{,} \PYG{n}{med}\PYG{p}{)}
+\PYG{n}{Xte1} \PYG{o}{=} \PYG{n}{median\PYGZus{}impute\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xte0}\PYG{p}{,} \PYG{n}{med}\PYG{p}{)}
+
+\PYG{n}{center}\PYG{p}{,} \PYG{n}{scale} \PYG{o}{=} \PYG{n}{sol}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}center\PYGZdq{}}\PYG{p}{],} \PYG{n}{sol}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}scale\PYGZdq{}}\PYG{p}{]}
+\PYG{n}{Xtr\PYGZus{}s} \PYG{o}{=} \PYG{n}{robust\PYGZus{}scale\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xtr1}\PYG{p}{,} \PYG{n}{center}\PYG{p}{,} \PYG{n}{scale}\PYG{p}{)}
+\PYG{n}{Xte\PYGZus{}s} \PYG{o}{=} \PYG{n}{robust\PYGZus{}scale\PYGZus{}apply}\PYG{p}{(}\PYG{n}{Xte1}\PYG{p}{,} \PYG{n}{center}\PYG{p}{,} \PYG{n}{scale}\PYG{p}{)}
+
+\PYG{n}{Ztr} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{column\PYGZus{}stack}\PYG{p}{([}\PYG{n}{np}\PYG{o}{.}\PYG{n}{ones}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{tr\PYGZus{}idx}\PYG{p}{)),} \PYG{n}{Xtr\PYGZus{}s}\PYG{p}{])}
+\PYG{n}{Zte} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{column\PYGZus{}stack}\PYG{p}{([}\PYG{n}{np}\PYG{o}{.}\PYG{n}{ones}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{te\PYGZus{}idx}\PYG{p}{)),} \PYG{n}{Xte\PYGZus{}s}\PYG{p}{])}
+
+\PYG{n}{beta} \PYG{o}{=} \PYG{n}{sol}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}beta\PYGZdq{}}\PYG{p}{]}
+\PYG{n}{yhat\PYGZus{}tr} \PYG{o}{=} \PYG{n}{Ztr} \PYG{o}{@} \PYG{n}{beta}
+\PYG{n}{yhat\PYGZus{}te} \PYG{o}{=} \PYG{n}{Zte} \PYG{o}{@} \PYG{n}{beta}
+
+\PYG{n}{mse\PYGZus{}tr}\PYG{p}{,} \PYG{n}{rmse\PYGZus{}tr}\PYG{p}{,} \PYG{n}{mae\PYGZus{}tr}\PYG{p}{,} \PYG{n}{r2\PYGZus{}tr} \PYG{o}{=} \PYG{n}{metrics}\PYG{p}{(}\PYG{n}{ytr}\PYG{p}{,} \PYG{n}{yhat\PYGZus{}tr}\PYG{p}{)}
+\PYG{n}{mse\PYGZus{}te}\PYG{p}{,} \PYG{n}{rmse\PYGZus{}te}\PYG{p}{,} \PYG{n}{mae\PYGZus{}te}\PYG{p}{,} \PYG{n}{r2\PYGZus{}te} \PYG{o}{=} \PYG{n}{metrics}\PYG{p}{(}\PYG{n}{yte}\PYG{p}{,} \PYG{n}{yhat\PYGZus{}te}\PYG{p}{)}
+\PYG{n}{adj\PYGZus{}te} \PYG{o}{=} \PYG{n}{adjusted\PYGZus{}r2}\PYG{p}{(}\PYG{n}{r2\PYGZus{}te}\PYG{p}{,} \PYG{n}{n}\PYG{o}{=}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{te\PYGZus{}idx}\PYG{p}{),} \PYG{n}{p}\PYG{o}{=}\PYG{n}{final\PYGZus{}p}\PYG{p}{)}
+
+\PYG{n}{coef\PYGZus{}table} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{(}
+    \PYG{p}{\PYGZob{}}
+        \PYG{l+s+s2}{\PYGZdq{}term\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}Intercept\PYGZdq{}}\PYG{p}{]} \PYG{o}{+} \PYG{n}{final\PYGZus{}selected}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}beta\PYGZdq{}}\PYG{p}{:} \PYG{n}{beta}\PYG{p}{,}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{)}
+
+\PYG{n}{display}\PYG{p}{(}\PYG{n}{coef\PYGZus{}table}\PYG{p}{)}
+
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}train: MSE=}\PYG{l+s+si}{\PYGZpc{}.6f}\PYG{l+s+s2}{ RMSE=}\PYG{l+s+si}{\PYGZpc{}.6f}\PYG{l+s+s2}{ MAE=}\PYG{l+s+si}{\PYGZpc{}.6f}\PYG{l+s+s2}{ R2=}\PYG{l+s+si}{\PYGZpc{}.6f}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZpc{}} \PYG{p}{(}\PYG{n}{mse\PYGZus{}tr}\PYG{p}{,} \PYG{n}{rmse\PYGZus{}tr}\PYG{p}{,} \PYG{n}{mae\PYGZus{}tr}\PYG{p}{,} \PYG{n}{r2\PYGZus{}tr}\PYG{p}{))}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}test : MSE=}\PYG{l+s+si}{\PYGZpc{}.6f}\PYG{l+s+s2}{ RMSE=}\PYG{l+s+si}{\PYGZpc{}.6f}\PYG{l+s+s2}{ MAE=}\PYG{l+s+si}{\PYGZpc{}.6f}\PYG{l+s+s2}{ R2=}\PYG{l+s+si}{\PYGZpc{}.6f}\PYG{l+s+s2}{ adjR2=}\PYG{l+s+si}{\PYGZpc{}.6f}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{\PYGZpc{}} \PYG{p}{(}\PYG{n}{mse\PYGZus{}te}\PYG{p}{,} \PYG{n}{rmse\PYGZus{}te}\PYG{p}{,} \PYG{n}{mae\PYGZus{}te}\PYG{p}{,} \PYG{n}{r2\PYGZus{}te}\PYG{p}{,} \PYG{n}{adj\PYGZus{}te}\PYG{p}{))}
+
+\PYG{n}{coef\PYGZus{}table}\PYG{o}{.}\PYG{n}{to\PYGZus{}csv}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}final\PYGZus{}regression\PYGZus{}coeffs.csv\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{encoding}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}utf\PYGZhy{}8\PYGZhy{}sig\PYGZdq{}}\PYG{p}{)}
+\PYG{k}{try}\PYG{p}{:}
+    \PYG{n}{coef\PYGZus{}table}\PYG{o}{.}\PYG{n}{to\PYGZus{}latex}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}final\PYGZus{}regression\PYGZus{}coeffs.tex\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{)}
+\PYG{k}{except} \PYG{n+ne}{Exception}\PYG{p}{:}
+    \PYG{k}{pass}
+
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Saved tables/lab4\PYGZus{}final\PYGZus{}regression\PYGZus{}coeffs.csv\PYGZdq{}}\PYG{p}{)}
+
+\PYG{n}{terms} \PYG{o}{=} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}Intercept\PYGZdq{}}\PYG{p}{]} \PYG{o}{+} \PYG{n}{final\PYGZus{}selected}
+\PYG{n}{beta\PYGZus{}map} \PYG{o}{=} \PYG{n+nb}{dict}\PYG{p}{(}\PYG{n+nb}{zip}\PYG{p}{(}\PYG{n}{terms}\PYG{p}{,} \PYG{n}{beta}\PYG{p}{))}
+
+\PYG{n}{rhs} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{} + \PYGZdq{}}\PYG{o}{.}\PYG{n}{join}\PYG{p}{([}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}(}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{beta\PYGZus{}map}\PYG{p}{[}\PYG{n}{name}\PYG{p}{]}\PYG{l+s+si}{:}\PYG{l+s+s2}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{)·}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{name}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{*\PYGZdq{}} \PYG{k}{for} \PYG{n}{name} \PYG{o+ow}{in} \PYG{n}{final\PYGZus{}selected}\PYG{p}{])}
+\PYG{n}{model\PYGZus{}str} \PYG{o}{=} \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}yhat = (}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{beta\PYGZus{}map}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}Intercept\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{:}\PYG{l+s+s2}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{) + \PYGZdq{}} \PYG{o}{+} \PYG{n}{rhs}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{Linear model form (robust\PYGZhy{}scaled predictors):\PYGZdq{}}\PYG{p}{)}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{n}{model\PYGZus{}str}\PYG{p}{)}
+
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{matplotlib.pyplot}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{plt}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{numpy}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{np}
+
+\PYG{n}{fig}\PYG{p}{,} \PYG{n}{ax} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{subplots}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{12}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{))}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{scatter}\PYG{p}{(}\PYG{n}{yte}\PYG{p}{,} \PYG{n}{yhat\PYGZus{}te}\PYG{p}{,} \PYG{n}{s}\PYG{o}{=}\PYG{l+m+mi}{18}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.7}\PYG{p}{)}
+\PYG{n}{mn} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n+nb}{min}\PYG{p}{(}\PYG{n}{yte}\PYG{o}{.}\PYG{n}{min}\PYG{p}{(),} \PYG{n}{yhat\PYGZus{}te}\PYG{o}{.}\PYG{n}{min}\PYG{p}{()))}
+\PYG{n}{mx} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n+nb}{max}\PYG{p}{(}\PYG{n}{yte}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(),} \PYG{n}{yhat\PYGZus{}te}\PYG{o}{.}\PYG{n}{max}\PYG{p}{()))}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{([}\PYG{n}{mn}\PYG{p}{,} \PYG{n}{mx}\PYG{p}{],} \PYG{p}{[}\PYG{n}{mn}\PYG{p}{,} \PYG{n}{mx}\PYG{p}{],} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}black\PYGZdq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}y = yhat\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}y (control)\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}yhat (control)\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Prediction: y vs yhat\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{()}
+
+
+\PYG{n}{ord\PYGZus{}idx} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{yte}\PYG{p}{))}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{ord\PYGZus{}idx}\PYG{p}{,} \PYG{n}{yte}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}y (control)\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{ord\PYGZus{}idx}\PYG{p}{,} \PYG{n}{yhat\PYGZus{}te}\PYG{p}{,} \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}yhat (control)\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}observation index\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}y and yhat on control set\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{()}
+
+\PYG{n}{fig}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{()}
+\PYG{n}{fig}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}images/lab4\PYGZus{}prediction\PYGZus{}vs\PYGZus{}true.png\PYGZdq{}}\PYG{p}{,} \PYG{n}{dpi}\PYG{o}{=}\PYG{l+m+mi}{200}\PYG{p}{)}
+\PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{()}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Saved images/lab4\PYGZus{}prediction\PYGZus{}vs\PYGZus{}true.png\PYGZdq{}}\PYG{p}{)}
+
+\PYG{n}{resid\PYGZus{}tr} \PYG{o}{=} \PYG{n}{ytr} \PYG{o}{\PYGZhy{}} \PYG{n}{yhat\PYGZus{}tr}
+\PYG{n}{resid\PYGZus{}te} \PYG{o}{=} \PYG{n}{yte} \PYG{o}{\PYGZhy{}} \PYG{n}{yhat\PYGZus{}te}
+
+\PYG{n}{resid\PYGZus{}summary} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{(}
+    \PYG{p}{\PYGZob{}}
+        \PYG{l+s+s2}{\PYGZdq{}split\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}train\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}test\PYGZdq{}}\PYG{p}{],}
+        \PYG{l+s+s2}{\PYGZdq{}mean\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{resid\PYGZus{}tr}\PYG{p}{)),} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{resid\PYGZus{}te}\PYG{p}{))],}
+        \PYG{l+s+s2}{\PYGZdq{}std\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{std}\PYG{p}{(}\PYG{n}{resid\PYGZus{}tr}\PYG{p}{,} \PYG{n}{ddof}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)),} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{std}\PYG{p}{(}\PYG{n}{resid\PYGZus{}te}\PYG{p}{,} \PYG{n}{ddof}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{))],}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{)}
+\PYG{n}{resid\PYGZus{}summary}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{ks\PYGZus{}2sample\PYGZus{}pvalue}\PYG{p}{(}\PYG{n}{x}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{,} \PYG{n}{y}\PYG{p}{:} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ndarray}\PYG{p}{):}
+    \PYG{n}{x} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{asarray}\PYG{p}{(}\PYG{n}{x}\PYG{p}{,} \PYG{n+nb}{float}\PYG{p}{)}
+    \PYG{n}{y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{asarray}\PYG{p}{(}\PYG{n}{y}\PYG{p}{,} \PYG{n+nb}{float}\PYG{p}{)}
+    \PYG{n}{x} \PYG{o}{=} \PYG{n}{x}\PYG{p}{[}\PYG{n}{np}\PYG{o}{.}\PYG{n}{isfinite}\PYG{p}{(}\PYG{n}{x}\PYG{p}{)]}
+    \PYG{n}{y} \PYG{o}{=} \PYG{n}{y}\PYG{p}{[}\PYG{n}{np}\PYG{o}{.}\PYG{n}{isfinite}\PYG{p}{(}\PYG{n}{y}\PYG{p}{)]}
+    \PYG{n}{n} \PYG{o}{=} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x}\PYG{p}{)}
+    \PYG{n}{m} \PYG{o}{=} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{y}\PYG{p}{)}
+    \PYG{k}{if} \PYG{n}{n} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{3} \PYG{o+ow}{or} \PYG{n}{m} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{3}\PYG{p}{:}
+        \PYG{k}{return} \PYG{n+nb}{float}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}nan\PYGZdq{}}\PYG{p}{),} \PYG{n+nb}{float}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}nan\PYGZdq{}}\PYG{p}{)}
+
+    \PYG{k}{try}\PYG{p}{:}
+        \PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{scipy.stats}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{ks\PYGZus{}2samp}
+
+        \PYG{n}{res} \PYG{o}{=} \PYG{n}{ks\PYGZus{}2samp}\PYG{p}{(}\PYG{n}{x}\PYG{p}{,} \PYG{n}{y}\PYG{p}{,} \PYG{n}{alternative}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}two\PYGZhy{}sided\PYGZdq{}}\PYG{p}{,} \PYG{n}{mode}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}auto\PYGZdq{}}\PYG{p}{)}
+        \PYG{k}{return} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{res}\PYG{o}{.}\PYG{n}{statistic}\PYG{p}{),} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{res}\PYG{o}{.}\PYG{n}{pvalue}\PYG{p}{)}
+    \PYG{k}{except} \PYG{n+ne}{Exception}\PYG{p}{:}
+        \PYG{n}{x\PYGZus{}sorted} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sort}\PYG{p}{(}\PYG{n}{x}\PYG{p}{)}
+        \PYG{n}{y\PYGZus{}sorted} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sort}\PYG{p}{(}\PYG{n}{y}\PYG{p}{)}
+        \PYG{n}{data\PYGZus{}all} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sort}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{concatenate}\PYG{p}{([}\PYG{n}{x\PYGZus{}sorted}\PYG{p}{,} \PYG{n}{y\PYGZus{}sorted}\PYG{p}{]))}
+        \PYG{n}{cdf\PYGZus{}x} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{searchsorted}\PYG{p}{(}\PYG{n}{x\PYGZus{}sorted}\PYG{p}{,} \PYG{n}{data\PYGZus{}all}\PYG{p}{,} \PYG{n}{side}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}right\PYGZdq{}}\PYG{p}{)} \PYG{o}{/} \PYG{n}{n}
+        \PYG{n}{cdf\PYGZus{}y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{searchsorted}\PYG{p}{(}\PYG{n}{y\PYGZus{}sorted}\PYG{p}{,} \PYG{n}{data\PYGZus{}all}\PYG{p}{,} \PYG{n}{side}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}right\PYGZdq{}}\PYG{p}{)} \PYG{o}{/} \PYG{n}{m}
+        \PYG{n}{d} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{abs}\PYG{p}{(}\PYG{n}{cdf\PYGZus{}x} \PYG{o}{\PYGZhy{}} \PYG{n}{cdf\PYGZus{}y}\PYG{p}{)))}
+
+        \PYG{n}{en} \PYG{o}{=} \PYG{n}{math}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{n} \PYG{o}{*} \PYG{n}{m} \PYG{o}{/} \PYG{p}{(}\PYG{n}{n} \PYG{o}{+} \PYG{n}{m}\PYG{p}{))}
+        \PYG{n}{lam} \PYG{o}{=} \PYG{p}{(}\PYG{n}{en} \PYG{o}{+} \PYG{l+m+mf}{0.12} \PYG{o}{+} \PYG{l+m+mf}{0.11} \PYG{o}{/} \PYG{n}{en}\PYG{p}{)} \PYG{o}{*} \PYG{n}{d}
+        \PYG{n}{j} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{200}\PYG{p}{)}
+        \PYG{n}{p} \PYG{o}{=} \PYG{l+m+mf}{2.0} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(((}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{)} \PYG{o}{**} \PYG{p}{(}\PYG{n}{j} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{))} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{exp}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{2.0} \PYG{o}{*} \PYG{p}{(}\PYG{n}{j} \PYG{o}{*} \PYG{n}{j}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{lam} \PYG{o}{*} \PYG{n}{lam}\PYG{p}{)))}
+        \PYG{n}{p} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{clip}\PYG{p}{(}\PYG{n}{p}\PYG{p}{,} \PYG{l+m+mf}{0.0}\PYG{p}{,} \PYG{l+m+mf}{1.0}\PYG{p}{))}
+        \PYG{k}{return} \PYG{n}{d}\PYG{p}{,} \PYG{n}{p}
+
+
+\PYG{n}{ks\PYGZus{}y\PYGZus{}stat}\PYG{p}{,} \PYG{n}{ks\PYGZus{}y\PYGZus{}p} \PYG{o}{=} \PYG{n}{ks\PYGZus{}2sample\PYGZus{}pvalue}\PYG{p}{(}\PYG{n}{yte}\PYG{p}{,} \PYG{n}{yhat\PYGZus{}te}\PYG{p}{)}
+\PYG{n}{rng} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{random}\PYG{o}{.}\PYG{n}{default\PYGZus{}rng}\PYG{p}{(}\PYG{n}{RANDOM\PYGZus{}SEED}\PYG{p}{)}
+\PYG{n}{s} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{std}\PYG{p}{(}\PYG{n}{resid\PYGZus{}te}\PYG{p}{,} \PYG{n}{ddof}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{))}
+\PYG{n}{ref} \PYG{o}{=} \PYG{n}{rng}\PYG{o}{.}\PYG{n}{normal}\PYG{p}{(}\PYG{l+m+mf}{0.0}\PYG{p}{,} \PYG{n}{s} \PYG{k}{if} \PYG{n}{s} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{k}{else} \PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{n}{size}\PYG{o}{=}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{resid\PYGZus{}te}\PYG{p}{))}
+\PYG{n}{ks\PYGZus{}e\PYGZus{}stat}\PYG{p}{,} \PYG{n}{ks\PYGZus{}e\PYGZus{}p} \PYG{o}{=} \PYG{n}{ks\PYGZus{}2sample\PYGZus{}pvalue}\PYG{p}{(}\PYG{n}{resid\PYGZus{}te}\PYG{p}{,} \PYG{n}{ref}\PYG{p}{)}
+
+\PYG{n}{ks\PYGZus{}tbl} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{(}
+    \PYG{p}{[}
+        \PYG{p}{\PYGZob{}}
+            \PYG{l+s+s2}{\PYGZdq{}test\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}KS(y\PYGZus{}test vs yhat\PYGZus{}test)\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}D\PYGZdq{}}\PYG{p}{:} \PYG{n}{ks\PYGZus{}y\PYGZus{}stat}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}p\PYGZdq{}}\PYG{p}{:} \PYG{n}{ks\PYGZus{}y\PYGZus{}p}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}alpha\PYGZdq{}}\PYG{p}{:} \PYG{n}{ALPHA}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}decision\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}fail to reject\PYGZdq{}} \PYG{k}{if} \PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{isfinite}\PYG{p}{(}\PYG{n}{ks\PYGZus{}y\PYGZus{}p}\PYG{p}{)} \PYG{o+ow}{and} \PYG{n}{ks\PYGZus{}y\PYGZus{}p} \PYG{o}{\PYGZgt{}=} \PYG{n}{ALPHA}\PYG{p}{)} \PYG{k}{else} \PYG{l+s+s2}{\PYGZdq{}reject\PYGZdq{}}\PYG{p}{,}
+        \PYG{p}{\PYGZcb{},}
+        \PYG{p}{\PYGZob{}}
+            \PYG{l+s+s2}{\PYGZdq{}test\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}KS(resid\PYGZus{}test vs N(0,s\PYGZca{}2) ref)\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}D\PYGZdq{}}\PYG{p}{:} \PYG{n}{ks\PYGZus{}e\PYGZus{}stat}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}p\PYGZdq{}}\PYG{p}{:} \PYG{n}{ks\PYGZus{}e\PYGZus{}p}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}alpha\PYGZdq{}}\PYG{p}{:} \PYG{n}{ALPHA}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}decision\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}fail to reject\PYGZdq{}} \PYG{k}{if} \PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{isfinite}\PYG{p}{(}\PYG{n}{ks\PYGZus{}e\PYGZus{}p}\PYG{p}{)} \PYG{o+ow}{and} \PYG{n}{ks\PYGZus{}e\PYGZus{}p} \PYG{o}{\PYGZgt{}=} \PYG{n}{ALPHA}\PYG{p}{)} \PYG{k}{else} \PYG{l+s+s2}{\PYGZdq{}reject\PYGZdq{}}\PYG{p}{,}
+        \PYG{p}{\PYGZcb{},}
+    \PYG{p}{]}
+\PYG{p}{)}
+
+\PYG{n}{ks\PYGZus{}tbl}
+
+\PYG{n}{p} \PYG{o}{=} \PYG{n}{final\PYGZus{}p}
+\PYG{n}{n\PYGZus{}tr} \PYG{o}{=} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{tr\PYGZus{}idx}\PYG{p}{)}
+
+\PYG{n}{sse} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{((}\PYG{n}{ytr} \PYG{o}{\PYGZhy{}} \PYG{n}{yhat\PYGZus{}tr}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2}\PYG{p}{))}
+\PYG{n}{sigma2\PYGZus{}hat} \PYG{o}{=} \PYG{n}{sse} \PYG{o}{/} \PYG{n+nb}{max}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{p}{(}\PYG{n}{n\PYGZus{}tr} \PYG{o}{\PYGZhy{}} \PYG{p}{(}\PYG{n}{p} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{)))}
+
+\PYG{n}{ZTZ\PYGZus{}inv} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linalg}\PYG{o}{.}\PYG{n}{inv}\PYG{p}{(}\PYG{n}{Ztr}\PYG{o}{.}\PYG{n}{T} \PYG{o}{@} \PYG{n}{Ztr} \PYG{o}{+} \PYG{l+m+mf}{1e\PYGZhy{}10} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{eye}\PYG{p}{(}\PYG{n}{Ztr}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]))}
+\PYG{n}{se\PYGZus{}beta} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{diag}\PYG{p}{(}\PYG{n}{ZTZ\PYGZus{}inv}\PYG{p}{)} \PYG{o}{*} \PYG{n}{sigma2\PYGZus{}hat}\PYG{p}{)}
+
+\PYG{n}{t\PYGZus{}beta} \PYG{o}{=} \PYG{n}{beta} \PYG{o}{/} \PYG{n}{se\PYGZus{}beta}
+
+\PYG{n}{df\PYGZus{}beta} \PYG{o}{=} \PYG{n}{n\PYGZus{}tr} \PYG{o}{\PYGZhy{}} \PYG{p}{(}\PYG{n}{p} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{)}
+
+\PYG{k}{try}\PYG{p}{:}
+    \PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{scipy.stats}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{t} \PYG{k}{as} \PYG{n}{student\PYGZus{}t}
+
+    \PYG{n}{tcrit\PYGZus{}beta} \PYG{o}{=} \PYG{n+nb}{float}\PYG{p}{(}\PYG{n}{student\PYGZus{}t}\PYG{o}{.}\PYG{n}{ppf}\PYG{p}{(}\PYG{l+m+mi}{1} \PYG{o}{\PYGZhy{}} \PYG{n}{ALPHA} \PYG{o}{/} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{df\PYGZus{}beta}\PYG{p}{))}
+    \PYG{n}{pvals} \PYG{o}{=} \PYG{l+m+mi}{2} \PYG{o}{*} \PYG{p}{(}\PYG{l+m+mi}{1} \PYG{o}{\PYGZhy{}} \PYG{n}{student\PYGZus{}t}\PYG{o}{.}\PYG{n}{cdf}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{abs}\PYG{p}{(}\PYG{n}{t\PYGZus{}beta}\PYG{p}{),} \PYG{n}{df\PYGZus{}beta}\PYG{p}{))}
+\PYG{k}{except} \PYG{n+ne}{Exception}\PYG{p}{:}
+    \PYG{n}{tcrit\PYGZus{}beta} \PYG{o}{=} \PYG{l+m+mf}{1.959964}
+    \PYG{n}{pvals} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{full\PYGZus{}like}\PYG{p}{(}\PYG{n}{t\PYGZus{}beta}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{nan}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n+nb}{float}\PYG{p}{)}
+
+\PYG{n}{coef\PYGZus{}signif} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{(}
+    \PYG{p}{\PYGZob{}}
+        \PYG{l+s+s2}{\PYGZdq{}term\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}Intercept\PYGZdq{}}\PYG{p}{]} \PYG{o}{+} \PYG{n}{final\PYGZus{}selected}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}beta\PYGZdq{}}\PYG{p}{:} \PYG{n}{beta}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}se\PYGZdq{}}\PYG{p}{:} \PYG{n}{se\PYGZus{}beta}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}t\PYGZus{}calc\PYGZdq{}}\PYG{p}{:} \PYG{n}{t\PYGZus{}beta}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}t\PYGZus{}crit\PYGZdq{}}\PYG{p}{:} \PYG{n}{tcrit\PYGZus{}beta}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}p\PYGZus{}value\PYGZdq{}}\PYG{p}{:} \PYG{n}{pvals}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}decision\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}
+            \PYG{l+s+s2}{\PYGZdq{}reject H0\PYGZdq{}} \PYG{k}{if} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{t}\PYG{p}{)} \PYG{o}{\PYGZgt{}=} \PYG{n}{tcrit\PYGZus{}beta} \PYG{k}{else} \PYG{l+s+s2}{\PYGZdq{}fail to reject H0\PYGZdq{}} \PYG{k}{for} \PYG{n}{t} \PYG{o+ow}{in} \PYG{n}{t\PYGZus{}beta}
+        \PYG{p}{],}
+        \PYG{l+s+s2}{\PYGZdq{}df\PYGZdq{}}\PYG{p}{:} \PYG{n}{df\PYGZus{}beta}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}alpha\PYGZdq{}}\PYG{p}{:} \PYG{n}{ALPHA}\PYG{p}{,}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{)}
+
+\PYG{n}{coef\PYGZus{}signif}
+
+\PYG{n}{resid\PYGZus{}summary}\PYG{o}{.}\PYG{n}{to\PYGZus{}csv}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}residuals\PYGZus{}summary.csv\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{encoding}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}utf\PYGZhy{}8\PYGZhy{}sig\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ks\PYGZus{}tbl}\PYG{o}{.}\PYG{n}{to\PYGZus{}csv}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}ks\PYGZus{}tests.csv\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{encoding}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}utf\PYGZhy{}8\PYGZhy{}sig\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{coef\PYGZus{}signif}\PYG{o}{.}\PYG{n}{to\PYGZus{}csv}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}coef\PYGZus{}significance.csv\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{encoding}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}utf\PYGZhy{}8\PYGZhy{}sig\PYGZdq{}}\PYG{p}{)}
+
+\PYG{k}{try}\PYG{p}{:}
+    \PYG{n}{resid\PYGZus{}summary}\PYG{o}{.}\PYG{n}{to\PYGZus{}latex}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}residuals\PYGZus{}summary.tex\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{)}
+
+    \PYG{n}{ks\PYGZus{}tex} \PYG{o}{=} \PYG{n}{ks\PYGZus{}tbl}\PYG{o}{.}\PYG{n}{copy}\PYG{p}{()}
+    \PYG{n}{ks\PYGZus{}tex}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}test\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{n}{ks\PYGZus{}tex}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}test\PYGZdq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{replace}\PYG{p}{(}
+        \PYG{p}{\PYGZob{}}
+            \PYG{l+s+s2}{\PYGZdq{}KS(y\PYGZus{}test vs yhat\PYGZus{}test)\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}KS(\PYGZdl{}y\PYGZus{}}\PYG{l+s+si}{\PYGZob{}test\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{} vs \PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{hat}\PYG{l+s+si}{\PYGZob{}y\PYGZcb{}}\PYG{l+s+s2}{\PYGZus{}}\PYG{l+s+si}{\PYGZob{}test\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{})\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}KS(resid\PYGZus{}test vs N(0,s\PYGZca{}2) ref)\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}KS(\PYGZdl{}e\PYGZus{}}\PYG{l+s+si}{\PYGZob{}test\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{} vs \PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{mathcal}\PYG{l+s+si}{\PYGZob{}N\PYGZcb{}}\PYG{l+s+s2}{(0,}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{hat\PYGZob{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{sigma\PYGZcb{}\PYGZca{}2)\PYGZdl{})\PYGZdq{}}\PYG{p}{,}
+        \PYG{p}{\PYGZcb{}}
+    \PYG{p}{)}
+    \PYG{n}{ks\PYGZus{}tex} \PYG{o}{=} \PYG{n}{ks\PYGZus{}tex}\PYG{o}{.}\PYG{n}{rename}\PYG{p}{(}\PYG{n}{columns}\PYG{o}{=}\PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}p\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}p\PYGZdl{}\PYGZhy{}value\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}alpha\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{alpha\PYGZdl{}\PYGZdq{}}\PYG{p}{\PYGZcb{})}
+    \PYG{n}{ks\PYGZus{}tex}\PYG{o}{.}\PYG{n}{to\PYGZus{}latex}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}ks\PYGZus{}tests.tex\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{escape}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{)}
+
+    \PYG{n}{coef\PYGZus{}tex} \PYG{o}{=} \PYG{n}{coef\PYGZus{}signif}\PYG{o}{.}\PYG{n}{rename}\PYG{p}{(}
+        \PYG{n}{columns}\PYG{o}{=}\PYG{p}{\PYGZob{}}
+            \PYG{l+s+s2}{\PYGZdq{}t\PYGZus{}calc\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}t\PYGZus{}}\PYG{l+s+si}{\PYGZob{}calc\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}t\PYGZus{}crit\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}t\PYGZus{}}\PYG{l+s+si}{\PYGZob{}crit\PYGZcb{}}\PYG{l+s+s2}{\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}p\PYGZus{}value\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}p\PYGZdl{}\PYGZhy{}value\PYGZdq{}}\PYG{p}{,}
+            \PYG{l+s+s2}{\PYGZdq{}alpha\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}\PYGZdl{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s+s2}{alpha\PYGZdl{}\PYGZdq{}}\PYG{p}{,}
+        \PYG{p}{\PYGZcb{}}
+    \PYG{p}{)}
+    \PYG{n}{coef\PYGZus{}tex}\PYG{o}{.}\PYG{n}{to\PYGZus{}latex}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}tables/lab4\PYGZus{}coef\PYGZus{}significance.tex\PYGZdq{}}\PYG{p}{,} \PYG{n}{index}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{escape}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{)}
+\PYG{k}{except} \PYG{n+ne}{Exception}\PYG{p}{:}
+    \PYG{k}{pass}
+
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Saved tables: lab4\PYGZus{}residuals\PYGZus{}summary, lab4\PYGZus{}ks\PYGZus{}tests, lab4\PYGZus{}coef\PYGZus{}significance\PYGZdq{}}\PYG{p}{)}
+
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{matplotlib.pyplot}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{plt}
+
+
+\PYG{n}{fig}\PYG{p}{,} \PYG{n}{ax} \PYG{o}{=} \PYG{n}{plt}\PYG{o}{.}\PYG{n}{subplots}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{12}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{))}
+
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{scatter}\PYG{p}{(}\PYG{n}{yhat\PYGZus{}te}\PYG{p}{,} \PYG{n}{resid\PYGZus{}te}\PYG{p}{,} \PYG{n}{s}\PYG{o}{=}\PYG{l+m+mi}{18}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.7}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{axhline}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}black\PYGZdq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}yhat (test)\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{set\PYGZus{}ylabel}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}residual (test)\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Residuals vs prediction\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{)}
+
+
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{hist}\PYG{p}{(}\PYG{n}{resid\PYGZus{}te}\PYG{p}{,} \PYG{n}{bins}\PYG{o}{=}\PYG{l+m+mi}{25}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.8}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{set\PYGZus{}title}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Residuals histogram (test)\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{set\PYGZus{}xlabel}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}residual\PYGZdq{}}\PYG{p}{)}
+\PYG{n}{ax}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{)}
+
+\PYG{n}{fig}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{()}
+\PYG{n}{fig}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}images/lab4\PYGZus{}residuals\PYGZus{}diagnostics.png\PYGZdq{}}\PYG{p}{,} \PYG{n}{dpi}\PYG{o}{=}\PYG{l+m+mi}{200}\PYG{p}{)}
+\PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{()}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Saved images/lab4\PYGZus{}residuals\PYGZus{}diagnostics.png\PYGZdq{}}\PYG{p}{)}
+
+\end{MintedVerbatim}

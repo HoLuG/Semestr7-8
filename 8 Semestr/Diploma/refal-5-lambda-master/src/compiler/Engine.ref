@@ -1,0 +1,848 @@
+$INCLUDE "LibraryEx";
+
+*$FROM Error
+$EXTERN EL-Destroy, EL-Create, EL-AddErrorAt, EL-AddWarningAt, EL-Concat,
+  EL-CheckEntryDuplicates;
+
+*$FROM Config
+$EXTERN
+  Config-GetPrelude,
+  Config-GetR5Mode,
+  Config-GetSearchFolders,
+  Config-GetDebugMode,
+  Config-GetOptPattern,
+  Config-GetOptResult,
+  Config-GetConditionsMode,
+  Config-GetGenMode,
+  Config-GetOptTree,
+  Config-GetWarningIds,
+  Config-GetWarningIdsAsErrors;
+
+*$FROM Checker
+$EXTERN CheckProgram;
+
+*$FROM R5-Lexer
+$EXTERN R5-Scan;
+
+*$FROM R5-Parser
+$EXTERN R5-Parse;
+
+*$FROM SR-Lexer
+$EXTERN SR-Scan;
+
+*$FROM SR-Parser
+$EXTERN SR-ParseProgram;
+
+*$FROM FindFile
+$EXTERN FindInclude;
+
+*$FROM Desugaring
+$EXTERN Desugar;
+
+*$FROM Log
+$EXTERN Log-AST, Log-HighLevelRASL;
+
+*$FROM OptTree
+$EXTERN OptTree, OptTree-CleanupMarkup;
+
+*$FROM HighLevelRASL
+$EXTERN HighLevelRASL;
+
+*$FROM LowLevelRASL
+$EXTERN LowLevelRASL;
+
+*$FROM Generator-RASL
+$EXTERN GenProgram-RASL;
+
+*$FROM Generator-Native
+$EXTERN GenProgram-Native;
+
+
+/**
+  <CompileFile t.Config (s.Dialect e.SrcName) e.OutputName>
+    == Success e.OutputName t.Native
+    == Fails
+
+  s.Dialect ::= R5 | SR
+  t.Native ::= NoNative | (e.NativeOutputName)
+*/
+$ENTRY CompileFile {
+  t.Config (s.Dialect e.SrcName) e.OutputName '.rasl'
+    = <FrontEnd t.Config s.Dialect e.SrcName>
+    : {
+        Success s.HasNative e.AST
+          = <BackEnd t.Config (e.SrcName) (e.OutputName) e.AST>;
+
+        Fails = Fails;
+      }
+}
+
+/**
+  <FrontEnd t.Config s.Dialect e.SrcName>
+    == Success s.HasNative e.AST
+    == Fails
+
+  s.HasNative ::= WithNative | NoNative
+*/
+$ENTRY FrontEnd {
+  t.Config s.Dialect e.SrcName
+    = <Config-GetWarningIds t.Config> : e.WarningIds
+    = <Config-GetWarningIdsAsErrors t.Config> : e.WarningIdsAsErrors
+
+    = <LoadAST t.Config s.Dialect e.SrcName> : t.ErrorList e.FirstAST
+    = <ResolveIncludes
+        t.Config (/* bad includes */)
+        (
+          t.ErrorList s.Dialect ((e.SrcName) (e.SrcName))
+          (/* scanned */) e.FirstAST
+        )
+      >
+    : e.IncludeUnits
+    = <GlueErrorListsAndASTs (e.SrcName) e.IncludeUnits> : t.ErrorList^ e.AST
+    = <CheckProgram (e.WarningIds) t.ErrorList e.AST> : t.ErrorList^
+    = <EL-Destroy t.ErrorList (e.WarningIds) (e.WarningIdsAsErrors)>
+    : {
+        EL-NoErrors
+          = <CreateMetaFunctions e.AST> : e.AST^
+          = e.AST
+          : {
+              e.AST-B (NativeBlock t.SrcPos e.Name) e.AST-E
+                = Success WithNative
+                  e.AST-B (NativeBlock t.SrcPos e.Name) e.AST-E;
+
+              e.AST-B
+              (Function t.SrcPos s.ScopeClass (e.Name) NativeBody e.Body)
+              e.AST-E
+                = Success WithNative
+                  e.AST-B
+                  (Function t.SrcPos s.ScopeClass (e.Name) NativeBody e.Body)
+                  e.AST-E;
+
+              e.AST^ = Success NoNative e.AST;
+          };
+
+        EL-HasErrors = Fails;
+      }
+}
+
+PreludeIncludeLine {
+  t.Config
+    = <Config-GetPrelude t.Config>
+    : {
+        /* пусто */ = /* пусто */;
+        e.Prelude = (Include 1 e.Prelude);
+      }
+}
+
+FilterLexerMessages {
+  t.ErrorList e.Tokens
+    = <MapAccum
+        {
+          t.ErrorList^ (TkWarning t.Pos s.Type e.Message)
+            = <EL-AddWarningAt t.ErrorList s.Type t.Pos e.Message>
+              /* пусто */;
+          t.ErrorList^ (TkError t.Pos e.Message)
+            = <EL-AddErrorAt t.ErrorList t.Pos e.Message>
+              /* пусто */;
+          t.ErrorList^ t.OtherToken
+            = t.ErrorList
+              t.OtherToken
+        }
+        t.ErrorList e.Tokens
+      >;
+}
+
+LoadAST {
+  t.Config R5 e.SrcName
+    = <Config-GetR5Mode t.Config> : s.Mode
+    = <R5-Scan s.Mode e.SrcName> : e.Tokens
+    = <FilterLexerMessages <EL-Create e.SrcName> e.Tokens>
+    : t.ErrorList e.Tokens^
+    = <R5-Parse t.ErrorList s.Mode e.Tokens> : t.ErrorList^ e.AST
+    = t.ErrorList <PreludeIncludeLine t.Config> e.AST;
+
+  t.Config SR e.SrcName
+    = <SR-Scan e.SrcName> : e.Tokens
+    = <FilterLexerMessages <EL-Create e.SrcName> e.Tokens>
+    : t.ErrorList e.Tokens^
+    = <SR-ParseProgram t.ErrorList e.Tokens>;
+
+  t.Config RSL e.SrcName
+    = e.SrcName : e.BaseName '.rsl'
+    = e.BaseName '-decompiled.ref' : e.DecompiledName
+    = (FileRowCol (1 1) e.DecompiledName) : t.ErrorPos
+    = <System 'rl-rsl-decompiler ' e.SrcName>
+      <ExistFile e.DecompiledName>
+    : {
+        0 True
+          = <LoadAST t.Config R5 e.DecompiledName> : t.ErrorList e.AST
+          = <RemoveFile e.DecompiledName>
+          : {
+              True () = t.ErrorList e.AST;
+
+              False (e.Message)
+                = <EL-AddErrorAt
+                    t.ErrorList t.ErrorPos
+                    'Can\'t remove file ' e.DecompiledName ' (' e.Message ')'
+                  >;
+            };
+
+        0 False
+          = <EL-AddErrorAt
+              <EL-Create> t.ErrorPos
+              'RSL decompiler can\'t create ' e.DecompiledName
+            >;
+
+        e.RetCode s.Bool
+          = <EL-AddErrorAt
+              <EL-Create> t.ErrorPos
+              'RSL decompiler failed with retcode ' <Symb e.RetCode>
+            >;
+      }
+}
+
+ResolveIncludes {
+  t.Config (e.BadIncludes-B (e.IncludeName) e.BadIncludes-E)
+  e.Units-B
+  (
+    t.ErrorList s.Dialect (e.Aliases)
+    (e.ScannedAST) e.AST-B (Include t.SrcPos e.IncludeName) e.AST-E
+  )
+  e.Units-E
+    = <ResolveIncludes
+        t.Config
+        (e.BadIncludes-B (e.IncludeName) e.BadIncludes-E)
+        e.Units-B
+        (
+          <EL-AddErrorAt
+            t.ErrorList t.SrcPos
+            'Include file "' e.IncludeName '" is not found'
+          >
+          s.Dialect (e.Aliases)
+          (e.ScannedAST e.AST-B (Include t.SrcPos e.IncludeName)) e.AST-E
+        )
+        e.Units-E
+      >;
+
+  t.Config (e.BadIncludes)
+  e.Units-B
+  (
+    t.ErrorList s.Dialect (e.Aliases)
+    (e.ScannedAST) e.AST-B (Include t.SrcPos e.IncludeName) e.AST-E
+  )
+  e.Units-E
+    = <ResolveIncludes-CheckAlias
+        t.Config (e.BadIncludes)
+        (e.Units-B)
+        (
+          (
+            t.ErrorList s.Dialect (e.Aliases)
+            (e.ScannedAST e.AST-B (Include t.SrcPos e.IncludeName)) e.AST-E
+          )
+        )
+        (e.Units-E)
+        (e.IncludeName)
+      >;
+
+  t.Config (e.BadIncludes) e.Units
+    = <Map
+        {
+          (
+            t.ErrorList s.Dialect ((e.Name) (e.FullPath) e.Aliases)
+            (e.ScannedAST) e.NotScannedAST
+          )
+            = (t.ErrorList (e.FullPath) e.ScannedAST e.NotScannedAST);
+        }
+        e.Units
+      >;
+}
+
+ResolveIncludes-CheckAlias {
+  t.Config (e.BadIncludes)
+  e.Groups-B
+  (
+    e.Units-B
+    (
+      t.ErrorList s.Dialect (e.Aliases-B (e.IncludeName) e.Aliases-E)
+      (e.ScannedAST) e.NotScannedAST
+    )
+    e.Units-E
+  )
+  e.Groups-E
+  (e.IncludeName)
+    = <ResolveIncludes
+        t.Config (e.BadIncludes)
+        <Map
+          &UnBracket
+          e.Groups-B
+          (
+            e.Units-B
+            (
+              t.ErrorList s.Dialect (e.Aliases-B (e.IncludeName) e.Aliases-E)
+              (e.ScannedAST) e.NotScannedAST
+            )
+            e.Units-E
+          )
+          e.Groups-E
+        >
+      >;
+
+   t.Config (e.BadIncludes)
+   (e.Units-B) (t.CheckedUnit) (e.Units-E) (e.IncludeName)
+     = <ResolveIncludes-CheckValid
+         t.Config (e.BadIncludes)
+         (e.Units-B) (t.CheckedUnit) (e.Units-E)
+         (e.IncludeName)
+         <FindInclude (<Config-GetSearchFolders t.Config>) e.IncludeName>
+       >;
+}
+
+ResolveIncludes-CheckValid {
+  t.Config (e.BadIncludes)
+  (e.Units-B)
+  (t.CheckedUnit)
+  (e.Units-E)
+  (e.IncludeName) Success s.Dialect e.FullPath
+    = <ResolveIncludes-CheckEqualAST
+        t.Config (e.BadIncludes)
+        (e.Units-B) (t.CheckedUnit) (e.Units-E)
+        s.Dialect (e.IncludeName) (e.FullPath)
+        (<LoadAST t.Config s.Dialect e.FullPath>)
+      >;
+
+  t.Config (e.BadIncludes)
+  (e.Units-B)
+  (
+    (
+      t.ErrorList s.Dialect (e.Aliases)
+      (e.ScannedAST (Include t.SrcPos e.IncludeName)) e.NotScannedAST
+    )
+  )
+  (e.Units-E)
+  (e.IncludeName) Fails
+    = <ResolveIncludes
+        t.Config (e.BadIncludes (e.IncludeName))
+        e.Units-B
+        (
+          <EL-AddErrorAt
+            t.ErrorList t.SrcPos
+            'Include file "' e.IncludeName '" is not found'
+          >
+          s.Dialect (e.Aliases)
+          (e.ScannedAST (Include t.SrcPos e.IncludeName)) e.NotScannedAST
+        )
+        e.Units-E
+      >;
+}
+
+ResolveIncludes-CheckEqualAST {
+  t.Config (e.BadIncludes)
+  e.Groups-B
+  (
+    e.Units-B
+    (t.ErrorList s.Dialect (e.Aliases) (e.ScannedAST) e.NotScannedAST)
+    e.Units-E
+  )
+  e.Groups-E
+  s.Dialect (e.IncludeName) (e.FullPath)
+  (t.NewErrorList e.ScannedAST e.NotScannedAST)
+    = <ResolveIncludes
+        t.Config (e.BadIncludes)
+        <Map
+          &UnBracket
+          e.Groups-B
+          (
+            e.Units-B
+            (
+              t.ErrorList s.Dialect (e.Aliases (e.IncludeName) (e.FullPath))
+              (e.ScannedAST) e.NotScannedAST
+            )
+            e.Units-E
+          )
+          e.Groups-E
+        >
+      >;
+
+  t.Config (e.BadIncludes)
+  (e.Units-B) (t.CheckedUnit) (e.Units-E)
+  s.Dialect (e.IncludeName) (e.FullPath) (t.ErrorList e.AST)
+    = <ResolveIncludes
+        t.Config (e.BadIncludes)
+        e.Units-B
+        (
+          t.ErrorList s.Dialect ((e.IncludeName) (e.FullPath))
+          (/* scanned */) e.AST
+        )
+        t.CheckedUnit
+        e.Units-E
+      >;
+}
+
+GlueErrorListsAndASTs {
+  (e.SrcName) e.Units
+    = <MapAccum
+        {
+          t.CommonErrorList (t.ErrorList (e.UnitName) e.AST)
+            = <EL-Concat t.CommonErrorList t.ErrorList>
+              <PatchASTSrcPos (e.UnitName) e.AST>;
+        }
+        <EL-Create e.SrcName>
+        e.Units
+      >;
+}
+
+PatchASTSrcPos {
+  (e.FileName) e.AST
+    = {
+        Name e.Name = e.Name;
+
+        SrcPos NoPos = NoPos;
+        SrcPos s.LnNum = (FileLine s.LnNum e.FileName);
+        SrcPos (RowCol s.Row s.Col) = (FileRowCol (s.Row s.Col) e.FileName);
+      }
+    : s.FnPatch
+    = <PatchAST s.FnPatch e.AST>;
+}
+
+$SPEC PatchAST s.FN-PATCH e.ast;
+
+PatchAST {
+  s.FnPatch e.AST = <Map (&PatchAST-Item s.FnPatch) e.AST>;
+}
+
+$SPEC PatchAST-Item s.FN-PATCH t.item;
+
+PatchAST-Item {
+  s.FnPatch (Function t.SrcPos s.ScopeClass (e.Name) e.Body)
+    = (Function
+        <s.FnPatch SrcPos t.SrcPos>
+        s.ScopeClass (<s.FnPatch Name e.Name>)
+        <PatchAST-Body s.FnPatch e.Body>
+      );
+
+  s.FnPatch (Ident t.SrcPos e.Name)
+    = (Ident <s.FnPatch SrcPos t.SrcPos> e.Name);
+
+  s.FnPatch (NativeBlock t.SrcPos e.Name)
+    = (NativeBlock <s.FnPatch SrcPos t.SrcPos> e.Name);
+
+  s.FnPatch (Include t.SrcPos e.IncludeName) = /* пропускаем */;
+
+  s.FnPatch (s.Label t.SrcPos s.ScopeClass e.Name)
+    , <OneOf s.Label Enum Swap Declaration Entry Inline Drive Intrinsic Meta> : True
+    = (s.Label
+        <s.FnPatch SrcPos t.SrcPos>
+        s.ScopeClass
+        <s.FnPatch Name e.Name>
+      );
+
+  s.FnPatch (Spec t.SrcPos (e.Name) e.Pattern)
+    = (
+        Spec <s.FnPatch SrcPos t.SrcPos> (<s.FnPatch Name e.Name>)
+        <PatchAST-Expr s.FnPatch e.Pattern>
+      );
+}
+
+$SPEC PatchAST-Body s.FN-PATCH e.body;
+
+PatchAST-Body {
+  s.FnPatch Sentences e.Sentences
+    = Sentences <Map (&PatchAST-Sentence s.FnPatch) e.Sentences>;
+
+  s.FnPatch NativeBody t.SrcPos e.Code
+    = NativeBody <s.FnPatch SrcPos t.SrcPos> e.Code;
+
+  s.FnPatch Metatable e.Metatable
+    = Metatable
+      <Map
+        {
+          ((e.Identifier) (Symbol Name t.SrcPos e.Name))
+            = <s.FnPatch SrcPos t.SrcPos> : t.SrcPos^
+            = <s.FnPatch Name e.Name> : e.Name^
+            = ((e.Identifier) (Symbol Name t.SrcPos e.Name));
+        }
+        e.Metatable
+      >;
+}
+
+$SPEC PatchAST-Sentence s.FN-PATCH t.sentence;
+
+PatchAST-Sentence {
+  s.FnPatch ((e.Pattern) e.ConditionsAndAssigns (e.Result) (e.Blocks))
+    = { e.Expr = <PatchAST-Expr s.FnPatch e.Expr>; } : s.FnPatchExpr
+    = (
+        (<s.FnPatchExpr e.Pattern>)
+        <PatchAST-Chain s.FnPatch s.FnPatchExpr e.ConditionsAndAssigns>
+        (<s.FnPatchExpr e.Result>)
+        (<PatchAST-Blocks s.FnPatch e.Blocks>)
+      );
+}
+
+$SPEC PatchAST-Chain s.FN-PATCH s.FN-PATCH-EXPR e.chain;
+
+PatchAST-Chain {
+  s.FnPatch s.FnPatchExpr e.ConditionsAndAssigns
+    = <Map
+        {
+          (s.ChainType (e.Result) (e.Blocks) (e.Pattern))
+            = (s.ChainType
+                (<s.FnPatchExpr e.Result>)
+                (<PatchAST-Blocks s.FnPatch e.Blocks>)
+                (<s.FnPatchExpr e.Pattern>)
+              );
+        }
+        e.ConditionsAndAssigns
+      >;
+}
+
+$SPEC PatchAST-Blocks s.FN-PATCH e.blocks;
+
+PatchAST-Blocks {
+  s.FnPatch e.Blocks
+    = <Map
+        {
+          (e.Body) = (<PatchAST-Body s.FnPatch e.Body>);
+        }
+        e.Blocks
+      >;
+}
+
+$SPEC PatchAST-Expr s.FN-PATCH e.expr;
+
+PatchAST-Expr {
+  s.FnPatch e.Expression
+    = <Map
+        {
+          (Var t.SrcPos s.Mode e.Index)
+            = (Var <s.FnPatch SrcPos t.SrcPos> s.Mode e.Index);
+
+          (NewVar t.SrcPos s.Mode e.Index)
+            = (NewVar <s.FnPatch SrcPos t.SrcPos> s.Mode e.Index);
+
+          (Symbol Name t.SrcPos e.Name)
+            = (Symbol Name <s.FnPatch SrcPos t.SrcPos> <s.FnPatch Name e.Name>);
+
+          (Brackets e.InBrackets)
+            = (Brackets <PatchAST-Expr s.FnPatch e.InBrackets>);
+
+          (ADT-Brackets t.SrcPos (e.Name) e.InBrackets)
+            = (ADT-Brackets
+                <s.FnPatch SrcPos t.SrcPos>
+                (<s.FnPatch Name e.Name>)
+                <PatchAST-Expr s.FnPatch e.InBrackets>
+              );
+
+          (CallBrackets e.InBrackets)
+            = (CallBrackets <PatchAST-Expr s.FnPatch e.InBrackets>);
+
+          (Closure e.Sentences)
+            = (Closure <PatchAST-Body s.FnPatch e.Sentences>);
+
+          t.OtherTerm = t.OtherTerm;
+        }
+        e.Expression
+      >;
+}
+
+
+/**
+  <BackEnd t.Config (e.SrcName) (e.OutputName) e.AST>
+    == Success e.OutputName t.Native
+    == Fails
+
+  t.Native ::= NoNative | (e.NativeOutputName)
+*/
+$ENTRY BackEnd {
+  t.Config (e.SrcName) (e.OutputName) e.AST
+    = <Config-GetDebugMode t.Config> : s.MarkupContext s.DebugInfo
+    = <Config-GetOptPattern t.Config> : s.OptPattern
+    = <Config-GetOptResult t.Config> : s.OptResult
+    = <Config-GetConditionsMode t.Config> : s.ConditionsMode
+    = <Config-GetGenMode t.Config> : s.GenMode
+    = <Config-GetOptTree t.Config> : s.OptTree
+
+    = <Desugar s.MarkupContext s.ConditionsMode e.AST> : e.AST^
+    = <Log-AST (e.SrcName ' (after desugar)') e.AST> : e.AST^
+    = s.OptTree
+    : {
+        OptTree = <OptTree t.Config e.AST>;
+        NoOpt = <OptTree-CleanupMarkup e.AST>;
+      }
+    : e.AST^
+    = <Log-AST (e.SrcName ' (after tree optimization)') e.AST> : e.AST^
+    = <HighLevelRASL s.OptPattern s.OptResult e.AST> : e.HighLevelRASL
+    = <Log-HighLevelRASL (e.SrcName) e.HighLevelRASL> : e.HighLevelRASL^
+    = <LowLevelRASL s.GenMode s.DebugInfo (e.SrcName) e.HighLevelRASL>
+    : {
+        t.RASLModule =
+          <BackEnd-RASLModule t.RASLModule e.OutputName '.rasl'>
+          NoNative;
+
+        t.RASLModule t.NativeModule =
+          <BackEnd-RASLModule t.RASLModule e.OutputName '.rasl'>
+          <BackEnd-NativeModule
+            t.NativeModule (e.SrcName) e.OutputName '.cpp'
+          >;
+      }
+}
+
+BackEnd-RASLModule {
+  t.RASLModule e.OutputName
+    = <GenProgram-RASL t.RASLModule>
+    : {
+        e.ByteStream =
+          <SaveBytes (e.OutputName) e.ByteStream>
+          Success e.OutputName;
+      }
+}
+
+BackEnd-NativeModule {
+  t.NativeModule (e.SrcName) e.OutputName =
+    <GenProgram-Native (e.SrcName) (e.OutputName) t.NativeModule>
+    (e.OutputName);
+}
+
+CreateMetaFunctions {
+  e.AST-B (Meta e.MetaInfo) e.AST-E
+    = <MapAccum
+        {
+          (e.FunctionNames) (Meta t.SrcPos s.ScopeClass e.Name)
+            = (e.FunctionNames (e.Name))
+              (Declaration t.SrcPos GN-Entry '__Meta_' e.Name)
+              (Declaration t.SrcPos GN-Entry '__Step-Drop')
+              (Inline t.SrcPos s.ScopeClass e.Name)
+              (Function
+                t.SrcPos s.ScopeClass (e.Name) Sentences
+                (
+                  ((Var t.SrcPos 'eArg'))
+                  (
+                    (CallBrackets (Symbol Name t.SrcPos '__Step-Drop'))
+                    (CallBrackets
+                      (Symbol Name t.SrcPos '__Meta_' e.Name)
+                      (Var t.SrcPos 'eArg')
+                      (Symbol Name t.SrcPos '$table')
+                    )
+                  )
+                  (/* нет блоков */)
+                )
+              );
+
+          (e.FunctionNames) (Function t.SrcPos s.ScopeClass (e.Name) e.Body)
+            = (e.FunctionNames (e.Name))
+              (Function t.SrcPos s.ScopeClass (e.Name) e.Body);
+
+          (e.FunctionNames) (s.Definition t.SrcPos s.ScopeClass e.Name)
+            , <OneOf s.Definition Swap Enum> : True
+            = (e.FunctionNames (e.Name))
+              (s.Definition t.SrcPos s.ScopeClass e.Name);
+
+          (e.FunctionNames) t.OtherItem = (e.FunctionNames) t.OtherItem;
+        }
+        (/* function names */)
+        e.AST-B (Meta e.MetaInfo) e.AST-E
+      >
+    : (e.FunctionNames) e.AST
+    = e.MetaInfo : t.MetaSrcPos s._ScopeClass e._Name
+    = e.AST
+      (Function
+        t.MetaSrcPos GN-Local ('$table') Metatable
+        <Map
+          {
+            (e.Name)
+              = (
+                  (Symbol Identifier e.Name)
+                  (Symbol Name t.MetaSrcPos e.Name)
+                );
+          }
+          e.FunctionNames
+        >
+      );
+
+  e.AST = e.AST;
+}
+
+
+/**
+  <GrammarCheck t.Config s.Dialect e.SrcName>
+    == Success
+    == Fails
+*/
+$ENTRY GrammarCheck {
+  t.Config s.Dialect e.SrcName
+    = <LoadAST t.Config s.Dialect e.SrcName> : t.ErrorList e.AST
+    = <EL-Destroy
+        t.ErrorList
+        (<Config-GetWarningIds t.Config>)
+        (<Config-GetWarningIdsAsErrors t.Config>)
+      >
+    : {
+        EL-NoErrors = Success;
+        EL-HasErrors = Fails;
+      };
+}
+
+
+/**
+  <GlobalASTStorage-Create> == t.ASTStorage
+*/
+$ENTRY GlobalASTStorage-Create {
+  /* пусто */
+    = 1 : s.NextLocalId
+    = /* пусто */ : e.Entries
+    = /* пусто */ : e.ASTs
+    = /* пусто */ : e.Inits
+    = /* пусто */ : e.Finals
+    = ((s.NextLocalId e.Entries) e.ASTs (e.Inits) (e.Finals));
+}
+
+
+/**
+  <GlobalASTStorage-AddAST t.ASTStorage e.AST> == t.ASTStorage^ s.Id
+*/
+$ENTRY GlobalASTStorage-AddAST {
+  ((s.NextLocalId e.Entries) e.ASTs (e.Inits) (e.Finals)) e.AST
+    = <MapAccum
+        {
+          t.Accum (Function t.SrcPos s.ScopeClass (e.Name) e.Body)
+            = <UpdateAccum t.Accum t.SrcPos s.ScopeClass e.Name>
+              (Function t.SrcPos s.ScopeClass (e.Name) e.Body);
+
+          t.Accum (s.Label t.SrcPos s.ScopeClass e.Name)
+            , <OneOf s.Label Enum Swap Entry Meta> : True
+            = <UpdateAccum t.Accum t.SrcPos s.ScopeClass e.Name>
+              (s.Label t.SrcPos s.ScopeClass e.Name);
+
+          t.Accum t.Other = t.Accum t.Other;
+        }
+        ((/* entries */) (/* locals */))
+        e.AST
+      >
+    : ((e.NewEntries) (e.Locals)) e.AST^
+
+    = <CleanupLocals e.Locals (e.NewEntries)> : e.Locals^
+    = e.NewEntries e.Entries : e.Entries^
+
+    = {
+        SrcPos t.SrcPos = t.SrcPos;
+
+        Name e.Name, e.Locals : e._ (e.Name t._) e._
+          = e.Name SUF '~' s.NextLocalId;
+
+        Name e.Name = e.Name;
+      }
+    : s.FnPatch
+
+    = (
+        (<Inc s.NextLocalId> e.Entries)
+        e.ASTs <PatchAST s.FnPatch e.AST>
+          (
+            e.Inits
+            <AddInitFinalFunc e.Locals ('__INIT') s.NextLocalId>
+          )
+          (
+            <AddInitFinalFunc e.Locals ('__FINAL') s.NextLocalId>
+            e.Finals
+          )
+      )
+      s.NextLocalId;
+}
+
+UpdateAccum {
+  ((e.Entries) (e.Locals)) t.SrcPos GN-Entry e.Name
+    = ((e.Entries ((e.Name) t.SrcPos))  (e.Locals));
+
+  ((e.Entries) (e.Locals)) t.SrcPos GN-Local e.Name
+    = ((e.Entries)  (e.Locals (e.Name t.SrcPos)));
+}
+
+CleanupLocals {
+  e.Locals-B (e.Name t._) e.Locals-E (e.Entries)
+    , e.Entries : e._ ((e.Name) t.SrcPos) e._
+    = e.Locals-B <CleanupLocals e.Locals-E (e.Entries)>;
+
+  e.Locals (e.Entries) = e.Locals;
+}
+
+AddInitFinalFunc {
+  e.Locals (e.FuncName) s.LocalId
+    = e.Locals
+    : {
+        e._ (e.FuncName t.SrcPos) e._ = (e.FuncName SUF '~' s.LocalId t.SrcPos);
+        e._ = /* пусто */;
+      }
+}
+
+/**
+  <GlobalASTStorage-Check t.ASTStorage>
+    == Success e.AST
+    == Fails
+*/
+$ENTRY GlobalASTStorage-Check {
+  ((s.NextLocalId e.Entries) e.AST (e.Inits) (e.Finals))
+    = <EL-CheckEntryDuplicates e.Entries>
+    : {
+        EL-NoErrors
+          = Success
+            <ExtendMetatables (e.Entries) e.AST>
+            <MakeInitFinalFunc ('__INIT') e.Inits>
+            <MakeInitFinalFunc ('__FINAL') e.Finals>;
+
+        EL-HasErrors = Fails;
+      }
+}
+
+ExtendMetatables {
+  (e.Entries) e.AST
+    = <Map
+        {
+          ((e.EntryName) t.SrcPos)
+            = (
+                (Symbol Identifier e.EntryName)
+                (Symbol Name t.SrcPos e.EntryName)
+              );
+        }
+        e.Entries
+      >
+    : e.MetatableExtension
+
+    = <Map
+        {
+          (Function t.SrcPos s.ScopeClass (e.Name) Metatable e.Metatable)
+            = (Function
+                t.SrcPos s.ScopeClass (e.Name)
+                Metatable <CleanupDuplicates e.Metatable e.MetatableExtension>
+              );
+
+          t.Other = t.Other;
+        }
+        e.AST
+      >
+}
+
+CleanupDuplicates {
+  ((e.Name) t.Pointer) e.MT-B ((e.Name) t._) e.MT-E
+    = <CleanupDuplicates ((e.Name) t.Pointer) e.MT-B e.MT-E>;
+
+  t.MT-Item e.Metatable = t.MT-Item <CleanupDuplicates e.Metatable>;
+
+  /* пусто */ = /* пусто */;
+}
+
+MakeInitFinalFunc {
+  (e.FuncName) /* пусто */ = /* пусто */;
+
+  (e.FuncName) e.CallSequence
+    = e.CallSequence : (e._ t.FirstSrcPos) e._
+    = <Map
+        {
+          (e.Name t.SrcPos)
+            = (CallBrackets (Symbol Name t.SrcPos e.Name) /* пустой аргумент */)
+        }
+        e.CallSequence
+      >
+    : e.ResultExpr
+    = (Function
+        t.FirstSrcPos GN-Local (e.FuncName) Sentences
+        ((/* образец */) /* условия */ (e.ResultExpr) (/* блоки */))
+      )
+}

@@ -1,0 +1,1050 @@
+$INCLUDE "LibraryEx";
+
+*$FROM TreeUtils
+$EXTERN ExtractVariables, ExtractVariables-Expr, NewVarName, AddSuffix;
+
+*$FROM GenericMatch
+$EXTERN GenericMatch, Solve-Spec;
+
+*$FROM Log
+$EXTERN Log-PutLine, Log-InlineExpr;
+
+*$FROM DisplayName
+$EXTERN DisplayName;
+
+*$FROM GlobalGen
+$EXTERN GlobalGen;
+
+*$FROM OptTree-StopRelation
+$EXTERN OptTree-CanonizeTuple, OptTree-CanonizeExpr;
+$EXTERN OptTree-CheckTupleStopRelation, OptTree-CheckExprStopRelation;
+
+/**
+  <OptTree-Spec-Prepare s.OptSpec e.AST> == e.AST^
+
+  s.OptSpec ::= OptSpec | NoOpt
+
+  В дерево добавляется узел (SpecInfo e.SpecInfo).
+
+  e.SpecInfo ::= (e.SpecFuncNames) e.SpecInfo-Specific
+  e.SpecFuncNames ::= (e.FuncName)*
+  e.SpecInfo-Specific ::= t.FunctionInfo* (e.Histories)
+  t.FunctionInfo ::= ((e.Name) (e.Pattern) (e.Body) s.NextCounter t.Signature*)
+  t.Signature ::= ((e.InstanceName) e.Expression)
+  e.InstanceName ::= e.Name
+  e.Histories ::= ((e.InstanceName) e.History)*
+  e.History ::= ((e.FuncName) e.Expression)*
+*/
+$ENTRY OptTree-Spec-Prepare {
+  NoOpt e.AST = e.AST;
+
+  OptSpec e.AST-B (SpecInfo e.SpecInfo) e.AST-E
+    = <Prepare-Aux (e.SpecInfo) e.AST-B e.AST-E>;
+
+  OptSpec e.AST
+    = (/* no names */) /* no info */ (/* no histories */)
+    : e.EmptyInfo
+    = <Prepare-Aux (e.EmptyInfo) e.AST>;
+}
+
+Prepare-Aux {
+  ((e.KnownNames) e.KnownInfo (e.KnownHistories)) e.AST
+    = <Fetch
+        ((/* no names */) /* no info */ (/* no histories */)) e.AST
+        <Pipe
+          (&MapAccum
+            {
+              /* Игнорируем новые $SPEC’и для известных функций */
+              ((e.Names) e.Info (e.Histories)) (Spec t.Name e.Pattern)
+                , e.KnownNames : e._B t.Name e._E
+                = ((e.Names) e.Info (e.Histories)) /* пропускаем */;
+
+              ((e.Names) e.Info (e.Histories)) (Spec t.Name e.Pattern)
+                = t.Name : (e.Name)
+                = (
+                    (e.Names t.Name)
+                    e.Info (t.Name (e.Pattern))
+                    (e.Histories <TrivialHistory e.Name (e.Pattern)>)
+                  )
+                  <Log-PutLine
+                    'New $SPEC function: ' <DisplayName e.Name> ' '
+                    <Log-InlineExpr e.Pattern>
+                  >;
+
+              ((e.Names) e.Info (e.Histories)) t.Other
+                = ((e.Names) e.Info (e.Histories)) t.Other;
+            }
+          )
+          (&MapAccum
+            {
+              ((e.Names) e.Info-B (t.Name (e.Pattern)) e.Info-E (e.Histories))
+              (Function s.ScopeClass t.Name Sentences e.Body)
+                = (
+                    (e.Names)
+                    e.Info-B (t.Name (e.Pattern) (e.Body) 1) e.Info-E
+                    (e.Histories)
+                  )
+                  (Function s.ScopeClass t.Name Sentences e.Body);
+
+               ((e.Names) e.Info) t.Other = ((e.Names) e.Info) t.Other;
+            }
+          )
+        >
+      >
+    : ((e.NewNames) e.NewInfo (e.NewHistories)) e.AST^
+
+    = <AddGuardSentences e.NewInfo> : e.NewInfo^
+    = <AddGuardEnums e.AST> : e.AST^
+
+    = <CreateRemainderFunctions e.NewInfo> : e.NewInfo^
+
+    = (SpecInfo
+        (e.KnownNames e.NewNames)
+        e.KnownInfo e.NewInfo
+        (e.KnownHistories e.NewHistories)
+      )
+      e.AST
+}
+
+TrivialHistory {
+  e.Name (e.Pattern)
+    = (<AddSuffix e.Name ('@' 0)>)
+      e.Pattern
+    : e.HistoryRecord
+    = ((e.Name) (e.HistoryRecord));
+}
+
+* Добавляет вызов аварийной функции Func@0 в конец каждой специализируемой
+* функции.Этот вызов облегчает отладку при аварийном завершении программы
+* в специализированной функции.
+AddGuardSentences {
+  e.Info
+    = <Map
+        {
+          ((e.Name) (e.SpecPattern) (e.Sentences) e.Signatures)
+            = <AddSuffix e.Name ('@' 0)> : e.GuardName
+            = (e.SpecPattern)
+              ((CallBrackets (Symbol Name e.GuardName) e.SpecPattern))
+            : e.GuardSentence
+            = (
+                (e.Name)
+                (e.SpecPattern)
+                (e.Sentences (e.GuardSentence))
+                e.Signatures
+              )
+        }
+        e.Info
+      >
+}
+
+AddGuardEnums {
+  e.AST
+    = <Map
+        {
+          (Function s.ScopeClass (e.Name) e.Body)
+            = (Function s.ScopeClass (e.Name) e.Body) <MakeGuardEnum e.Name>;
+
+          (Declaration s.ScopeClass e.Name)
+            = (Declaration s.ScopeClass e.Name) <MakeGuardEnum e.Name>;
+
+          t.OtherItem = t.OtherItem;
+        }
+        e.AST
+      >
+}
+
+GuardEnumName {
+  e.Name = <AddSuffix e.Name ('@' 0)>
+}
+
+MakeGuardEnum {
+  e.Name = (Function GN-Local (<GuardEnumName e.Name>) Sentences /* пусто */)
+}
+
+* Обеспечивает специализацию функций Func*n. Такие функции могут получаться
+* при частичной прогонке функций, помеченных как прогоняемые
+* и специализированные одновременно. Этот остаток тоже имеет смысл
+* специализировать.
+CreateRemainderFunctions {
+  e.Info = <Map (&CreateRemainderFunctions-OneFunction 0) e.Info>
+}
+
+CreateRemainderFunctions-OneFunction {
+  s.Count ((e.Name) (e.SpecPattern) ((e.GuardSentence)) 1 /* нет сигнатур */)
+    = /* пусто */;
+
+  s.Count ((e.Name) (e.SpecPattern) (e.Sentences) 1 /* нет сигнатур */)
+    = s.Count
+    : {
+        0 = e.Name;
+        s._ = <AddSuffix e.Name ('*' s.Count)>;
+      }
+    : e.RemainderName
+    = ((e.RemainderName) (e.SpecPattern) (e.Sentences) 1 /* нет сигнатур */)
+      <CreateRemainderFunctions-OneFunction
+        <Inc s.Count>
+        ((e.Name) (e.SpecPattern) (<Drop e.Sentences>) 1 /* нет сигнатур */)
+      >;
+}
+
+Drop {
+  t.First e.Rest = e.Rest
+}
+
+/**
+  <OptTree-Spec s.OptSpec e.AST> == e.AST^
+
+  s.OptSpec ::= OptSpec | NoOpt
+*/
+$ENTRY OptTree-Spec {
+  NoOpt e.AST = <ColdAll e.AST>;
+
+  OptSpec e.AST-B (SpecInfo (e.Names) e.SpecInfo (e.Histories)) e.AST-E
+    = <PrintHistories e.Histories>
+      <MapAccum
+        &SpecUnit
+        (e.SpecInfo (e.Histories) (/* new functions */))
+        e.AST-B e.AST-E
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.NewFunctions)) e.AST
+    = (SpecInfo (e.Names) e.SpecInfo (e.Histories)) e.AST e.NewFunctions;
+}
+
+ColdAll {
+  e.AST
+    = <Map
+        {
+          (Function s.ScopeClass (e.Name) e.Body)
+            = (ColdFunction SPEC s.ScopeClass (e.Name) e.Body);
+
+          t.OtherItem = t.OtherItem;
+        }
+        e.AST
+      >;
+}
+
+PrintHistories {
+  e.Histories = <Map &PrintHistory e.Histories>;
+}
+
+PrintHistory {
+  ((e.Function) e.History)
+    = <Log-PutLine
+        'History of ' <DisplayName e.Function> '\n'
+        <Map
+          {
+            ((e.FuncName) e.StaticVarsVals)
+              = '    ' <DisplayName e.FuncName> ':'
+                ' [' <Log-InlineExpr e.StaticVarsVals> ']\n';
+          }
+          e.History
+        >
+      >
+}
+
+SpecUnit {
+  (e.SpecInfo
+    (e.Histories-B (t.Name e.History) e.Histories-E) (e.NewFunctions)
+  )
+  (Function s.ScopeClass t.Name Sentences e.Sentences)
+    = <MapAccum
+        &SpecSentence
+        (
+          e.SpecInfo (e.Histories-B (t.Name e.History) e.Histories-E)
+          (e.History) (e.NewFunctions)
+        )
+        e.Sentences
+      >
+    : (e.SpecInfo^ (e.Histories) (e.History^) (e.NewFunctions^)) e.Sentences^
+    = (e.SpecInfo (e.Histories) (e.NewFunctions))
+      (ColdFunction SPEC s.ScopeClass t.Name Sentences e.Sentences);
+
+  (e.SpecInfo (e.Histories) (e.NewFunctions))
+  (Function s.ScopeClass t.Name Sentences e.Sentences)
+    = <MapAccum
+        &SpecSentence
+        (e.SpecInfo (e.Histories) (/* empty history */) (e.NewFunctions))
+        e.Sentences
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.History) (e.NewFunctions^))
+      e.Sentences^
+    = (e.SpecInfo (e.Histories) (e.NewFunctions))
+      (ColdFunction SPEC s.ScopeClass t.Name Sentences e.Sentences);
+
+  (e.SpecInfo (e.Histories) (e.NewFunctions)) t.Other
+    = (e.SpecInfo (e.Histories) (e.NewFunctions)) t.Other;
+}
+
+/**
+  <SpecSentence
+    (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+    t.Sentence
+  >
+    == (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^) t.Sentence^
+
+  t.Sentence ::= ((e.Pattern) e.Conditions (e.Result))
+
+  Функция ищет в правой части предложения вызовы специализируемых функций
+  и пытается выполнить специализацию для него
+*/
+SpecSentence {
+  (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+  ((e.Pattern) e.Conditions (e.Result))
+    = <MapAccum
+        {
+          (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^))
+          (Condition (e.Name) (e.ConditionResult) (e.ConditionPattern))
+            = <SpecResult
+                (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+                e.ConditionResult
+              >
+            : (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^))
+              e.ConditionResult^
+            = (e.SpecInfo (e.Histories) (e.History)  (e.NewFunctions))
+              (Condition (e.Name) (e.ConditionResult) (e.ConditionPattern));
+        }
+        (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        e.Conditions
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^)) e.Conditions^
+    = <SpecResult
+        (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        e.Result
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^)) e.Result^
+    = (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+      ((e.Pattern) e.Conditions (e.Result));
+}
+
+
+/**
+  <SpecResult
+    (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+    e.Results
+  >
+    == (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^)) e.Result^
+
+  Функция разбирает результирующее выражение, ищет в нем вызовы специализируемых
+  функций и замыканий и пытается выполнить специализацию для них
+*/
+SpecResult {
+  (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions)) e.Result
+    = <SpecResult-Pass
+        Functions (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        e.Result
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^)) e.Result^
+    = <SpecResult-Pass
+        Closures (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        e.Result
+      >;
+}
+
+SpecResult-Pass {
+  s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions)) e.Result
+    = <MapAccum
+        {
+          (e.Info (e.CurHistories) (e.CurHistory) (e.NewFuncs)) t.Result-T
+            = <SpecTerm
+                s.Pass (e.Info (e.CurHistories) (e.CurHistory) (e.NewFuncs))
+                t.Result-T
+              >;
+        }
+        (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        e.Result
+      >;
+}
+
+/**
+  <SpecTerm (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions)) t.Term>
+    == (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^)) t.Term^
+
+  Функция ищет в терме вызовы специализируемых функций
+  и пытается выполнить специализацию для него
+*/
+SpecTerm {
+  s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+  (CallBrackets (Symbol Name e.Name) e.Expression)
+    , e.Name : e._ '@' 0
+    /*
+      Аргументы вызовов аварийных функций специализатора специализировать
+      нельзя, они должны оставаться неизменными.
+
+      Вместо этого мы все ссылки на функции заменим ссылками на пустые функции —
+      это необходимо, чтобы инструмент удаления неиспользуемых функций удалил
+      те, по которым программа уже специализировалась.
+
+      Например, для <Map {{ &F\1 … }} …> в аварийном предложении останется
+      &F\1, которая сама может тянуть ненужные функции (и занимать собой
+      сгенерированный код). Мы заменим её на пустую функцию.
+    */
+    = (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+      (CallBrackets (Symbol Name e.Name) <ReplaceToGuards e.Expression>);
+
+  s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+  (CallBrackets (Symbol Name e.Name) e.Expression)
+    = <SpecResult-Pass
+        s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        e.Expression
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^)) e.Expression^
+
+    = s.Pass
+    : {
+        Functions = &TrySpecCall;
+        Closures = &SkipSpecCall;
+      }
+    : s.TrySpecCall
+
+    = <s.TrySpecCall
+        (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        (CallBrackets (Symbol Name e.Name) e.Expression)
+      >;
+
+  s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+  (CallBrackets e.Expression)
+    = <SpecResult-Pass
+        s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        e.Expression
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^)) e.Expression^
+    = (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+      (CallBrackets e.Expression);
+
+  s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+  (ClosureBrackets e.ClosureContent)
+    = <SpecResult-Pass
+        s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        e.ClosureContent
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^))
+      e.ClosureContent^
+
+    = s.Pass
+    : {
+        Functions = &SkipSpecCall;
+        Closures = &TrySpecCall;
+      }
+    : s.TrySpecCall
+
+    = <s.TrySpecCall
+        (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        (CallBrackets e.ClosureContent (Var 'e@'))
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^))
+      (CallBrackets e.ClosureContent^ (Var 'e@'))
+
+    = e.ClosureContent
+    : {
+        (Symbol Name e.OptName) /* пусто */
+          = (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+            (Symbol Name e.OptName);
+
+        e.ClosureContent^
+          = (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+            (ClosureBrackets e.ClosureContent);
+      };
+
+
+  s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+    (Brackets e.Expression)
+    = <SpecResult-Pass
+        s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        e.Expression
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^)) e.Expression^
+    = (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+      (Brackets e.Expression);
+
+  s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+    (ADT-Brackets (e.Name) e.Expression)
+    = <SpecResult-Pass
+        s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+        e.Expression
+      >
+    : (e.SpecInfo^ (e.Histories^) (e.History^) (e.NewFunctions^)) e.Expression^
+    = (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+      (ADT-Brackets (e.Name) e.Expression);
+
+  s.Pass (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions)) t.Other
+   = (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions)) t.Other;
+}
+
+ReplaceToGuards {
+  e.Expression
+    = <Map
+        {
+          (s.Brackets e.Nested)
+            , Brackets CallBrackets ClosureBrackets : e._ s.Brackets e._
+            = (s.Brackets <ReplaceToGuards e.Nested>);
+
+          (ADT-Brackets (e.Name) e.Nested)
+            = (ADT-Brackets (e.Name) <ReplaceToGuards e.Nested>);
+
+          /* Уже пустая функция, ничего не делаем с ней */
+          (Symbol Name e.Name '@' 0) = (Symbol Name e.Name '@' 0);
+
+*         TODO: это костыль. Нужно понять, в чём проблема и удалить эту затычку.
+          (Symbol Name e.Name '@' s._) = (Symbol Name e.Name '@' 0);
+
+          (Symbol Name e.Name) = (Symbol Name <GuardEnumName e.Name>);
+
+          t.Other = t.Other;
+        }
+        e.Expression
+      >
+}
+
+TrySpecCall {
+  (
+    e.SpecInfo-B ((e.Name) e.Info) e.SpecInfo-E
+    (e.Histories) (e.History) (e.NewFunctions)
+  )
+  (CallBrackets (Symbol Name e.Name) e.Expression)
+    = <SpecCall (e.Name) e.Info (e.Expression) (e.History)>
+    : (e.Info^) t.NewCall e.NewFunction (e.NewHistory)
+    = (
+        ((e.Name) e.Info) e.SpecInfo-B e.SpecInfo-E
+        (e.Histories e.NewHistory)
+        (e.History)
+        (e.NewFunctions e.NewFunction)
+      )
+      t.NewCall;
+
+  (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+  (CallBrackets (Symbol Name e.Name) e.Expression)
+    = (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions))
+      (CallBrackets (Symbol Name e.Name) e.Expression);
+}
+
+SkipSpecCall {
+  (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions)) t.CallTerm
+    = (e.SpecInfo (e.Histories) (e.History) (e.NewFunctions)) t.CallTerm;
+}
+
+/**
+  <SpecCall
+    (e.Name) (e.SpecPattern) (e.Body)
+    s.CurrentNumber e.Signatures (e.Argument) (e.History)
+  >
+    == ((e.SpecPattern) (e.Body) s.NextNumber e.Signatures t.NewSignature)
+        t.NewCall t.NewFunction (e.NewHistory)
+
+  Функция пытается выполнить специализацию для заданного вызова:
+  # ищет среди сигнатур готовых специализированных функций похожую
+    * если сигнатура найдена, заменяем исходный вызов на вызов найденной функции
+    * если сигнатура не найдена выполняем специализацию для аргументов вызова
+      # формируем новый вызов
+      # формируем определение новой специализированной функции
+  # возвращает e.Info с новой сигнатурой,
+    новый вызов
+    определение новой специализированной функции
+*/
+
+SpecCall {
+  /* TODO: убрать этот хак в рамках задачи #332 */
+  (e.Name) (e.SpecPattern) (e.Body) s.NextNumber e.Signatures
+  (e.Argument) (e.History)
+    , s.NextNumber : 100
+    = ((e.SpecPattern) (e.Body) s.NextNumber e.Signatures)
+      (CallBrackets (Symbol Name e.Name) e.Argument)
+      /* пусто */ (/* пусто */);
+
+  (e.Name) (e.SpecPattern) (e.Body) s.NextNumber e.Signatures
+  (e.Argument) (e.History)
+    = <ExtractVariables ((e.Argument) (/* пусто */))> : e.UsedVars
+    = <ExtractCalls-Expr (/* пусто */ (e.UsedVars)) e.Argument>
+    : (e.ExtractedCalls (e.UsedVars^)) e.NewArgument
+    /* ищем динамическое обобщение для аргумента и образцов */
+    = <DynGenArg
+        (e.NewArgument) (e.ExtractedCalls) (/* пусто */)
+        (/* пусто */) e.Body
+      >
+    : (e.NewArgument^) (e.Sg) (e.Solutions)
+    = <SpecCall-Aux
+        (e.Name) (e.SpecPattern) (e.Body) s.NextNumber e.Signatures
+        (e.Argument) (e.NewArgument) (e.Sg) (e.Solutions) (e.History)
+        True
+      >;
+}
+
+DynGenArg {
+  (e.Arg) (e.Sg) (e.Sol) (e.Begin)
+  ((e.Pat) e.Tail) e.Sentences
+    = <ExtractVariables ((e.Arg e.Pat) e.Tail)> : e.UsedVars
+    = <NewVarName (e.UsedVars) 'eNew'> : (e.UsedVars^) e.eNew
+    = e.Arg (Brackets (Var e.eNew)) : e.Arg^
+    = <WrappedCondVars e.Tail> : e.WrappedCondVars
+    = e.Pat (Brackets e.WrappedCondVars) : e.Pat^
+    = <Solve-Spec (e.UsedVars) (e.Arg) (e.Pat)>
+    : {
+        Success e.Solutions (e.SgNew) (e.ArgNew)
+          , e.SgNew : /* пусто */
+          = e.ArgNew : e.ArgNew^ (Brackets e._)
+          = e.Pat : e.Pat^ (Brackets e._)
+          = <DynGenArg
+              (e.ArgNew) (e.Sg) (e.Sol (e.Solutions))
+              (e.Begin ((e.Pat) e.Tail)) e.Sentences
+            >;
+
+        Success e.Solutions (e.SgNew) (e.ArgNew)
+          = e.ArgNew : e.ArgNew^ (Brackets e._)
+          = e.Pat : e.Pat^ (Brackets e._)
+          = <DynGenArg
+              (e.ArgNew)
+              (
+                <RemoveAssignByLeftPart
+                    ((Var e.eNew))
+                    e.Sg <ApplySubst-Subst (e.Sg) e.SgNew>
+                >
+              )
+              (/* пусто */) (/* пусто */)
+              e.Begin ((e.Pat) e.Tail) e.Sentences
+            >;
+
+        Failure
+          = e.Arg : e.Arg^ (Brackets e._)
+          = e.Pat : e.Pat^ (Brackets e._)
+          = <DynGenArg
+              (e.Arg) (e.Sg) (e.Sol (Failure))
+              (e.Begin ((e.Pat) e.Tail)) e.Sentences
+            >;
+      };
+
+  (e.Arg) (e.Sg) (e.Sol) (e.Begin) /* пусто */
+    = (e.Arg) (e.Sg) (e.Sol);
+}
+
+WrappedCondVars {
+  e.Tail
+    = <Reduce
+        {
+          (e.CondVars) (Condition (e.ConditionName) (e.Result) (e.Pattern))
+            = (e.CondVars <ExtractVariables-Expr e.Pattern>);
+
+          (e.CondVars) (e.Result)
+            = (e.CondVars);
+        }
+        (/* пусто */)
+        e.Tail
+      >
+    : (e.CondVars)
+    = <Unique e.CondVars> : e.CondVars^
+    = <Map
+        { (s.Mode e.Index) = <WrapVar s.Mode (Var s.Mode e.Index)> }
+        e.CondVars
+      >
+    : e.CondVars^
+    = <RemoveLastGhostBracket e.CondVars>;
+}
+
+RemoveAssignByLeftPart {
+  (e.Left) e.Assigns
+    = <Map
+        {
+          (e.Left ':' t.Var) = /* пусто */;
+
+          t.Assign = t.Assign;
+        }
+        e.Assigns
+      >;
+}
+
+SpecCall-Aux {
+  /* тривиальная сигнатура */
+  (e.Name) (e.SpecPattern) (e.Body) s.NextNumber e.Signatures
+  (e.OldArg) (e.NewArg) (e.Sg) (e.Solutions) (e.History)
+  s.NeedRelationCheck
+    , <IsTrivialSignature e.NewArg> : True
+    = ((e.SpecPattern) (e.Body) s.NextNumber e.Signatures)
+      (CallBrackets (Symbol Name e.Name) e.OldArg)
+      /* пусто */ (/* пусто */);
+
+  /* проверяем, известна ли сигнатура */
+  (e.Name) (e.SpecPattern) (e.Body) s.NextNumber e.Signatures
+  (e.OldArg) (e.NewArg) (e.Sg) (e.Solutions) (e.History)
+  s.NeedRelationCheck
+    = <RenameSignatureVars-Expr (/* пусто */ 0) e.NewArg>
+    : t._ e.Signature
+    = <Spec-FindInSignatures (e.Signature) e.Signatures>
+    : {
+        Found e.InstanceName (e.Signatures^)
+          = ((e.SpecPattern) (e.Body) s.NextNumber e.Signatures)
+            (CallBrackets
+              (Symbol Name e.InstanceName)
+              <ApplySubst-Expr (e.Sg) <WrapVars e.NewArg>>
+            )
+            /* пусто */ (/* пусто */);
+
+        /* проверяем на зацикливание */
+        NotFound e.Signatures^
+          = s.NeedRelationCheck
+          : {
+              True
+                = <HasHigmanKruskalRelation
+                    (e.Name) (<OptTree-CanonizeExpr e.Signature>)
+                    e.History
+                  >;
+
+              False = False;
+            }
+          : {
+              True e.HistorySignature
+                /* Получает обобщённую сигнатуру для двух сигнатур */
+                = <GlobalGen (e.Signature) (e.HistorySignature)> : e.GenSignature
+                = <ExtractVariables ((e.NewArg) (/* пусто */))> : e.ArgVars
+                = <NameSignatureVars-Expr (e.ArgVars) e.GenSignature>
+                : t._ e.GenSignature^
+                = <GenericMatch (e.NewArg) (e.GenSignature)> : Clear e.NewSg
+                = <IsTrivialSubstitutions e.NewSg>
+                : {
+                    /*
+                      Если подстановка e.NewSg является тривиальной,
+                      проверку отношения Хигмана-Крускала
+                      в рекурсивном вызове не выполняем
+                    */
+                    True = False;
+
+                    False = True;
+                  }
+                : s.NeedRelationCheck^
+                = <DynGenArg
+                    (e.GenSignature) (<ApplySubst-Subst (e.Sg) e.NewSg>)
+                    (/* пусто */) (/* пусто */) e.Body
+                  >
+                : (e.NewArg^) (e.Sg^) (e.Solutions^)
+                = <SpecCall-Aux
+                    (e.Name) (e.SpecPattern) (e.Body) s.NextNumber
+                    e.Signatures (e.OldArg) (e.NewArg)
+                    (e.Sg) (e.Solutions) (e.History) s.NeedRelationCheck
+                  >;
+
+              False
+                = <CreateNewSentences
+                    (e.NewArg) (/* пусто */)
+                    (e.Solutions) (e.Body)
+                  >
+                : e.NewSentences
+                = <AddSuffix e.Name ('@' s.NextNumber)> : e.InstanceName
+                = (
+                    (e.SpecPattern) (e.Body) <Inc s.NextNumber>
+                    e.Signatures ((e.InstanceName) e.Signature)
+                  )
+                  (CallBrackets
+                    (Symbol Name e.InstanceName)
+                    <ApplySubst-Expr (e.Sg) <WrapVars e.NewArg>>
+                  )
+                  (Function
+                    GN-Local (e.InstanceName)
+                    Sentences e.NewSentences
+                  )
+                  (
+                    (
+                      (e.InstanceName) e.History
+                      ((e.InstanceName) e.Signature)
+                    )
+                  );
+            }
+      };
+}
+
+ExtractCalls-Expr {
+  (e.Calls (e.UsedVars)) e.Expr
+    = <MapAccum &ExtractCalls-Term (e.Calls (e.UsedVars)) e.Expr>;
+}
+
+ExtractCalls-Term {
+  (e.Calls (e.UsedVars)) (CallBrackets e.Expr)
+    = <NewVarName (e.UsedVars) 'eCall'> : (e.UsedVars^) e.NewVar
+    = (e.Calls ((CallBrackets e.Expr) ':' (e.NewVar)) (e.UsedVars))
+      (Var e.NewVar);
+
+  (e.Calls (e.UsedVars)) (Brackets e.Expr)
+    = <ExtractCalls-Expr (e.Calls (e.UsedVars)) e.Expr>
+    : (e.Calls^ (e.UsedVars^)) e.Expr^
+    = (e.Calls (e.UsedVars)) (Brackets e.Expr);
+
+  (e.Calls (e.UsedVars)) (ADT-Brackets (e.Name) e.Expr)
+    = <ExtractCalls-Expr (e.Calls (e.UsedVars)) e.Expr>
+    : (e.Calls^ (e.UsedVars^)) e.Expr^
+    = (e.Calls (e.UsedVars)) (ADT-Brackets (e.Name) e.Expr);
+
+  (e.Calls (e.UsedVars)) t.OtherTerm = (e.Calls (e.UsedVars)) t.OtherTerm;
+}
+
+RenameSignatureVars-Expr {
+  t.State e.Expr = <MapAccum &RenameSignatureVars-Term t.State e.Expr>;
+}
+
+RenameSignatureVars-Term {
+  (e.KnownVariables s.NextId) (Var s.Mode e.OldIndex)
+    , e.KnownVariables : e._B (s.Mode e.OldIndex (e.NewIndex)) e._E
+    = (e.KnownVariables s.NextId)
+      (Var s.Mode e.NewIndex);
+
+  (e.KnownVariables s.NextId) (Var s.Mode e.OldIndex)
+    = <Symb s.NextId> : e.NewIndex
+    = (e.KnownVariables (s.Mode e.OldIndex (e.NewIndex)) <Inc s.NextId>)
+      (Var s.Mode e.NewIndex);
+
+  t.State (s.BracketsTag e.Expr)
+    , <OneOf s.BracketsTag CallBrackets ClosureBrackets Brackets> : True
+    = <RenameSignatureVars-Expr t.State e.Expr> : t.State^ e.Expr^
+    = t.State (s.BracketsTag e.Expr);
+
+  t.State (ADT-Brackets (e.Name) e.Expr)
+    = <RenameSignatureVars-Expr t.State e.Expr> : t.State^ e.Expr^
+    = t.State (ADT-Brackets (e.Name) e.Expr);
+
+  t.State t.OtherTerm = t.State t.OtherTerm;
+}
+
+/*
+  Применяем левую подстановку к левым частям правой.
+  Это не совсем композиция подстановок, поскольку для композиции нужно
+  также объединять домены подстановок.
+*/
+ApplySubst-Subst {
+  (e.FromSubstitution) e.ToSubstitution
+    = <Map
+        {
+          (e.Expr ':' t.Var)
+            = (<ApplySubst-Expr (e.FromSubstitution) e.Expr> ':' t.Var);
+        }
+        e.ToSubstitution
+      >;
+}
+
+ApplySubst-Expr {
+  (e.Substitution) e.Expression
+    = <Map
+        {
+          (Var e.ModeIndex)
+            , e.Substitution : e.Subst-B (e.Value ':' (e.ModeIndex)) e.Subst-E
+            = e.Value;
+
+          (Brackets e.Nested)
+            = (Brackets <ApplySubst-Expr (e.Substitution) e.Nested>);
+
+          (ADT-Brackets (e.Name) e.Nested)
+            = (ADT-Brackets
+                (e.Name) <ApplySubst-Expr (e.Substitution) e.Nested>
+              );
+
+          (CallBrackets e.Nested)
+            = (CallBrackets <ApplySubst-Expr (e.Substitution) e.Nested>);
+
+          (ClosureBrackets e.ClosureContent)
+            = (ClosureBrackets
+                <ApplySubst-Expr (e.Substitution) e.ClosureContent>
+              );
+
+          t.OtherTerm = t.OtherTerm;
+        }
+        e.Expression
+      >;
+}
+
+Spec-FindInSignatures {
+  (e.Signature)
+  e.Signatures-B ((e.InstanceName) e.Signature) e.Signatures-E
+    = Found e.InstanceName
+      (((e.InstanceName) e.Signature) e.Signatures-B e.Signatures-E);
+
+  (e.Signature) e.Signatures = NotFound e.Signatures;
+}
+
+/**
+  <IsTrivialSubstitutions e.StaticMatches>
+*/
+IsTrivialSubstitutions {
+  e.StaticMatches
+    = <Reduce
+        {
+          False t.Any = False;
+
+          True ((Var s.Mode e.Index1) ':' (Var s.Mode e.Index2))
+            = True;
+
+          True ((Var s.Mode e.Index1) ':' (s.Mode e.Index2))
+            = True;
+
+          True t.OtherSubstitution = False;
+        }
+        True
+        e.StaticMatches
+      >;
+}
+
+CreateNewSentences {
+  (e.Arg) (e.NewSentences)
+  ((e.Sol) e.Solutions) (((e.Pat) e.Tail) e.Body)
+    = <Reduce
+        {
+          (e.NewSentences^) ((e.Contrs) (e.Assigns))
+            = <FormatContractions e.Contrs> : e.Contrs^
+            = <FormatAssigns e.Assigns> : e.Assigns^
+            = (
+                e.NewSentences
+                (
+                  (<ApplySubst-Expr (e.Contrs) <WrapVars e.Arg>>)
+                  <ApplySubst-Tail (e.Assigns) e.Tail>
+                )
+              );
+
+          (e.NewSentences^) Failure
+            = (e.NewSentences);
+        }
+        (e.NewSentences)
+        e.Sol
+      >
+    : (e.NewSentences^)
+    = <CreateNewSentences
+        (e.Arg) (e.NewSentences)
+        (e.Solutions) (e.Body)
+      >;
+
+  (e.Arg) (e.NewSentences)
+  (/* пусто */) (/* пусто */)
+    = e.NewSentences;
+}
+
+FormatContractions {
+  ((Var e.ModeIndex) ':' e.Val) e.Contrs
+    = (e.Val ':' (e.ModeIndex)) <FormatContractions e.Contrs>;
+
+  /* пусто */ = /* пусто */;
+}
+
+FormatAssigns {
+  (e.Val ':' (Var e.ModeIndex)) e.Assigns
+    = (e.Val ':' (e.ModeIndex)) <FormatAssigns e.Assigns>;
+
+  /* пусто */ = /* пусто */;
+}
+
+ApplySubst-Tail {
+  (e.Substitution) (Condition (e.ConditionName) (e.Result) (e.Pattern)) e.Tail
+    = (
+        Condition (e.ConditionName)
+        (<ApplySubst-Expr (e.Substitution) e.Result>)
+        (<ApplySubst-Expr (e.Substitution) e.Pattern>)
+      )
+      <ApplySubst-Tail (e.Substitution) e.Tail>;
+
+  (e.Substitution) (e.Result)
+    = (<ApplySubst-Expr (e.Substitution) e.Result>);
+}
+
+WrapVars {
+  e.Arg
+    = <ExtractVariables-Expr e.Arg> : e.UsedVars
+    = <OrderUniqueVars e.UsedVars> : e.UsedVars^
+    = <Map
+        { (s.Mode e.Index) = <WrapVar s.Mode (Var s.Mode e.Index)> }
+        e.UsedVars
+      >
+    : e.UsedVars^
+    = <RemoveLastGhostBracket e.UsedVars>
+}
+
+WrapVar {
+  'e' e.Expr = (GhostBrackets e.Expr);
+  s.Mode e.Expr = e.Expr
+}
+
+RemoveLastGhostBracket {
+  e.NewArgOrPattern (GhostBrackets e.LastEValue)
+    = <Map
+        {
+          (GhostBrackets e.Expr) = (Brackets e.Expr);
+          t.STValue = t.STValue;
+        }
+        e.NewArgOrPattern
+      >
+      e.LastEValue;
+
+  e.NewArgOrPattern t.STValue
+    = <RemoveLastGhostBracket e.NewArgOrPattern> t.STValue;
+
+  /* пусто */ = /* пусто */;
+}
+
+IsTrivialSignature {
+  e.Arg, e.Arg : (Var 'e' e._) = True;
+
+  e.Arg = False;
+}
+
+OrderUniqueVars {
+  e.Vars-B t.Var e.Vars-M t.Var e.Vars-E
+    = e.Vars-B <OrderUniqueVars t.Var e.Vars-M e.Vars-E>;
+
+  e.Variables = e.Variables;
+}
+
+/*
+  Функции, относящиеся к проверке отношения Хигмана-Крускала
+*/
+
+/**
+  <HasHigmanKruskalRelation (e.Name) (e.Signature) e.History>
+    == True e.HistorySignature
+    == False
+
+  Функция проверяет, выполняется ли отношение Хигмана-Крускала
+  для одной из сигнатур в e.History и сигнатуры e.Signature,
+  то есть проверяется, можно ли вложить одну сигнатуру в другую,
+  удалив некоторые элементы.
+  В случае, если в истории сигнатур удаётся найти сигнатуру,
+  для которой выполняется указанное отношение,
+  функция возвращает True и соответствующий e.HistorySignature.
+  В ином случае возвращается False.
+*/
+
+HasHigmanKruskalRelation {
+  (e.Name) (e.Signature) e.History ((e.InstanceName) e.HistorySignature)
+    , <SourceNameOfInstance e.InstanceName> : e.Name
+    , <OptTree-CheckExprStopRelation
+        (e.Signature) <OptTree-CanonizeExpr e.HistorySignature>
+      >
+    : True
+    = True e.HistorySignature;
+
+  (e.Name) (e.Signature) e.History ((e.InstanceName) e.HistorySignature)
+    = <HasHigmanKruskalRelation (e.Name) (e.Signature) e.History>;
+
+  (e.Name) (e.Signature) /* пустая история */ = False;
+}
+
+SourceNameOfInstance {
+  e.Name SUF '@' s._ = e.Name;
+  e.Name '@' s._ = e.Name;
+}
+
+/*
+  Назначает имена переменным в сигнатуре,
+  отличные от тех, что есть в t.State.
+*/
+
+NameSignatureVars-Expr {
+  t.State e.Expr = <MapAccum &NameSignatureVars-Term t.State e.Expr>;
+}
+
+NameSignatureVars-Term {
+  (e.KnownVars) (Var s.Mode)
+    = <NewVarName (e.KnownVars) s.Mode 'X'> : (e.KnownVars^) e.Index
+    = (e.KnownVars)
+      (Var e.Index);
+
+  t.State (s.BracketsTag e.Expr)
+    , <OneOf s.BracketsTag CallBrackets ClosureBrackets Brackets> : True
+    = <NameSignatureVars-Expr t.State e.Expr> : t.State^ e.Expr^
+    = t.State (s.BracketsTag e.Expr);
+
+  t.State (ADT-Brackets (e.Name) e.Expr)
+    = <NameSignatureVars-Expr t.State e.Expr> : t.State^ e.Expr^
+    = t.State (ADT-Brackets (e.Name) e.Expr);
+
+  t.State t.OtherTerm = t.State t.OtherTerm;
+}

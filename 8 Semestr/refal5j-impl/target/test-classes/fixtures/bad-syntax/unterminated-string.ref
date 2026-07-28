@@ -1,0 +1,6 @@
+$ENTRY Main;
+
+* String literal is never closed.
+Main {
+  = 'hello ;
+}

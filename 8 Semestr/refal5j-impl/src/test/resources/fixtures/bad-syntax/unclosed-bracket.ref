@@ -1,0 +1,6 @@
+$ENTRY Main;
+
+* '(' is never closed inside the result.
+Main {
+  = (A B C ;
+}

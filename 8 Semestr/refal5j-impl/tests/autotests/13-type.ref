@@ -1,0 +1,30 @@
+* Тест писался до раскрутки компилятора, поэтому в символьных и словных
+* литералах можно использовать только ASCII, а парсер не поддерживает
+* задание кодов Юникода.
+
+$ENTRY Go {
+  /* пусто */
+    = <Eq ('Lu' 'Hello') <Type 'Hello'>>
+      <Eq ('Ll' 'hello') <Type 'hello'>>
+      <Eq ('D0' '100500') <Type '100500'>>
+      <Eq ('Wi' Hello-World_) <Type Hello-World_>>
+      <Eq ('Wq' "Hello!") <Type "Hello!">>
+      <Eq ('N0' 100500) <Type 100500>>
+      <Eq ('N0' <BigNumber>) <Type <BigNumber>>>
+      <Eq ('P' '!!!') <SkipSubtype <Type '!!!'>>>
+      <Eq ('O' '\n') <SkipSubtype <Type '\n'>>>
+      <Eq ('B0' (100) 500) <Type (100) 500>>
+      <Eq ('*0' /* пусто */) <Type /* пусто */>>
+
+      <Eq ('Lu' <Preved>) <Type <Preved>>>;
+}
+
+Eq { (e.X) e.X = }
+
+BigNumber { = <Numb '9999999999999999999999999999999999999999999999999999'> }
+
+SkipSubtype {
+  s.Type s.SubType e.Value = s.Type e.Value;
+}
+
+Preved { = <Open 'r' 7 'preved.txt'> <Get 7> <Close 7> }

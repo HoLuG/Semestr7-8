@@ -1,0 +1,14 @@
+$ENTRY Main;
+
+* Composing function calls in result expressions
+Main {
+  = <Pair <Id A> <Id B>>;
+}
+
+Pair {
+  s.X s.Y = (s.X s.Y);
+}
+
+Id {
+  e.X = e.X;
+}

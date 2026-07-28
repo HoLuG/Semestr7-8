@@ -1,0 +1,11 @@
+$ENTRY Main;
+
+* Reverse a sequence using recursion + an e-variable accumulator.
+Main {
+  = <Reverse 1 2 3 4 5>;
+}
+
+Reverse {
+  = ;
+  s.X e.Rest = <Reverse e.Rest> s.X;
+}

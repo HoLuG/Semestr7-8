@@ -1,0 +1,3 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{record} \PYG{n+nc}{Br}\PYG{p}{(}\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{items}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Term}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+\end{MintedVerbatim}

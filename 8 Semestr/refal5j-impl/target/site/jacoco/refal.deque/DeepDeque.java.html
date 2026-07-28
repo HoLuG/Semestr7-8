@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeepDeque.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.deque</a> &gt; <span class="el_source">DeepDeque.java</span></div><h1>DeepDeque.java</h1><pre class="source lang-java linenums">package refal.deque;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import static refal.deque.ShallowDeque.CAPACITY;
+import static refal.deque.ShallowDeque.MIN_FILL;
+
+public final class DeepDeque&lt;T&gt; implements Expr&lt;T&gt; {
+
+    private final ShallowDeque&lt;T&gt; front;
+    private final Expr&lt;ShallowDeque&lt;T&gt;&gt; mid;
+    private final ShallowDeque&lt;T&gt; back;
+    private final int sz;
+
+    private DeepDeque(
+            ShallowDeque&lt;T&gt; front,
+            Expr&lt;ShallowDeque&lt;T&gt;&gt; mid,
+            ShallowDeque&lt;T&gt; back,
+<span class="fc" id="L20">            int sz) {</span>
+<span class="fc" id="L21">        this.front = front;</span>
+<span class="fc" id="L22">        this.mid = mid;</span>
+<span class="fc" id="L23">        this.back = back;</span>
+<span class="fc" id="L24">        this.sz = sz;</span>
+<span class="fc" id="L25">    }</span>
+
+    // Умный конструктор: если суммарный размер помещается в ShallowDeque, делаем его.
+    static &lt;T&gt; Expr&lt;T&gt; mkDeep(
+            ShallowDeque&lt;T&gt; front,
+            Expr&lt;ShallowDeque&lt;T&gt;&gt; mid,
+            ShallowDeque&lt;T&gt; back,
+            int total) {
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (total &lt;= CAPACITY) {</span>
+<span class="fc" id="L34">            ShallowDeque&lt;T&gt; flat = ShallowDeque.empty();</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">            for (T x : iterableOf(front)) {</span>
+<span class="fc" id="L36">                flat = flat.pushBackTight(x);</span>
+<span class="fc" id="L37">            }</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">            for (ShallowDeque&lt;T&gt; bucket : iterableOf(mid)) {</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">                for (T x : iterableOf(bucket)) {</span>
+<span class="fc" id="L40">                    flat = flat.pushBackTight(x);</span>
+<span class="fc" id="L41">                }</span>
+<span class="fc" id="L42">            }</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">            for (T x : iterableOf(back)) {</span>
+<span class="fc" id="L44">                flat = flat.pushBackTight(x);</span>
+<span class="fc" id="L45">            }</span>
+<span class="fc" id="L46">            return flat;</span>
+        }
+<span class="fc" id="L48">        return new DeepDeque&lt;&gt;(front, mid, back, total);</span>
+    }
+
+    private static &lt;X&gt; Iterable&lt;X&gt; iterableOf(Expr&lt;X&gt; e) {
+<span class="fc" id="L52">        return e::iterator;</span>
+    }
+
+    @Override
+    public boolean isEmpty() {
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        return sz == 0;</span>
+    }
+
+    @Override
+    public int size() {
+<span class="fc" id="L62">        return sz;</span>
+    }
+
+    ShallowDeque&lt;T&gt; front() {
+<span class="fc" id="L66">        return front;</span>
+    }
+
+    Expr&lt;ShallowDeque&lt;T&gt;&gt; mid() {
+<span class="fc" id="L70">        return mid;</span>
+    }
+
+    ShallowDeque&lt;T&gt; back() {
+<span class="fc" id="L74">        return back;</span>
+    }
+
+    @Override
+    public Expr&lt;T&gt; pushFront(T x) {
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (!front.isFull()) {</span>
+<span class="fc" id="L80">            return new DeepDeque&lt;&gt;(front.pushFrontTight(x), mid, back, sz + 1);</span>
+        }
+        // Разбить [x, front[0..C-1]] в [first MIN_FILL] и [tail].
+<span class="fc" id="L83">        var split = splitForPushFront(front, x);</span>
+<span class="fc" id="L84">        return mkDeep(split.head(), mid.pushFront(split.tail()), back, sz + 1);</span>
+    }
+
+    @Override
+    public Expr&lt;T&gt; pushBack(T x) {
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (!back.isFull()) {</span>
+<span class="fc" id="L90">            return new DeepDeque&lt;&gt;(front, mid, back.pushBackTight(x), sz + 1);</span>
+        }
+        // Разбить [back[0..C-1], x] в [head] и [last MIN_FILL].
+<span class="fc" id="L93">        var split = splitForPushBack(back, x);</span>
+<span class="fc" id="L94">        return mkDeep(front, mid.pushBack(split.head()), split.tail(), sz + 1);</span>
+    }
+
+    @Override
+    public PeekResult&lt;T&gt; separateFront() {
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if (sz == 0) {</span>
+<span class="nc" id="L100">            throw new IllegalStateException(&quot;separateFront from empty DeepDeque&quot;);</span>
+        }
+<span class="fc" id="L102">        DeepDeque&lt;T&gt; norm = normalizeForFront();</span>
+<span class="fc" id="L103">        var pr = norm.front.separateFront();</span>
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L105">        ShallowDeque&lt;T&gt; restFront = (ShallowDeque&lt;T&gt;) pr.rest();</span>
+<span class="fc" id="L106">        return new PeekResult&lt;&gt;(pr.term(),</span>
+<span class="fc" id="L107">                mkDeep(restFront, norm.mid, norm.back, sz - 1));</span>
+    }
+
+    @Override
+    public PeekResult&lt;T&gt; separateBack() {
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if (sz == 0) {</span>
+<span class="nc" id="L113">            throw new IllegalStateException(&quot;separateBack from empty DeepDeque&quot;);</span>
+        }
+<span class="fc" id="L115">        DeepDeque&lt;T&gt; norm = normalizeForBack();</span>
+<span class="fc" id="L116">        var pr = norm.back.separateBack();</span>
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L118">        ShallowDeque&lt;T&gt; restBack = (ShallowDeque&lt;T&gt;) pr.rest();</span>
+<span class="fc" id="L119">        return new PeekResult&lt;&gt;(pr.term(),</span>
+<span class="fc" id="L120">                mkDeep(norm.front, norm.mid, restBack, sz - 1));</span>
+    }
+
+    private DeepDeque&lt;T&gt; normalizeForFront() {
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if (!front.isEmpty()) {</span>
+<span class="fc" id="L125">            return this;</span>
+        }
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        if (!mid.isEmpty()) {</span>
+<span class="fc" id="L128">            var pr = mid.separateFront();</span>
+<span class="fc" id="L129">            return new DeepDeque&lt;&gt;(pr.term(), pr.rest(), back, sz);</span>
+        }
+        // mid пуст, front пуст — поднимаем back наверх как новый front.
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (!back.isEmpty()) {</span>
+<span class="nc" id="L133">            return new DeepDeque&lt;&gt;(back, ShallowDeque.empty(), ShallowDeque.empty(), sz);</span>
+        }
+<span class="nc" id="L135">        throw new IllegalStateException(&quot;DeepDeque with size&gt;0 has no elements&quot;);</span>
+    }
+
+    private DeepDeque&lt;T&gt; normalizeForBack() {
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (!back.isEmpty()) {</span>
+<span class="fc" id="L140">            return this;</span>
+        }
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        if (!mid.isEmpty()) {</span>
+<span class="fc" id="L143">            var pr = mid.separateBack();</span>
+<span class="fc" id="L144">            return new DeepDeque&lt;&gt;(front, pr.rest(), pr.term(), sz);</span>
+        }
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (!front.isEmpty()) {</span>
+<span class="nc" id="L147">            return new DeepDeque&lt;&gt;(ShallowDeque.empty(), ShallowDeque.empty(), front, sz);</span>
+        }
+<span class="nc" id="L149">        throw new IllegalStateException(&quot;DeepDeque with size&gt;0 has no elements&quot;);</span>
+    }
+
+    @Override
+    public Iterator&lt;T&gt; iterator() {
+<span class="fc" id="L154">        return new Iterator&lt;&gt;() {</span>
+<span class="fc" id="L155">            private final Iterator&lt;T&gt; frontIt = front.iterator();</span>
+<span class="fc" id="L156">            private final Iterator&lt;ShallowDeque&lt;T&gt;&gt; midIt = mid.iterator();</span>
+<span class="fc" id="L157">            private final Iterator&lt;T&gt; backIt = back.iterator();</span>
+<span class="fc" id="L158">            private Iterator&lt;T&gt; midBucketIt = java.util.Collections.emptyIterator();</span>
+
+            @Override
+            public boolean hasNext() {
+<span class="fc bfc" id="L162" title="All 2 branches covered.">                if (frontIt.hasNext()) {</span>
+<span class="fc" id="L163">                    return true;</span>
+                }
+<span class="fc bfc" id="L165" title="All 2 branches covered.">                if (midBucketIt.hasNext()) {</span>
+<span class="fc" id="L166">                    return true;</span>
+                }
+<span class="fc bfc" id="L168" title="All 4 branches covered.">                while (midIt.hasNext() &amp;&amp; !midBucketIt.hasNext()) {</span>
+<span class="fc" id="L169">                    midBucketIt = midIt.next().iterator();</span>
+                }
+<span class="fc bfc" id="L171" title="All 2 branches covered.">                if (midBucketIt.hasNext()) {</span>
+<span class="fc" id="L172">                    return true;</span>
+                }
+<span class="fc" id="L174">                return backIt.hasNext();</span>
+            }
+
+            @Override
+            public T next() {
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">                if (!hasNext()) {</span>
+<span class="nc" id="L180">                    throw new NoSuchElementException();</span>
+                }
+<span class="fc bfc" id="L182" title="All 2 branches covered.">                if (frontIt.hasNext()) {</span>
+<span class="fc" id="L183">                    return frontIt.next();</span>
+                }
+<span class="fc bfc" id="L185" title="All 2 branches covered.">                if (midBucketIt.hasNext()) {</span>
+<span class="fc" id="L186">                    return midBucketIt.next();</span>
+                }
+<span class="fc" id="L188">                return backIt.next();</span>
+            }
+        };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if (this == o) {</span>
+<span class="fc" id="L196">            return true;</span>
+        }
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">        if (!(o instanceof Expr&lt;?&gt; that)) {</span>
+<span class="nc" id="L199">            return false;</span>
+        }
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        if (this.size() != that.size()) {</span>
+<span class="nc" id="L202">            return false;</span>
+        }
+<span class="fc" id="L204">        var i1 = this.iterator();</span>
+<span class="fc" id="L205">        var i2 = that.iterator();</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        while (i1.hasNext()) {</span>
+<span class="fc" id="L207">            Object a = i1.next();</span>
+<span class="fc" id="L208">            Object b = i2.next();</span>
+<span class="pc bpc" id="L209" title="4 of 6 branches missed.">            if (a == null ? b != null : !a.equals(b)) {</span>
+<span class="nc" id="L210">                return false;</span>
+            }
+<span class="fc" id="L212">        }</span>
+<span class="fc" id="L213">        return true;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L218">        int h = 1;</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        for (Iterator&lt;T&gt; it = iterator(); it.hasNext(); ) {</span>
+<span class="nc" id="L220">            T x = it.next();</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">            h = 31 * h + (x == null ? 0 : x.hashCode());</span>
+<span class="nc" id="L222">        }</span>
+<span class="nc" id="L223">        return h;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L228">        StringBuilder sb = new StringBuilder(&quot;Deep[&quot;);</span>
+<span class="nc" id="L229">        var it = iterator();</span>
+<span class="nc" id="L230">        boolean first = true;</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        while (it.hasNext()) {</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">            if (!first) {</span>
+<span class="nc" id="L233">                sb.append(&quot;, &quot;);</span>
+            }
+<span class="nc" id="L235">            sb.append(it.next());</span>
+<span class="nc" id="L236">            first = false;</span>
+        }
+<span class="nc" id="L238">        sb.append(']');</span>
+<span class="nc" id="L239">        return sb.toString();</span>
+    }
+
+<span class="fc" id="L242">    record SplitPair&lt;T&gt;(ShallowDeque&lt;T&gt; head, ShallowDeque&lt;T&gt; tail) {</span>
+    }
+
+    // Расщепить полный front-буфер с новым элементом слева на два подбуфера.
+    static &lt;T&gt; SplitPair&lt;T&gt; splitForPushFront(ShallowDeque&lt;T&gt; full, T x) {
+<span class="pc bpc" id="L247" title="1 of 2 branches missed.">        if (!full.isFull()) {</span>
+<span class="nc" id="L248">            throw new IllegalArgumentException(&quot;splitForPushFront expects full buffer&quot;);</span>
+        }
+<span class="fc" id="L250">        Object[] tmp = new Object[CAPACITY + 1];</span>
+<span class="fc" id="L251">        tmp[0] = x;</span>
+<span class="fc bfc" id="L252" title="All 2 branches covered.">        for (int i = 0; i &lt; CAPACITY; i++) {</span>
+<span class="fc" id="L253">            tmp[i + 1] = full.get(i);</span>
+        }
+<span class="fc" id="L255">        ShallowDeque&lt;T&gt; head = ShallowDeque.ofArray(tmp, 0, MIN_FILL);</span>
+<span class="fc" id="L256">        ShallowDeque&lt;T&gt; tail = ShallowDeque.ofArray(tmp, MIN_FILL, CAPACITY + 1 - MIN_FILL);</span>
+<span class="fc" id="L257">        return new SplitPair&lt;&gt;(head, tail);</span>
+    }
+
+    // Расщепить полный back-буфер с новым элементом справа на два подбуфера.
+    static &lt;T&gt; SplitPair&lt;T&gt; splitForPushBack(ShallowDeque&lt;T&gt; full, T x) {
+<span class="pc bpc" id="L262" title="1 of 2 branches missed.">        if (!full.isFull()) {</span>
+<span class="nc" id="L263">            throw new IllegalArgumentException(&quot;splitForPushBack expects full buffer&quot;);</span>
+        }
+<span class="fc" id="L265">        Object[] tmp = new Object[CAPACITY + 1];</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">        for (int i = 0; i &lt; CAPACITY; i++) {</span>
+<span class="fc" id="L267">            tmp[i] = full.get(i);</span>
+        }
+<span class="fc" id="L269">        tmp[CAPACITY] = x;</span>
+<span class="fc" id="L270">        int total = CAPACITY + 1;</span>
+<span class="fc" id="L271">        ShallowDeque&lt;T&gt; head = ShallowDeque.ofArray(tmp, 0, total - MIN_FILL);</span>
+<span class="fc" id="L272">        ShallowDeque&lt;T&gt; tail = ShallowDeque.ofArray(tmp, total - MIN_FILL, MIN_FILL);</span>
+<span class="fc" id="L273">        return new SplitPair&lt;&gt;(head, tail);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

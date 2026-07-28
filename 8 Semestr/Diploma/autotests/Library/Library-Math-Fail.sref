@@ -1,0 +1,6 @@
+//FROM Library
+$EXTERN Add, Prout;
+
+$ENTRY Go {
+  = <Prout '1+2=' <Add '1' '2'>>;
+}

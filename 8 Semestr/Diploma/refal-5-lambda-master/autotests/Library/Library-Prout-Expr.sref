@@ -1,0 +1,11 @@
+//FROM Library
+$EXTERN Prout;
+
+Empty { /* пусто */ = ; }
+
+$ENTRY Go {
+  e.Context =
+    <Empty
+      <Prout 100 #Ident Go (1 2) 'abc' [Go] { = e.Context; } '!'>
+    >;
+}

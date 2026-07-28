@@ -1,0 +1,8 @@
+$ENTRY Go {
+   = <Prout 'Go'>;
+}
+
+$ENTRY GO {
+   = <Prout 'GO'>;
+}
+

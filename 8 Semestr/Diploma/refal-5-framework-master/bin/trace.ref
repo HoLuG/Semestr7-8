@@ -1,0 +1,11 @@
+* R5FW-Parser
+$EXTERN Scan, Parse;
+
+$ENTRY Go {
+  = <Prout 'PARSING...'> <Show <Parse <Scan 'small.ref'>>>;
+}
+
+Show {
+  Success e.AST = <Prout 'SUCCESS'> <Prout 'AST has terms'>;
+  Fails e.Errors = <Prout 'FAILS'>;
+}

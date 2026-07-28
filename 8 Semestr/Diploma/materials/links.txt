@@ -1,0 +1,8 @@
+http://refal.botik.ru/book/html/
+https://github.com/gogabr/pfds?tab=readme-ov-file
+https://mazdaywik.github.io/Refal-05/
+https://mazdaywik.github.io/Refal-05/1-intro.html
+https://mazdaywik.github.io/Refal-05/2-syntax.html
+https://mazdaywik.github.io/Refal-05/3-install-and-usage.html
+https://mazdaywik.github.io/Refal-05/4-implementation.html
+https://github.com/Mazdaywik/Refal-05

@@ -1,0 +1,457 @@
+\section{Технологическая часть}
+\label{sec:tech}
+
+\subsection{Инструкция пользователя}
+\label{subsec:user-manual}
+
+\subsubsection{Требования к среде}
+
+Для сборки и запуска интерпретатора необходимо следующее программное обеспечение
+(таблица~\ref{tab:requirements}). Проверка наличия и версий выполняется
+командами \prog{java -\/\/-version}, \prog{mvn -\/\/-version} в терминале.
+
+\begin{table}[!htb]
+\caption{\centering Требования к среде разработки}
+\label{tab:requirements}
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Компонент} & \textbf{Минимальная версия} & \textbf{Примечание} \\
+\midrule
+Java Development Kit & 25 LTS & Сборка и запуск \\
+Apache Maven & 3.9.x & Сборка проекта \\
+Python~3 & 3.9+ & Только для построения графиков \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Сборка}
+
+Проект собирается командой Apache~Maven из корня репозитория \prog{refal5j-impl/}:
+
+\begin{longlisting}
+\caption{Команда сборки}\label{lst:build}
+\begin{minted}{bash}
+mvn package -DskipTests
+\end{minted}
+\end{longlisting}
+
+Результат сборки --- файл \prog{target/refal5q.jar}, самодостаточный
+JAR-архив с прописанным классом \prog{Main-Class: refal.Main}.
+Все зависимости рантайма включены в него через плагин Maven~Shade,
+поэтому для запуска достаточно стандартной JVM без дополнительных библиотек.
+
+Сборка с полным прогоном тестов выполняется командой \prog{mvn package}
+(без флага \prog{-DskipTests}) или \prog{mvn verify}, которая дополнительно
+формирует отчёт о покрытии кода инструментом JaCoCo.
+
+\newpage
+\subsubsection{Запуск интерпретатора}
+
+Интерпретатор запускается через стандартную команду \prog{java -jar}:
+
+\begin{longlisting}
+\caption{Форма запуска}\label{lst:run}
+\begin{minted}{bash}
+java -jar target/refal5q.jar [OPTIONS] program.ref
+\end{minted}
+\end{longlisting}
+
+Позиционный аргумент --- путь к исходному файлу \prog{.ref}.
+Поддерживаемые опции перечислены в таблице~\ref{tab:options}.
+
+\begin{table}[!htb]
+\caption{\centering Опции командной строки}
+\label{tab:options}
+\centering
+\small
+\begin{tabular}{@{}lp{8.5cm}@{}}
+\toprule
+\textbf{Опция} & \textbf{Описание} \\
+\midrule
+\prog{--entry <имя>} &
+    Явное указание входной функции; имеет приоритет над \prog{\$ENTRY} в файле \\
+\prog{--step-limit <N>} &
+    Максимальное число шагов нормализации (по умолчанию~--- 100\,000) \\
+\prog{--expr <терм...>} &
+    Начальное выражение, передаваемое входной функции вместо пустого \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Код завершения процесса отражает результат выполнения
+(таблица~\ref{tab:exit-codes}).
+
+\begin{table}[!htb]
+\caption{\centering Коды завершения процесса}
+\label{tab:exit-codes}
+\centering
+\small
+\begin{tabular}{@{}cl@{}}
+\toprule
+\textbf{Код} & \textbf{Условие} \\
+\midrule
+0 & Успешное завершение или \prog{<Exit 0>} \\
+1 & Ошибка лексического, синтаксического или семантического анализа \\
+2 & Ошибка времени выполнения: нет подходящего правила,
+    превышение лимита шагов \\
+$n$ & Значение $n$, переданное встроенной функции \prog{<Exit~n>} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Пример запуска программы \prog{hello.ref} с явным указанием точки входа:
+
+\begin{longlisting}
+\caption{Пример запуска}\label{lst:run-example}
+\begin{minted}{bash}
+java -jar target/refal5q.jar --entry Go hello.ref
+\end{minted}
+\end{longlisting}
+
+\subsubsection{Запуск тестов}
+
+Полный набор тестов запускается одной командой Maven:
+
+\newpage
+\begin{longlisting}
+\caption{Запуск тестов}\label{lst:test}
+\begin{minted}{bash}
+mvn test
+mvn verify
+mvn test -Dtest=AutotestsRunnerTest
+\end{minted}
+\end{longlisting}
+
+Первые две команды прогоняют 143~JUnit-теста, покрывающих все компоненты
+проекта. Третья команда запускает отдельный класс \prog{AutotestsRunnerTest},
+который вызывает интерпретатор на 81~внешней программе из двух наборов:
+автотесты репозитория \prog{refal-5j} и десахаренные тесты репозитория
+\prog{refal-5-framework}. Каждая программа выполняется в отдельном процессе
+с тайм-аутом 20~секунд.
+
+Отчёт JaCoCo формируется в каталоге \prog{target/site/jacoco/}; открыть
+его можно браузером, указав путь к \prog{index.html}.
+
+%%% ─────────────────────────────────────────────────────────
+\subsection{Структура данных: раскрученная двусторонняя очередь}
+\label{subsec:deque-impl}
+
+Объектное выражение в нашей реализации хранится в раскрученной (bootstrapped)
+двусторонней очереди по Окасаки~\cite{okasaki_pfds}. У неё амортизированно
+константная конкатенация~--- та самая операция, на которой классические
+списочные интерпретаторы Рефала (включая Refal-5~PZ и Refal-5J) тратят
+линейное время.
+
+\subsubsection{Sealed interface Expr<T>}
+
+Контейнер выражения объявлен как обобщённый запечатанный интерфейс с двумя
+реализациями:
+
+\begin{longlisting}
+\caption{Запечатанный интерфейс Expr<T>}\label{lst:expr-iface}
+\begin{minted}{java}
+public sealed interface Expr<T> extends Iterable<T>
+        permits ShallowDeque, DeepDeque {
+    boolean isEmpty();
+    int size();
+    PeekResult<T> separateFront();
+    PeekResult<T> separateBack();
+    Expr<T> pushFront(T x);
+    Expr<T> pushBack(T x);
+    static <T> Expr<T> empty()        { return ShallowDeque.empty(); }
+    static <T> Expr<T> singleton(T x) { return ShallowDeque.<T>empty().pushBack(x); }
+    static <T> Expr<T> concat(Expr<T> a, Expr<T> b) { return ExprOps.concat(a, b); }
+}
+\end{minted}
+\end{longlisting}
+
+Слово \prog{sealed} запрещает любые другие наследники. Компилятор
+Java~25 на этом основании проверяет полноту разбора в
+\prog{switch}-выражениях, поэтому в коде конкатенации мы можем
+перечислить ровно четыре случая по типам операндов и не писать ветку
+\prog{default}: её отсутствие гарантировано системой типов.
+
+\subsubsection{Параметры буферов}
+
+Ёмкость мелкого буфера~--- константа \prog{ShallowDeque.CAPACITY = 9},
+нижняя граница заполненности \prog{MIN\_FILL = 5}, то есть
+$\lceil CAPACITY / 2 \rceil$. Нечётное значение выбрано по
+арифметическим соображениям: при переполнении мелкого буфера суммарно
+получается $CAPACITY + 1 = 10$ элементов; они делятся ровно пополам
+на два фрагмента по 5, и оба фрагмента сразу удовлетворяют
+\prog{MIN\_FILL}. С чётной ёмкостью пришлось бы либо мириться с
+остатком в один элемент, либо добавлять отдельную обработку этого
+случая~--- ни то ни другое не даёт выигрыша по свойствам структуры.
+
+На практике глубина рекурсии \prog{DeepDeque} при таком \prog{CAPACITY}
+почти не выходит за два уровня: в тестовых программах с выражениями
+длиной до десятков тысяч термов средняя очередь сама ни разу не успевает
+стать глубокой.
+
+\subsubsection{ShallowDeque<T>: мелкий буфер}
+
+\prog{ShallowDeque<T>}~--- иммутабельный класс с тремя полями:
+массив фиксированной длины \prog{Object[] buf} размером \prog{CAPACITY},
+индекс головы \prog{head} и текущий размер \prog{sz}.
+Доступ по логическому индексу~$i$ выполняется через единственную формулу:
+
+\newpage
+\begin{longlisting}
+\caption{Циклическое индексирование в ShallowDeque}\label{lst:shallow-idx}
+\begin{minted}{java}
+int idx(int i) {
+    return Math.floorMod(head + i, CAPACITY);
+}
+\end{minted}
+\end{longlisting}
+
+\prog{floorMod} здесь стоит вместо обычного \prog{\%}, потому что в Java
+оператор \prog{\%} при отрицательном делимом возвращает отрицательный
+остаток, а нам нужен индекс в массиве. \prog{pushFrontTight} как раз
+сдвигает голову на~$-1$, и без \prog{floorMod} в этой точке пришлось бы
+вручную добавлять \prog{CAPACITY}.
+
+В классе определены два варианта операций добавления:
+\begin{itemize}
+  \item \prog{pushFrontTight(T)} и \prog{pushBackTight(T)}~--- внутренние, возвращают
+        \prog{ShallowDeque<T>} и бросают \prog{IllegalStateException} при переполнении;
+        применяются там, где вызывающий код гарантирует наличие свободного места
+        (например, при формировании буферов во время конкатенации);
+  \item \prog{pushFront(T)} и \prog{pushBack(T)}~--- публичные (методы
+        интерфейса \prog{Expr<T>}); при переполнении автоматически переходят
+        в глубокий уровень через \prog{DeepDeque.mkDeep}.
+\end{itemize}
+
+\subsubsection{DeepDeque<T>: глубокий уровень}
+
+\prog{DeepDeque<T>} реализует тройку $\langle front, mid, back \rangle$:
+
+\begin{longlisting}
+\caption{Поля DeepDeque<T>}\label{lst:deep-fields}
+\begin{minted}{java}
+public final class DeepDeque<T> implements Expr<T> {
+    private final ShallowDeque<T>          front;
+    private final Expr<ShallowDeque<T>>    mid;
+    private final ShallowDeque<T>          back;
+    private final int                      sz;
+    ...
+}
+\end{minted}
+\end{longlisting}
+
+Тип поля \prog{mid}~--- \prog{Expr<ShallowDeque<T>>}, и именно здесь
+проявляется «раскрутка»: средняя очередь хранит мелкие буферы, но сама
+она тоже \prog{Expr<\ldots>}, то есть может оказаться как
+\prog{ShallowDeque}, так и \prog{DeepDeque} следующего уровня.
+На разумных размерах выражений рекурсия редко уходит глубже второго
+уровня.
+
+Конструктор \prog{mkDeep} автоматически схлопывает глубокую очередь обратно
+в мелкую, когда суммарное число элементов не превышает \prog{CAPACITY}:
+
+\begin{longlisting}
+\caption{Конструктор mkDeep с откатом в ShallowDeque}\label{lst:mkdeep}
+\begin{minted}{java}
+static <T> Expr<T> mkDeep(ShallowDeque<T> front,
+                           Expr<ShallowDeque<T>> mid,
+                           ShallowDeque<T> back, int total) {
+    if (total <= CAPACITY) {
+        ShallowDeque<T> flat = ShallowDeque.empty();
+        for (T x : iterableOf(front))  flat = flat.pushBackTight(x);
+        for (ShallowDeque<T> bucket : iterableOf(mid))
+            for (T x : iterableOf(bucket)) flat = flat.pushBackTight(x);
+        for (T x : iterableOf(back))   flat = flat.pushBackTight(x);
+        return flat;
+    }
+    return new DeepDeque<>(front, mid, back, total);
+}
+\end{minted}
+\end{longlisting}
+
+Параметр \prog{total} передаётся явно, чтобы не пересчитывать его внутри:
+\prog{mid.size()} возвращает число буферов в средней очереди, а не суммарное
+число листовых элементов, поэтому наивная формула
+\prog{front.size() + mid.size() + back.size()} оказалась бы некорректной.
+Каждый вызов \prog{mkDeep} обновляет \prog{total} инкрементально~---
+прибавляя или вычитая единицу по ходу операции добавления или извлечения.
+
+\subsubsection{Конкатенация: четыре случая}
+
+Конкатенация реализована в служебном классе \prog{ExprOps} с разбором
+четырёх случаев по мелкости/глубине операндов:
+
+\begin{longlisting}
+\caption{Разбор четырёх случаев конкатенации}\label{lst:concat-cases}
+\begin{minted}{java}
+static <T> Expr<T> concat(Expr<T> a, Expr<T> b) {
+    if (a.isEmpty()) return b;
+    if (b.isEmpty()) return a;
+    if (a instanceof ShallowDeque<T> sa && b instanceof ShallowDeque<T> sb)
+        return concatSS(sa, sb);
+    if (a instanceof ShallowDeque<T> sa && b instanceof DeepDeque<T> db)
+        return concatSD(sa, db);
+    if (a instanceof DeepDeque<T> da && b instanceof ShallowDeque<T> sb)
+        return concatDS(da, sb);
+    DeepDeque<T> da = (DeepDeque<T>) a;
+    DeepDeque<T> db = (DeepDeque<T>) b;
+    return concatDD(da, db);
+}
+\end{minted}
+\end{longlisting}
+
+В случае \emph{Deep\,+\,Deep} пограничные буферы \prog{a.back} и
+\prog{b.front} склеиваются в один буфер, а \prog{concat} вызывается
+рекурсивно уже на средних очередях. На каждом уровне рекурсии работа
+ограничена константой, а сама рекурсия идёт не глубже логарифма от
+длины выражения~--- так Окасаки и получает амортизированную
+константу~\cite{okasaki_pfds}.
+
+%%% ─────────────────────────────────────────────────────────
+\subsection{Цикл нормализации}
+\label{subsec:runtime-impl}
+
+\subsubsection{Поле зрения и иерархия ViewTerm}
+
+Нормализация выражения выполняется итеративным проходом по
+\emph{полю зрения}~--- линейной последовательности элементарных единиц.
+Каждая такая единица описывается запечатанным интерфейсом \prog{ViewTerm}:
+
+\begin{longlisting}
+\caption{Иерархия ViewTerm}\label{lst:viewterm}
+\begin{minted}{java}
+public sealed interface ViewTerm
+        permits ViewTerm.Passive,  ViewTerm.BulkPassive,
+                ViewTerm.AngOpen,  ViewTerm.AngClose,
+                ViewTerm.ParenOpen, ViewTerm.ParenClose {
+
+    record Passive(Term term)          implements ViewTerm {}
+    record BulkPassive(Expr<Term> items) implements ViewTerm {}
+    record AngOpen(String fn)          implements ViewTerm {}
+    record AngClose()                  implements ViewTerm {}
+    record ParenOpen()                 implements ViewTerm {}
+    record ParenClose()                implements ViewTerm {}
+}
+\end{minted}
+\end{longlisting}
+
+Термы-атомы (\prog{Sym}, \prog{Num}, \prog{Str}) и скобочные термы \prog{Br}
+после нормализации вложенных выражений представляются как \prog{Passive}.
+Вызов \prog{<f args>} разворачивается в последовательность
+\prog{AngOpen(f)}, элементы аргументов, \prog{AngClose}.
+Скобочный терм~\prog{(e.X)} аналогично разворачивается через
+\prog{ParenOpen} и \prog{ParenClose}.
+\prog{BulkPassive} отвечает за оптимизацию связывания переменных и описан
+в следующем подразделе.
+
+\subsubsection{Двустековая реализация нормализатора}
+
+Нормализация работает с двумя стеками~--- \prog{left} и \prog{right}:
+\begin{itemize}
+  \item \prog{right} содержит ещё не обработанные элементы поля зрения;
+  \item \prog{left} накапливает уже пассивные элементы~--- те, в которых
+        не осталось ни одного активного вызова.
+\end{itemize}
+
+Исходное выражение сначала сплющивается в \prog{right} слева-направо.
+Затем главный цикл извлекает элементы из \prog{right} по одному с головы.
+Пассивные элементы (\prog{Passive}, \prog{BulkPassive}) и открывающие
+маркеры (\prog{AngOpen}, \prog{ParenOpen}) просто перекладываются в
+\prog{left}. Обработка наступает при встрече закрывающего маркера:
+
+\begin{longlisting}
+\caption{Обработка закрывающего маркера вызова функции}\label{lst:angclose}
+\begin{minted}{java}
+case ViewTerm.AngClose ignored -> {
+    bumpStep();
+    Expr<Term> argsExpr = Expr.empty();
+    String fn = null;
+    while (true) {
+        ViewTerm top = left.pollLast();
+        if (top instanceof ViewTerm.AngOpen ao) { fn = ao.fn(); break; }
+        if (top instanceof ViewTerm.Passive pt)
+            argsExpr = argsExpr.pushFront(pt.term());
+        else if (top instanceof ViewTerm.BulkPassive bp)
+            argsExpr = Expr.concat(bp.items(), argsExpr); // O(1)
+    }
+}
+\end{minted}
+\end{longlisting}
+
+При встрече \prog{AngClose} мы снимаем элементы с хвоста \prog{left}
+до парного \prog{AngOpen} и попутно собираем выражение аргументов
+\prog{argsExpr}. Одиночный \prog{Passive} присоединяется через
+\prog{pushFront} за~$O(1)$, а \prog{BulkPassive}~--- через
+\prog{Expr.concat(bp.items(), argsExpr)}, тоже за~$O(1)$
+амортизированно. Обработка \prog{ParenClose} устроена точно так же,
+только без поиска имени функции.
+
+После сборки аргументов для встроенной функции результат сплющивается и
+помещается обратно в \prog{right}; для пользовательской функции находится
+первое подходящее правило и его правая часть, с подставленными связываниями
+переменных, укладывается на \prog{right} методом
+\prog{pushResultToStack}.
+
+Итеративный цикл вместо рекурсивного обхода даёт нам независимость от
+размера стека JVM: сколь угодно глубоко вложенная рефал-программа
+обрабатывается в константной глубине Java-стека, а реальный расход
+памяти зависит только от длины поля зрения.
+
+\subsubsection{Оптимизация BulkPassive}
+\label{subsubsec:bulkpassive}
+
+Без оптимизации подстановка значения переменной в правой части правила
+требовала поэлементной укладки: каждый \prog{Term} из связанного значения
+помещался на стек \prog{right} как отдельный объект \prog{Passive}:
+
+\begin{longlisting}
+\caption{Наивная укладка переменной (до оптимизации)}\label{lst:var-naive}
+\begin{minted}{java}
+case refal.ast.Var v -> {
+    Expr<Term> val = bindings.get(v.key());
+    // O(N) итераций: каждый терм становится Passive
+    for (Term t : val) {
+        right.addFirst(new ViewTerm.Passive(t));
+    }
+}
+\end{minted}
+\end{longlisting}
+
+При следующей встрече \prog{AngClose} те же $N$ элементов снимались
+с \prog{left} по одному~--- ещё $O(N)$ работы на каждый шаг нормализации.
+В программе, которая на каждом шаге накапливает выражение длиной $N$
+(как Loop/Select из аналитической части), это давало $O(N^2)$
+операций суммарно.
+
+Оптимизация сводится к одному изменению: вместо перебора элементов
+переменной её значение помещается на стек одним объектом \prog{BulkPassive}:
+
+\begin{longlisting}
+\caption{Укладка переменной через BulkPassive (O(1))}\label{lst:var-bulk}
+\begin{minted}{java}
+case refal.ast.Var v -> {
+    Expr<Term> val = bindings.get(v.key());
+    if (!val.isEmpty()) {
+        right.addFirst(new ViewTerm.BulkPassive(val)); // O(1)
+    }
+}
+\end{minted}
+\end{longlisting}
+
+Когда обработчик \prog{AngClose} снимает этот объект с \prog{left},
+он подмешивает его в накапливаемые аргументы вызовом \prog{Expr.concat}~---
+тоже амортизированно $O(1)$ (листинг~\refAlgo{lst:angclose}).
+
+Важный инвариант: \prog{BulkPassive} попадает в поле зрения ровно в той
+позиции, где раньше лежали бы отдельные \prog{Passive} с тем же набором
+термов в том же порядке. Это значит, что замена не меняет порядок
+вычисления и не нарушает семантику Рефала~--- мы просто переносим
+ту же подпоследовательность одним объектом вместо $N$.
+
+Эффект от оптимизации хорошо виден на двух тестах. Тест
+\prog{03-concat.ref}, который раньше упирался в лимит в 100~миллионов
+шагов нормализации и не завершался, теперь проходит примерно за
+10~секунд. На бенчмарке Loop/Select при $N = 20\,000$ наш интерпретатор
+показывает порядка 300~мс против секунды и более у Refal-5~PZ и
+Refal-5J.

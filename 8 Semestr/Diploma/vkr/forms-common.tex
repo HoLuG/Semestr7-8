@@ -1,0 +1,64 @@
+% Общие элементы бланков ВКР (по образцу VKR_Morozov.pdf)
+
+% Текст шапки министерства, 6 строк (как у Морозова на задании и плане)
+\newcommand{\vkrministrytext}{%
+Министерство науки и высшего образования Российской Федерации\\
+Федеральное государственное автономное образовательное учреждение\\
+высшего образования\\
+<<Московский государственный технический университет имени Н.Э. Баумана\\
+(национальный исследовательский университет)>>\\
+(МГТУ им. Н.Э. Баумана)}
+
+% Двойная линия под шапкой (толстая + тонкая), во всю ширину текста
+\newcommand{\vkrheaderrule}{%
+  \par\vspace{1pt}\nointerlineskip
+  \noindent\rule{\textwidth}{2.8pt}\par\nointerlineskip
+  \vspace{1.6pt}\nointerlineskip
+  \noindent\rule{\textwidth}{0.5pt}\par}
+
+% Центрированная жирная шапка министерства + двойная линия (задание, план)
+\newcommand{\vkrformministry}{%
+  {\centering\fontsize{11.5pt}{12pt}\selectfont\bfseries\vkrministrytext\par}%
+  \vkrheaderrule}
+
+% Блок УТВЕРЖДАЮ — единый для задания и кал. плана (по образцу Морозова).
+% Все три содержательные строки начинаются под буквой «З» (одинаковый левый
+% край) и заканчиваются на одной вертикали; линии для заполнения тянутся до
+% правого края блока (\hrulefill ~ подчёркивание). Подписи (Индекс)/(И.О.Фамилия)
+% мелким шрифтом, прижаты вправо, минимальный интервал к линиям.
+\newlength{\vkrutvw}\setlength{\vkrutvw}{5.7cm}
+\newcommand{\vkrutvline}{\leavevmode\hrulefill}
+% Мелкая подпись, прижатая к линии сверху (как у Морозова — почти вплотную)
+\newcommand{\vkrutvcap}[1]{\par\nobreak\vskip-0.6ex\makebox[\vkrutvw][r]{\scriptsize#1}}
+\newcommand{\vkrapproveinner}{%
+\begin{minipage}[t]{\vkrutvw}%
+\setlength{\parindent}{0pt}%
+\setlength{\parskip}{0pt}%
+\centering УТВЕРЖДАЮ\par
+\vskip0.5em
+{\raggedright\baselineskip=2.2ex
+Заведующий кафедрой\,\vkrutvline
+\vkrutvcap{(Индекс)}\par
+\vskip0.35em
+\vkrutvline
+\vkrutvcap{(И.О.Фамилия)}\par
+\vskip0.3em
+<<\,\underline{\makebox[1.0cm]{}}\,>>\,\underline{\makebox[2.3cm]{}}\,20\,\underline{\makebox[0.8cm]{}}\,г.\par}%
+\end{minipage}}
+
+\newcommand{\vkrformapprove}{%
+\noindent\hfill\vkrapproveinner}
+
+\newcommand{\vkrtopic}{Компилятор базисного подмножества Рефала-5 с представлением данных, использующим раскрученные очереди}
+
+% ФАКУЛЬТЕТ / КАФЕДРА / ГРУППА (значения на одной вертикали)
+\newcommand{\vkrformfaculty}[3]{%
+{\bfseries\fontsize{13pt}{15pt}\selectfont
+\makebox[3.25cm][l]{ФАКУЛЬТЕТ}\underline{\makebox[2.35cm][c]{#1}}\\[0.18em]
+\makebox[3.25cm][l]{КАФЕДРА}\underline{\makebox[2.35cm][c]{#2}}\\[0.18em]
+\makebox[3.25cm][l]{ГРУППА}\underline{\makebox[2.35cm][c]{#3}}%
+}}
+
+% Строка ФАКУЛЬТЕТ/КАФЕДРА на титуле: метка + название по центру на подчёркивании
+\newcommand{\vkrfacultyline}[2]{%
+  \noindent\makebox[2.9cm][l]{#1}\underline{\makebox[\dimexpr\textwidth-2.9cm\relax][c]{#2}}\par}

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Bindings.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.runtime</a> &gt; <span class="el_source">Bindings.java</span></div><h1>Bindings.java</h1><pre class="source lang-java linenums">package refal.runtime;
+
+import refal.ast.Term;
+import refal.deque.Expr;
+
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+// Окружение сопоставления: ключ переменной (вида &quot;s.X&quot;) -&gt; последовательность термов.
+// Значения хранятся как Expr (деки), поэтому «копирование» переменной — O(1).
+public final class Bindings {
+
+    private final Map&lt;String, Expr&lt;Term&gt;&gt; map;
+
+<span class="fc" id="L18">    private Bindings(Map&lt;String, Expr&lt;Term&gt;&gt; map) {</span>
+<span class="fc" id="L19">        this.map = map;</span>
+<span class="fc" id="L20">    }</span>
+
+    public static Bindings empty() {
+<span class="fc" id="L23">        return new Bindings(new LinkedHashMap&lt;&gt;());</span>
+    }
+
+    public boolean contains(String key) {
+<span class="fc" id="L27">        return map.containsKey(key);</span>
+    }
+
+    public Expr&lt;Term&gt; get(String key) {
+<span class="fc" id="L31">        return map.get(key);</span>
+    }
+
+    public Bindings with(String key, Expr&lt;Term&gt; value) {
+<span class="fc" id="L35">        Map&lt;String, Expr&lt;Term&gt;&gt; next = new LinkedHashMap&lt;&gt;(map);</span>
+<span class="fc" id="L36">        next.put(key, value);</span>
+<span class="fc" id="L37">        return new Bindings(next);</span>
+    }
+
+    // Удобная перегрузка для тестов: принимает обычный List.
+    public Bindings with(String key, List&lt;Term&gt; value) {
+<span class="fc" id="L42">        return with(key, Expr.fromList(value));</span>
+    }
+
+    public Map&lt;String, Expr&lt;Term&gt;&gt; asMap() {
+<span class="fc" id="L46">        return Map.copyOf(map);</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (this == o) {</span>
+<span class="nc" id="L52">            return true;</span>
+        }
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (!(o instanceof Bindings b)) {</span>
+<span class="nc" id="L55">            return false;</span>
+        }
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (!map.keySet().equals(b.map.keySet())) {</span>
+<span class="nc" id="L58">            return false;</span>
+        }
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        for (var e : map.entrySet()) {</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">            if (!equalExprs(e.getValue(), b.map.get(e.getKey()))) {</span>
+<span class="nc" id="L62">                return false;</span>
+            }
+<span class="nc" id="L64">        }</span>
+<span class="nc" id="L65">        return true;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L70">        int h = 0;</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        for (var e : map.entrySet()) {</span>
+<span class="nc" id="L72">            h += Objects.hashCode(e.getKey()) ^ exprHash(e.getValue());</span>
+<span class="nc" id="L73">        }</span>
+<span class="nc" id="L74">        return h;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L79">        StringBuilder sb = new StringBuilder(&quot;Bindings{&quot;);</span>
+<span class="nc" id="L80">        boolean first = true;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        for (var e : map.entrySet()) {</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (!first) {</span>
+<span class="nc" id="L83">                sb.append(&quot;, &quot;);</span>
+            }
+<span class="nc" id="L85">            first = false;</span>
+<span class="nc" id="L86">            sb.append(e.getKey()).append('=').append(e.getValue().toList());</span>
+<span class="nc" id="L87">        }</span>
+<span class="nc" id="L88">        return sb.append('}').toString();</span>
+    }
+
+    // Структурное равенство двух выражений по итератору.
+    public static boolean equalExprs(Expr&lt;Term&gt; a, Expr&lt;Term&gt; b) {
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (a.size() != b.size()) {</span>
+<span class="fc" id="L94">            return false;</span>
+        }
+<span class="fc" id="L96">        Iterator&lt;Term&gt; ia = a.iterator();</span>
+<span class="fc" id="L97">        Iterator&lt;Term&gt; ib = b.iterator();</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        while (ia.hasNext()) {</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">            if (!Objects.equals(ia.next(), ib.next())) {</span>
+<span class="fc" id="L100">                return false;</span>
+            }
+        }
+<span class="fc" id="L103">        return true;</span>
+    }
+
+    private static int exprHash(Expr&lt;Term&gt; e) {
+<span class="nc" id="L107">        int h = 1;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        for (Term t : e) {</span>
+<span class="nc" id="L109">            h = 31 * h + Objects.hashCode(t);</span>
+<span class="nc" id="L110">        }</span>
+<span class="nc" id="L111">        return h;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

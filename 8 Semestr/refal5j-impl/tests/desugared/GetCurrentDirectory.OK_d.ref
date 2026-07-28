@@ -1,0 +1,10 @@
+$ENTRY Go {
+   = <CheckCurrentDirectory <GetCurrentDirectory>>;
+}
+
+CheckCurrentDirectory {
+  e.Prefix s.Sep 'autotests' s.Sep 'compatibility' s.Sep = ;
+
+  e.Prefix s.Sep 'autotests' s.Sep 'compatibility' = ;
+}
+

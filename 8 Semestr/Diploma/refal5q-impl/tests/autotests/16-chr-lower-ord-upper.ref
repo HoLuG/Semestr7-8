@@ -1,0 +1,68 @@
+* тест взят из репозитория Рефала-5λ и адаптирован под потребности Рефала-5J
+
+$ENTRY Go {
+  /* пусто */
+    , <ListOfBuiltin> : e.11 (s.12 Chr regular) e.13
+    , <ListOfBuiltin> : e.21 (s.22 Lower regular) e.23
+    , <ListOfBuiltin> : e.31 (s.32 Ord regular) e.24
+    , <ListOfBuiltin> : e.41 (s.42 Upper regular) e.25
+    = <Eq ('He' (('l') Abc 'lo')) <Chr 72 101 ((1114220) Abc 2228332 111)>>
+      /* 1114220 = 0x110000 + 108 = 0x110000 + 'l' */
+      /* 2228332 = 0x220000 + 108 = 0x110000 + 'l' */
+      <Eq (<LowerPrintableAscii>) <Lower <PrintableAscii>>>
+      <Eq
+        ('h' 10 'e' 20 'l' Abc ('l') 'o')
+        <Lower 'H' 10 'e' 20 'L' Abc ('L') 'o'>
+      >
+      <Eq (72 101 ((108) Abc 108 111)) <Ord 'He' (('l') Abc 'lo')>>
+      <Eq (<UpperPrintableAscii>) <Upper <PrintableAscii>>>
+      <Eq
+        ('H' 10 'E' 20 'L' Abc ('L') 'O')
+        <Upper 'h' 10 'E' 20 'l' Abc ('l') 'O'>
+      >
+
+      <Eq (<LoadFile 'preved-upper.txt'>) <Upper <LoadFile 'preved.txt'>>>
+      <Eq (<LoadFile 'preved-lower.txt'>) <Lower <LoadFile 'preved.txt'>>>
+      <Eq (<Preved-Codes>) <Ord <LoadFile 'preved.txt'>>>
+      <Eq (<LoadFile 'preved.txt'>) <Chr <Preved-Codes>>>;
+}
+
+PrintableAscii {
+  = ' !"#$%&\'()*+,-./0123456789:;<=>?'
+    '@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_'
+    '`abcdefghijklmnopqrstuvwxyz{|}~';
+}
+
+LowerPrintableAscii {
+  = ' !"#$%&\'()*+,-./0123456789:;<=>?'
+    '@abcdefghijklmnopqrstuvwxyz[\\]^_'
+    '`abcdefghijklmnopqrstuvwxyz{|}~';
+}
+
+UpperPrintableAscii {
+  = ' !"#$%&\'()*+,-./0123456789:;<=>?'
+    '@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_'
+    '`ABCDEFGHIJKLMNOPQRSTUVWXYZ{|}~';
+}
+
+Eq { (e.X) e.X =  }
+
+LoadFile {
+  e.FileName = <DoLoadFile <Open 'r' 7 e.FileName>>;
+}
+
+DoLoadFile {
+  /* пусто */
+    , <Get 7>
+    : {
+        /* пусто */ 0 = /* пусто */;
+        e.Line 0 = (e.Line);
+        e.Line = (e.Line) <DoLoadFile>;
+      };
+}
+
+Preved-Codes {
+  /* пусто */
+    = (1055 1088 1077 1074 1077 1076 44)
+      (1052 1077 1076 1074 1077 1076 33);
+}

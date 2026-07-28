@@ -1,0 +1,61 @@
+*$CLASSIC
+*$EXTENDED
+$ENTRY Go {
+   = ;
+
+  (A (10 BCD 'efgh')) Q = <Go (P Q <Go> R) 'st'>;
+
+  Pattern = <Go_check CondResult1>;
+
+  e.Other = <Go_cont e.Other>;
+}
+
+Go_check {
+  CondPattern1 = <Go_check0 CondResult2>;
+
+  e.Other = <Go_cont0 e.Other>;
+}
+
+Go_cont {
+  Pattern = <Go_check1 CondResult1>;
+
+  e.Other = <Go_cont1 e.Other>;
+}
+
+Go_check0 {
+  CondPattern2 = Result;
+
+  e.Other = <Go_cont0 CondPattern1>;
+}
+
+Go_cont0 {
+  e.Other = <Go_cont Pattern>;
+}
+
+Go_check1 {
+  CondPattern1 = <Go0 BlockResult2>;
+
+  e.Other = <Go_cont1 Pattern>;
+}
+
+Go_cont1 {
+  Pattern = <Go1 BlockResult>;
+}
+
+Go0 {
+  BlockPattern1 = BlockResult1;
+
+  BlockPattern2 = <Go0_check BlockCondResult1>;
+}
+
+Go0_check {
+  BlockCondPattern1 = BlockResult2;
+}
+
+Go1 {
+  BlockPattern = BlockResult;
+}
+
+*$EXTENDED
+$EXTERN Foo, Bar, Baz;
+

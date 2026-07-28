@@ -1,0 +1,5 @@
+# Created at 2026-06-17T22:42:34.124
+Boot Manifest-JAR contains absolute paths in classpath 'D:\Programming\Projects\8 Semestr\Diploma\refal5j-impl\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+

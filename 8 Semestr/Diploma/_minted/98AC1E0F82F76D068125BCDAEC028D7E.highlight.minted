@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{pi}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{pe}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                                }\PYG{c+c1}{// (1)}
+\PYG{+w}{        }\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{left}\PYG{+w}{  }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pat}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{pi}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{right}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pat}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{pe}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{);}
+\PYG{+w}{        }\PYG{k+kt}{boolean}\PYG{+w}{ }\PYG{n}{leftEvar}\PYG{+w}{  }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{left}\PYG{+w}{  }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{EVar}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{boolean}\PYG{+w}{ }\PYG{n}{rightEvar}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{right}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{EVar}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{leftEvar}\PYG{+w}{ }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }\PYG{n}{rightEvar}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{break}\PYG{p}{;}\PYG{+w}{            }\PYG{c+c1}{// (2)}
+\end{MintedVerbatim}

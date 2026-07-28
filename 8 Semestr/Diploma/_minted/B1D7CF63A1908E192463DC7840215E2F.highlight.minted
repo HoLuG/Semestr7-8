@@ -1,0 +1,14 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{sealed}\PYG{+w}{ }\PYG{k+kd}{interface} \PYG{n+nc}{Thunk}\PYG{+w}{ }\PYG{n}{permits}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{More}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{record} \PYG{n+nc}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{o}{\PYGZlt{}}\PYG{n}{Bindings}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{value}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{+w}{    }\PYG{k+kd}{record} \PYG{n+nc}{More}\PYG{p}{(}\PYG{n}{Supplier}\PYG{o}{\PYGZlt{}}\PYG{n}{Thunk}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{next}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{Optional}\PYG{o}{\PYGZlt{}}\PYG{n}{Bindings}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{run}\PYG{p}{(}\PYG{n}{Thunk}\PYG{+w}{ }\PYG{n}{start}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{Thunk}\PYG{+w}{ }\PYG{n}{t}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{start}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{t}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{More}\PYG{+w}{ }\PYG{n}{m}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n}{t}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{m}\PYG{p}{.}\PYG{n+na}{next}\PYG{p}{().}\PYG{n+na}{get}\PYG{p}{();}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{p}{((}\PYG{n}{Done}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{).}\PYG{n+na}{value}\PYG{p}{();}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\PYG{c+c1}{// Instead of recursion: each step returns Done(result) or More(next\PYGZus{}step)}
+\PYG{c+c1}{// Java stack depth = O(1), regardless of pattern complexity}
+\end{MintedVerbatim}

@@ -1,0 +1,98 @@
+$ENTRY Go {
+  /* пусто */
+    = <Eq <Rev-L <Rev-L <Expr>>> (<Expr>)>
+      <Eq <Rev-R <Rev-R <Expr>>> (<Expr>)>
+      <Eq <Rev-L <Rev-R <Expr>>> (<Expr>)>
+      <Eq <Rev-R <Rev-L <Expr>>> (<Expr>)>
+
+      <Eq <Rev-LA <Rev-LA <Expr>>> (<Expr>)>
+      <Eq <Rev-RA <Rev-LA <Expr>>> (<Expr>)>
+      <Eq <Rev-LA <Rev-RA <Expr>>> (<Expr>)>
+      <Eq <Rev-RA <Rev-RA <Expr>>> (<Expr>)>
+
+      <Eq <Rev-C <Rev-C <Expr>>> (<Expr>)>
+
+      <Eq <Rev-L <Rev-L <Expr10>>> (<Expr10>)>
+      <Eq <Rev-R <Rev-R <Expr10>>> (<Expr10>)>
+      <Eq <Rev-C <Rev-C <Expr10>>> (<Expr10>)>
+
+      <Eq <Rev-L <Rev-L <Expr100>>> (<Expr100>)>
+      <Eq <Rev-R <Rev-R <Expr100>>> (<Expr100>)>
+      <Eq <Rev-C <Rev-C <Expr100>>> (<Expr100>)>
+
+      <Eq <Rev-L <Rev-L <Expr1000>>> (<Expr1000>)>
+      <Eq <Rev-LA <Rev-LA <Expr1000>>> (<Expr1000>)>
+      <Eq <Rev-R <Rev-R <Expr1000>>> (<Expr1000>)>
+      <Eq <Rev-RA <Rev-RA <Expr1000>>> (<Expr1000>)>
+      <Eq <Rev-C <Rev-C <Expr1000>>> (<Expr1000>)>
+
+      <Eq <Rev-L <Rev-L <Expr10000>>> (<Expr10000>)>
+      <Eq <Rev-LA <Rev-LA <Expr10000>>> (<Expr10000>)>
+      <Eq <Rev-R <Rev-R <Expr10000>>> (<Expr10000>)>
+      <Eq <Rev-RA <Rev-RA <Expr10000>>> (<Expr10000>)>
+      <Eq <Rev-C <Rev-C <Expr10000>>> (<Expr10000>)>;
+}
+
+Expr {
+  /* пусто */
+    = '`1234567890-=~!@#$%^&*()_+'
+      'qwertyuiop[]\\QWERTYUIOP{}|'
+      'asdfghjkl;\'ASDFGHJKL:"'
+      'zxcvbnm,./ZXCVBNM<>?';
+}
+
+Eq { e.X (e.X) = }
+
+Rev-L {
+  s.X e.Xs = <Rev-L e.Xs> s.X;
+  /* пусто */ = /* пусто */;
+}
+
+Rev-R {
+  e.Xs s.X = s.X <Rev-R e.Xs>;
+  /* пусто */ = /* пусто */;
+}
+
+Rev-LA { e.Xs = <DoRev-LA () (e.Xs)> }
+
+DoRev-LA {
+  (e.A) (s.X e.Xs) = <DoRev-LA (s.X e.A) (e.Xs)>;
+  (e.A) (/* пусто */) = e.A;
+}
+
+Rev-RA { e.Xs = <DoRev-RA () (e.Xs)> }
+
+DoRev-RA {
+  (e.A) (e.Xs s.X) = <DoRev-RA (e.A s.X) (e.Xs)>;
+  (e.A) (/* пусто */) = e.A;
+}
+
+Rev-C {
+  s.L e.M s.R = s.R <Rev-C e.M> s.L;
+  s.O = s.O;
+  /* пусто */ = /* пусто */;
+}
+
+Expr10 {
+  /* пусто */
+    = <Expr> <Expr> <Expr> <Expr> <Expr>
+      <Expr> <Expr> <Expr> <Expr> <Expr>;
+}
+
+Expr100 {
+  /* пусто */
+    = <Expr10> <Expr10> <Expr10> <Expr10> <Expr10>
+      <Expr10> <Expr10> <Expr10> <Expr10> <Expr10>;
+}
+
+Expr1000 {
+  /* пусто */
+    = <Expr100> <Expr100> <Expr100> <Expr100> <Expr100>
+      <Expr100> <Expr100> <Expr100> <Expr100> <Expr100>;
+}
+
+Expr10000 {
+  /* пусто */
+    = <Expr1000> <Expr1000> <Expr1000> <Expr1000> <Expr1000>
+      <Expr1000> <Expr1000> <Expr1000> <Expr1000> <Expr1000>;
+}

@@ -1,0 +1,4 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{sealed}\PYG{+w}{ }\PYG{k+kd}{interface} \PYG{n+nc}{Term}
+\PYG{+w}{    }\PYG{n}{permits}\PYG{+w}{ }\PYG{n}{Sym}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Num}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Str}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Var}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Br}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Call}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+\end{MintedVerbatim}

@@ -1,0 +1,11 @@
+$ENTRY Go {
+    = <Eq ('LuA') <Type 'A'>> <Eq ('Lla') <Type 'a'>> <Eq ('D07') <Type '7'>>
+      <Eq ('Wi' Hello) <Type Hello>> <Eq ('Wq' "a b c") <Type "a b c">>
+      <Eq ('N0' 7) <Type 7>> <Eq ('Pl@') <Type '@'>> <Eq ('Ol\n') <Type '\n'>>
+      <Eq ('B0' ()) <Type ()>> <Eq ('*0') <Type>> <Eq (31) <Step>>;
+}
+
+Eq {
+  (e.X) e.X = <Prout e.X>;
+}
+

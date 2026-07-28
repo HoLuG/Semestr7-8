@@ -1,0 +1,17 @@
+//FROM Library
+$EXTERN Put, Putout, Get, Close, Close;
+
+$ENTRY Go {
+  = <Get #stdin> : e.FirstLine
+  = <Put "stdout" e.FirstLine> : 'Hello'
+  = <Putout #stderr e.FirstLine> : /* empty */
+  = <Get "stdin"> : e.SecondLine
+  = <Put #stderr e.SecondLine> : 'World'
+  = <Putout "stout" e.SecondLine> : /* empty */
+    /* this functions must do nothing: */
+  = <Close #stdin> : /* empty */
+  = <Close #stdout> : /* empty */
+  = <Close #stderr> : /* empty */
+  = <Close #stout> : /* empty */
+  = /* that's all */;
+}

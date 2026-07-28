@@ -1,0 +1,13 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{n}{Map}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Func}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{funcEnv}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{HashMap}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{prog}\PYG{p}{.}\PYG{n+na}{funcs}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// (3)}
+
+\PYG{+w}{    }\PYG{c+c1}{// Шаг 2: проверка затенения встроенных}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{funcName}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{funcEnv}\PYG{p}{.}\PYG{n+na}{keySet}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{         }\PYG{c+c1}{// (4)}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{bins}\PYG{p}{.}\PYG{n+na}{contains}\PYG{p}{(}\PYG{n}{funcName}\PYG{p}{))}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{SemanticException}\PYG{p}{(}
+\PYG{+w}{                }\PYG{n}{Kind}\PYG{p}{.}\PYG{n+na}{BUILTIN\PYGZus{}SHADOW}\PYG{p}{,}
+\PYG{+w}{                }\PYG{l+s}{\PYGZdq{}function \PYGZsq{}\PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{funcName}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}\PYGZsq{} shadows a built\PYGZhy{}in\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{                }\PYG{n}{funcName}\PYG{p}{,}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

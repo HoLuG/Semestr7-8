@@ -1,0 +1,19 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@FunctionalInterface}
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{interface} \PYG{n+nc}{BuiltinFn}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{apply}\PYG{p}{(}\PYG{n}{Runtime}\PYG{+w}{ }\PYG{n}{rt}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{args}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{throws}\PYG{+w}{ }\PYG{n}{RefalException}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+c1}{// Arithmetic uses BigInteger via macro\PYGZhy{}digit format}
+\PYG{c+c1}{// (base 2\PYGZca{}32, sign as Str(\PYGZdq{}\PYGZhy{}\PYGZdq{})/Str(\PYGZdq{}+\PYGZdq{}))}
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{Map}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{BuiltinFn}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{defaultBuiltins}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Map}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{BuiltinFn}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{m}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{LinkedHashMap}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}
+\PYG{+w}{    }\PYG{n}{m}\PYG{p}{.}\PYG{n+na}{put}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Prout\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Builtins}\PYG{p}{::}\PYG{n}{prout}\PYG{p}{);}\PYG{+w}{    }\PYG{c+c1}{// print + newline}
+\PYG{+w}{    }\PYG{n}{m}\PYG{p}{.}\PYG{n+na}{put}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Add\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Builtins}\PYG{p}{::}\PYG{n}{add}\PYG{p}{);}\PYG{+w}{        }\PYG{c+c1}{// BigInteger addition}
+\PYG{+w}{    }\PYG{n}{m}\PYG{p}{.}\PYG{n+na}{put}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}+\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Builtins}\PYG{p}{::}\PYG{n}{add}\PYG{p}{);}\PYG{+w}{          }\PYG{c+c1}{// alias}
+\PYG{+w}{    }\PYG{n}{m}\PYG{p}{.}\PYG{n+na}{put}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Compare\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Builtins}\PYG{p}{::}\PYG{n}{compare}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// \PYGZsq{}\PYGZhy{}\PYGZsq{}/\PYGZsq{}0\PYGZsq{}/\PYGZsq{}+\PYGZsq{}}
+\PYG{+w}{    }\PYG{n}{m}\PYG{p}{.}\PYG{n+na}{put}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Mu\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Builtins}\PYG{p}{::}\PYG{n}{mu}\PYG{p}{);}\PYG{+w}{          }\PYG{c+c1}{// call function by name}
+\PYG{+w}{    }\PYG{n}{m}\PYG{p}{.}\PYG{n+na}{put}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}TimeElapsed\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Builtins}\PYG{p}{::}\PYG{n}{timeElapsed}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// \PYGZlt{}TimeElapsed 0\PYGZgt{} \PYGZhy{}\PYGZgt{} reset}
+\PYG{+w}{    }\PYG{c+c1}{// ... total 40+ functions}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

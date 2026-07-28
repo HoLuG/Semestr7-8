@@ -1,0 +1,7 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYGZdl{}ENTRY Main;
+
+Main \PYGZob{}
+  s.A s.B = s.B s.A;
+\PYGZcb{}
+\end{MintedVerbatim}

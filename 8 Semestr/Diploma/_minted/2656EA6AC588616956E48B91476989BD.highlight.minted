@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{Optional}\PYG{o}{\PYGZlt{}}\PYG{n}{Bindings}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{match}\PYG{p}{(}\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{pattern}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{run}\PYG{p}{(}
+\PYG{+w}{        }\PYG{n}{rec}\PYG{p}{(}\PYG{n}{pattern}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{pattern}\PYG{p}{.}\PYG{n+na}{size}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{,}
+\PYG{+w}{            }\PYG{n}{Bindings}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{(),}
+\PYG{+w}{            }\PYG{n}{env}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{n}{env}\PYG{p}{))));}\PYG{+w}{ }\PYG{c+c1}{// (1)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

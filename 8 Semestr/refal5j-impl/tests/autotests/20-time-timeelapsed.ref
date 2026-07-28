@@ -1,0 +1,39 @@
+* Функции Time и TimeElapsed используются в SCP4, MSCP-A и crefal
+* Данный автотест основан на автотестах из репозиториев Рефала-5λ и Рефала-05
+
+$ENTRY Go {
+  = <ProutText
+      ('Time elapsed: ' <TimeElapsed>) 
+      <Calculations>
+      ('Time elapsed: ' <TimeElapsed>)
+      <Calculations>
+      ('Time elapsed: ' <TimeElapsed 0>)
+      <Calculations>
+      ('Time elapsed: ' <TimeElapsed>)
+      <Calculations>
+      ('Time elapsed: ' <TimeElapsed>)
+    >
+}
+
+Calculations {
+  /* пусто */
+    = <Calculations-Aux
+        ('aaaaaaaaaaaaaaaaaaaaaaaz')
+        ('aaaaaaaaaaaaaaaaaaaaaaaz')
+        ('aaaaaaaaaaaaaaaaaaaaaaaz')
+        ('aaaaaaaaaaaaaaaaaaaaaaaz')
+        ('aaaaaaaaaaaaaaaaaaaaaaaz')
+        ('zzzzzzzzzzzzzzzzzzzzzzzz')
+      >;
+}
+
+Calculations-Aux {
+  (e.A-b s.Z e.A-e) (e.B-b s.Z e.B-e) (e.C-b s.Z e.C-e)
+  (e.D-b s.Z e.D-e) (e.E-b s.Z e.E-e) (e.F-b s.Z e.F-e)
+    = /* пусто */;
+}
+
+ProutText {
+  (e.Line) e.Lines = <Prout e.Line> <ProutText e.Lines>;
+  /* пусто */ = /* всё */;
+}

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Expr.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.deque</a> &gt; <span class="el_source">Expr.java</span></div><h1>Expr.java</h1><pre class="source lang-java linenums">package refal.deque;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+public sealed interface Expr&lt;T&gt; extends Iterable&lt;T&gt; permits ShallowDeque, DeepDeque {
+
+    /** Истина, если выражение пусто. */
+    boolean isEmpty();
+
+    /** Размер выражения (количество термов на верхнем уровне). */
+    int size();
+
+    /** Отделить первый терм.*/
+    PeekResult&lt;T&gt; separateFront();
+
+    /** Отделить последний терм. */
+    PeekResult&lt;T&gt; separateBack();
+
+    /** Добавить терм слева.*/
+    Expr&lt;T&gt; pushFront(T x);
+
+    /** Добавить терм справа. */
+    Expr&lt;T&gt; pushBack(T x);
+
+    /** Итерация по элементам в порядке front → back. */
+    Iterator&lt;T&gt; iterator();
+
+    /** Конкатенация двух выражений. */
+    static &lt;T&gt; Expr&lt;T&gt; concat(Expr&lt;T&gt; a, Expr&lt;T&gt; b) {
+<span class="fc" id="L32">        return ExprOps.concat(a, b);</span>
+    }
+
+    /** Пустое выражение. */
+    static &lt;T&gt; Expr&lt;T&gt; empty() {
+<span class="fc" id="L37">        return ShallowDeque.empty();</span>
+    }
+
+    /** Выражение из одного элемента. */
+    static &lt;T&gt; Expr&lt;T&gt; singleton(T x) {
+<span class="fc" id="L42">        return ShallowDeque.&lt;T&gt;empty().pushBack(x);</span>
+    }
+
+    /** Построить выражение из обычного списка.*/
+    static &lt;T&gt; Expr&lt;T&gt; fromList(List&lt;? extends T&gt; xs) {
+<span class="fc" id="L47">        Expr&lt;T&gt; d = empty();</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        for (T x : xs) {</span>
+<span class="fc" id="L49">            d = d.pushBack(x);</span>
+<span class="fc" id="L50">        }</span>
+<span class="fc" id="L51">        return d;</span>
+    }
+
+    // Скопировать содержимое в обычный список.
+    default List&lt;T&gt; toList() {
+<span class="fc" id="L56">        var out = new ArrayList&lt;T&gt;(size());</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (Iterator&lt;T&gt; it = iterator(); it.hasNext(); ) {</span>
+<span class="fc" id="L58">            out.add(it.next());</span>
+        }
+<span class="fc" id="L60">        return out;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

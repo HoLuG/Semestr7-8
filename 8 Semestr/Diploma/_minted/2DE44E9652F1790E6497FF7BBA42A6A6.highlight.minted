@@ -1,0 +1,17 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{        }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{LANGLE}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                    }\PYG{c+c1}{// (7)}
+\PYG{+w}{            }\PYG{n}{Token}\PYG{+w}{ }\PYG{n}{open}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{Token}\PYG{+w}{ }\PYG{n}{head}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{peek}\PYG{p}{();}
+\PYG{+w}{            }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{head}\PYG{p}{.}\PYG{n+na}{type}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{n}{IDENT}\PYG{p}{)}
+\PYG{+w}{                }\PYG{k}{throw}\PYG{+w}{ }\PYG{n}{err}\PYG{p}{(}\PYG{n}{head}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Expected function name after \PYGZsq{}\PYGZlt{}\PYGZsq{}\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}\PYG{+w}{                            }\PYG{c+c1}{// потребляем имя функции}
+\PYG{+w}{            }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{args}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayList}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}
+\PYG{+w}{            }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{peek}\PYG{p}{().}\PYG{n+na}{type}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{n}{RANGLE}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{peek}\PYG{p}{().}\PYG{n+na}{type}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{n}{EOF}\PYG{p}{)}
+\PYG{+w}{                    }\PYG{k}{throw}\PYG{+w}{ }\PYG{n}{err}\PYG{p}{(}\PYG{n}{open}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Unclosed \PYGZsq{}\PYGZlt{}\PYGZsq{} in call\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{                }\PYG{n}{args}\PYG{p}{.}\PYG{n+na}{add}\PYG{p}{(}\PYG{n}{parseResultTerm}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// рекурсия: аргументы}
+\PYG{+w}{            }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{            }\PYG{n}{expect}\PYG{p}{(}\PYG{n}{RANGLE}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kd}{yield}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n+nf}{Call}\PYG{p}{(}\PYG{n}{head}\PYG{p}{.}\PYG{n+na}{value}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{fromList}\PYG{p}{(}\PYG{n}{args}\PYG{p}{));}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

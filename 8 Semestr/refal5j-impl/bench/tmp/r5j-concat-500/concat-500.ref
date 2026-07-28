@@ -1,0 +1,13 @@
+$ENTRY Go {
+  = <Append (<RangeUp 1 500>) (<RangeUp 501 1000>)>;
+}
+Append {
+  (e.X) (e.Y) = e.X e.Y;
+}
+RangeUp {
+  s.From s.To = <ConsBy <Compare s.From s.To> s.From s.To>;
+}
+ConsBy {
+  '+' s.From s.To = ;
+  s.Op  s.From s.To = s.From <RangeUp <Add s.From 1> s.To>;
+}

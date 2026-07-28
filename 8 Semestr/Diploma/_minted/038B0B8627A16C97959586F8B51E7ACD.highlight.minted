@@ -1,0 +1,11 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@Test}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{muCallsUserFunction}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// Program with Inc \PYGZob{} s.N = \PYGZlt{}Add s.N 1\PYGZgt{}; \PYGZcb{}}
+\PYG{+w}{    }\PYG{n}{Program}\PYG{+w}{ }\PYG{n}{prog}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{buildProgram}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Inc\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}s.N\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}\PYGZlt{}Add s.N 1\PYGZgt{}\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{    }\PYG{n}{Runtime}\PYG{+w}{ }\PYG{n}{rt}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Runtime}\PYG{p}{(}\PYG{n}{prog}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Builtins}\PYG{p}{.}\PYG{n+na}{defaultBuiltins}\PYG{p}{(),}\PYG{+w}{ }\PYG{l+m+mi}{100}\PYG{p}{);}
+\PYG{+w}{    }\PYG{c+c1}{// \PYGZlt{}Mu \PYGZdq{}Inc\PYGZdq{} 5\PYGZgt{} \PYGZhy{}\PYGZgt{} [6]}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{result}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{rt}\PYG{p}{.}\PYG{n+na}{evalCall}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Mu\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{fromList}\PYG{p}{(}\PYG{n}{List}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Sym}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Inc\PYGZdq{}}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{))));}
+\PYG{+w}{    }\PYG{n}{assertThat}\PYG{p}{(}\PYG{n}{result}\PYG{p}{.}\PYG{n+na}{toList}\PYG{p}{()).}\PYG{n+na}{containsExactly}\PYG{p}{(}\PYG{n}{mkNum}\PYG{p}{(}\PYG{l+m+mi}{6}\PYG{p}{));}\PYG{+w}{  }\PYG{c+c1}{// (6)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

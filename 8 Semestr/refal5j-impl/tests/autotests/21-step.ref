@@ -1,0 +1,66 @@
+* Функция Step используется в crefal’е и SCP4
+
+$ENTRY Go {
+  /* пусто */
+    = <Eq (1) <Step>>
+      <Eq (3 4 5) <Step> <Step> <Step>>
+      /* тест на функцию с условиями */
+      <Eq
+        (
+          ('a') ('ab') ('abc') ('abcd') ('abcde') ('abcdef')
+          ('b') ('bc') ('bcd') ('bcde') ('bcdef')
+          ('c') ('cd') ('cde') ('cdef')
+          ('d') ('de') ('def')
+          ('e') ('ef')
+          ('f')
+        )
+        <AllSubstrings-Hard 'abcdef'>
+      >
+      <Eq (129) <Step>>
+      /* тест на функцию с блоком */
+      <Eq (True) <SameChars 'aaaaaaa'>>
+      <Eq (True) <SameChars /* пусто */>>
+      <Eq (False) <SameChars 'aaaAaaa'>>
+      <Eq (141) <Step>>;
+}
+
+Eq { (e.X) e.X = }
+
+
+TestAllSubstrings-Hard {
+  /* пусто */
+    = <Eq
+        (
+          ('a') ('ab') ('abc') ('abcd') ('abcde') ('abcdef')
+          ('b') ('bc') ('bcd') ('bcde') ('bcdef')
+          ('c') ('cd') ('cde') ('cdef')
+          ('d') ('de') ('def')
+          ('e') ('ef')
+          ('f')
+        )
+        <AllSubstrings-Hard 'abcdef'>
+      >;
+}
+
+AllSubstrings-Hard {
+  e.String, <Br Substr '=' /* пусто */> : NotEmpty = ;
+
+  e.Begin e.Middle e.End
+    , e.Middle : t.1 e.2
+    , <Br Substr '=' <Dg Substr> (e.Middle)> : /* пусто */
+    , e.Middle : t.3
+    , e.End : /* пусто */
+    = <Dg Substr>;
+}
+
+SameChars {
+  /* пусто */ = True;
+
+  e.Chars
+    , e.Chars : s.Init e.Last
+    , e.Last s.Init
+    : {
+        e.Chars = True;
+        e.Other = False;
+      };
+}

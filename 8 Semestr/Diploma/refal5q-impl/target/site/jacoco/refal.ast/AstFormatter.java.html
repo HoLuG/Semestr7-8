@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AstFormatter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.ast</a> &gt; <span class="el_source">AstFormatter.java</span></div><h1>AstFormatter.java</h1><pre class="source lang-java linenums">package refal.ast;
+
+import java.util.List;
+
+public final class AstFormatter {
+    private AstFormatter() {
+    }
+
+    public static String format(Term t) {
+<span class="fc" id="L10">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L11">        appendTerm(sb, t);</span>
+<span class="fc" id="L12">        return sb.toString();</span>
+    }
+
+    public static String format(List&lt;Term&gt; terms) {
+<span class="fc" id="L16">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L17">        appendList(sb, terms);</span>
+<span class="fc" id="L18">        return sb.toString();</span>
+    }
+
+    private static void appendTerm(StringBuilder sb, Term t) {
+<span class="fc bfc" id="L22" title="All 6 branches covered.">        switch (t) {</span>
+<span class="fc" id="L23">            case Sym s -&gt; sb.append(s.name());</span>
+<span class="fc" id="L24">            case Num n -&gt; sb.append(n.value());</span>
+<span class="fc" id="L25">            case Str s -&gt; sb.append('\'').append(s.value()).append('\'');</span>
+<span class="fc" id="L26">            case Var v -&gt; sb.append(v.kind()).append('.').append(v.name());</span>
+<span class="fc" id="L27">            case Br b -&gt; {</span>
+<span class="fc" id="L28">                sb.append('(');</span>
+<span class="fc" id="L29">                appendList(sb, b.items());</span>
+<span class="fc" id="L30">                sb.append(')');</span>
+<span class="fc" id="L31">            }</span>
+<span class="fc" id="L32">            case Call c -&gt; {</span>
+<span class="fc" id="L33">                sb.append('&lt;').append(c.fn());</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">                if (!c.args().isEmpty()) {</span>
+<span class="fc" id="L35">                    sb.append(' ');</span>
+<span class="fc" id="L36">                    appendList(sb, c.args());</span>
+                }
+<span class="fc" id="L38">                sb.append('&gt;');</span>
+            }
+        }
+<span class="fc" id="L41">    }</span>
+
+    private static void appendList(StringBuilder sb, Iterable&lt;Term&gt; ts) {
+<span class="fc" id="L44">        boolean first = true;</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        for (Term t : ts) {</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            if (!first) {</span>
+<span class="fc" id="L47">                sb.append(' ');</span>
+            }
+<span class="fc" id="L49">            first = false;</span>
+<span class="fc" id="L50">            appendTerm(sb, t);</span>
+<span class="fc" id="L51">        }</span>
+<span class="fc" id="L52">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

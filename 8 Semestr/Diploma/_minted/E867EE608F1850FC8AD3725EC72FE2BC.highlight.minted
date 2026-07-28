@@ -1,0 +1,7 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{SemanticInfo}\PYG{+w}{ }\PYG{n+nf}{check}\PYG{p}{(}
+\PYG{+w}{        }\PYG{n}{Program}\PYG{+w}{ }\PYG{n}{prog}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n}{Optional}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{overrideEntry}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n}{Set}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{builtinNames}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Set}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{bins}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{builtinNames}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{+w}{ }\PYG{o}{?}\PYG{+w}{ }\PYG{n}{Set}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{builtinNames}\PYG{p}{;}\PYG{+w}{ }\PYG{c+c1}{// (1)}
+\end{MintedVerbatim}

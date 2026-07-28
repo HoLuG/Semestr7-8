@@ -1,0 +1,17 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{AngClose}\PYG{+w}{ }\PYG{n}{ignored}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{      }\PYG{c+c1}{// (14)}
+\PYG{+w}{                }\PYG{n}{bumpStep}\PYG{p}{();}\PYG{+w}{                          }\PYG{c+c1}{// (15)}
+\PYG{+w}{                }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{argsExpr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{();}
+\PYG{+w}{                }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{fn}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{p}{;}
+\PYG{+w}{                }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kc}{true}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                    }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{n}{top}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{left}\PYG{p}{.}\PYG{n+na}{pollLast}\PYG{p}{();}\PYG{+w}{  }\PYG{c+c1}{// (16)}
+\PYG{+w}{                    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{top}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{AngOpen}\PYG{+w}{ }\PYG{n}{ao}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                        }\PYG{n}{fn}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{ao}\PYG{p}{.}\PYG{n+na}{fn}\PYG{p}{();}\PYG{+w}{ }\PYG{k}{break}\PYG{p}{;}\PYG{+w}{         }\PYG{c+c1}{// (17)}
+\PYG{+w}{                    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{                    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{top}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{Passive}\PYG{+w}{ }\PYG{n}{pt}\PYG{p}{)}
+\PYG{+w}{                        }\PYG{n}{argsExpr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{argsExpr}\PYG{p}{.}\PYG{n+na}{pushFront}\PYG{p}{(}\PYG{n}{pt}\PYG{p}{.}\PYG{n+na}{term}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// (18)}
+\PYG{+w}{                    }\PYG{k}{else}\PYG{+w}{ }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{top}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{BulkPassive}\PYG{+w}{ }\PYG{n}{bp}\PYG{p}{)}
+\PYG{+w}{                        }\PYG{n}{argsExpr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{concat}\PYG{p}{(}\PYG{n}{bp}\PYG{p}{.}\PYG{n+na}{items}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{argsExpr}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (19)}
+\PYG{+w}{                    }\PYG{k}{else}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{RefalException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Unexpected inside call\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{                }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

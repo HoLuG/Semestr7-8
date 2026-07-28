@@ -1,0 +1,20 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{sealed}\PYG{+w}{ }\PYG{k+kd}{interface} \PYG{n+nc}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{k+kd}{extends}\PYG{+w}{ }\PYG{n}{Iterable}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}
+\PYG{+w}{        }\PYG{n}{permits}\PYG{+w}{ }\PYG{n}{ShallowDeque}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{DeepDeque}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+
+\PYG{+w}{    }\PYG{k+kt}{boolean}\PYG{+w}{ }\PYG{n+nf}{isEmpty}\PYG{p}{();}
+\PYG{+w}{    }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n+nf}{size}\PYG{p}{();}
+\PYG{+w}{    }\PYG{n}{PeekResult}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{separateFront}\PYG{p}{();}\PYG{+w}{ }\PYG{c+c1}{// remove first \PYGZhy{}\PYGZgt{} (element, rest)}
+\PYG{+w}{    }\PYG{n}{PeekResult}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{separateBack}\PYG{p}{();}\PYG{+w}{  }\PYG{c+c1}{// remove last}
+\PYG{+w}{    }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{pushFront}\PYG{p}{(}\PYG{n}{T}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{);}\PYG{+w}{        }\PYG{c+c1}{// add left \PYGZhy{}\PYGZgt{} new Expr}
+\PYG{+w}{    }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{pushBack}\PYG{p}{(}\PYG{n}{T}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{);}\PYG{+w}{         }\PYG{c+c1}{// add right \PYGZhy{}\PYGZgt{} new Expr}
+
+\PYG{+w}{    }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{concat}\PYG{p}{(}\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// O(1) amortized}
+\PYG{+w}{    }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{empty}\PYG{p}{();}
+\PYG{+w}{    }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{singleton}\PYG{p}{(}\PYG{n}{T}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{);}
+\PYG{+w}{    }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{fromList}\PYG{p}{(}\PYG{n}{List}\PYG{o}{\PYGZlt{}?}\PYG{+w}{ }\PYG{k+kd}{extends}\PYG{+w}{ }\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{xs}\PYG{p}{);}
+\PYG{+w}{    }\PYG{k}{default}\PYG{+w}{ }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{toList}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{p}{...}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\PYG{c+c1}{// All operations immutable \PYGZhy{}\PYGZhy{} return new Expr, original unchanged}
+\PYG{c+c1}{// PeekResult\PYGZlt{}T\PYGZgt{}: record(T term, Expr\PYGZlt{}T\PYGZgt{} rest)}
+\end{MintedVerbatim}

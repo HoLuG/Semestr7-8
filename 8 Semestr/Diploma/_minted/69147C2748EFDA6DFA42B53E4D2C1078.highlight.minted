@@ -1,0 +1,26 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{+w}{ }\PYG{n+nf}{rec}\PYG{p}{(}\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{pat}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{pi}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{pe}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Bindings}\PYG{+w}{ }\PYG{n}{env}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Function}\PYG{o}{\PYGZlt{}}\PYG{n}{Bindings}\PYG{p}{,}\PYG{n}{Thunk}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+
+\PYG{+w}{    }\PYG{c+c1}{// Bidirectional sweep: while at least one end is not e\PYGZhy{}variable}
+\PYG{+w}{    }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{pi}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{pe}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k+kt}{boolean}\PYG{+w}{ }\PYG{n}{leftEvar}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pat}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{pi}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{EVar}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{boolean}\PYG{+w}{ }\PYG{n}{rightEvar}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pat}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{pe}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{EVar}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{leftEvar}\PYG{+w}{ }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }\PYG{n}{rightEvar}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{break}\PYG{p}{;}\PYG{+w}{ }\PYG{c+c1}{// both EVar \PYGZhy{}\PYGZhy{} exit loop}
+
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{leftEvar}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{c+c1}{// consume from left: expr.separateFront()}
+\PYG{+w}{            }\PYG{c+c1}{// matchSingleAll(pat[pi], consumed, env, cont \PYGZhy{}\PYGZgt{} rec(pi+1, ...))}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{else}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{c+c1}{// consume from right: expr.separateBack()}
+\PYG{+w}{            }\PYG{c+c1}{// matchSingleAll(pat[pe\PYGZhy{}1], consumed, env, cont \PYGZhy{}\PYGZgt{} rec(..., pe\PYGZhy{}1))}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{pi}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{n}{pe}\PYG{p}{)}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{?}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{.}\PYG{n+na}{apply}\PYG{p}{(}\PYG{n}{env}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{());}
+
+\PYG{+w}{    }\PYG{c+c1}{// Single EVar: bind entire remaining expr}
+\PYG{+w}{    }\PYG{c+c1}{// Multiple EVar: tryEVar \PYGZhy{}\PYGZhy{} iterative length enumeration via Thunk}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

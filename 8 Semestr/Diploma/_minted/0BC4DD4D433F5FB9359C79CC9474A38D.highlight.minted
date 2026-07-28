@@ -1,0 +1,27 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{pushTermToStack}\PYG{p}{(}
+\PYG{+w}{        }\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Bindings}\PYG{+w}{ }\PYG{n}{bindings}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ArrayDeque}\PYG{o}{\PYGZlt{}}\PYG{n}{ViewTerm}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{right}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{switch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{t}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{Var}\PYG{+w}{ }\PYG{n}{v}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                              }\PYG{c+c1}{// (2)}
+\PYG{+w}{            }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{val}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{bindings}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{v}\PYG{p}{.}\PYG{n+na}{key}\PYG{p}{());}
+\PYG{+w}{            }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{val}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}
+\PYG{+w}{                }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{addFirst}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{BulkPassive}\PYG{p}{(}\PYG{n}{val}\PYG{p}{));}\PYG{+w}{ }\PYG{c+c1}{// (3)}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{Br}\PYG{+w}{ }\PYG{n}{br}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                             }\PYG{c+c1}{// (4)}
+\PYG{+w}{            }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{addFirst}\PYG{p}{(}\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{ParenClose}\PYG{p}{.}\PYG{n+na}{INSTANCE}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{items}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{br}\PYG{p}{.}\PYG{n+na}{items}\PYG{p}{().}\PYG{n+na}{toList}\PYG{p}{();}
+\PYG{+w}{            }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{j}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{items}\PYG{p}{.}\PYG{n+na}{size}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{j}\PYG{+w}{ }\PYG{o}{\PYGZgt{}=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{j}\PYG{o}{\PYGZhy{}\PYGZhy{}}\PYG{p}{)}
+\PYG{+w}{                }\PYG{n}{pushTermToStack}\PYG{p}{(}\PYG{n}{items}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{j}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{bindings}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{right}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (5)}
+\PYG{+w}{            }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{addFirst}\PYG{p}{(}\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{ParenOpen}\PYG{p}{.}\PYG{n+na}{INSTANCE}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{Call}\PYG{+w}{ }\PYG{n}{c}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                            }\PYG{c+c1}{// (6)}
+\PYG{+w}{            }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{addFirst}\PYG{p}{(}\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{AngClose}\PYG{p}{.}\PYG{n+na}{INSTANCE}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{cargs}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{c}\PYG{p}{.}\PYG{n+na}{args}\PYG{p}{().}\PYG{n+na}{toList}\PYG{p}{();}
+\PYG{+w}{            }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{j}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{cargs}\PYG{p}{.}\PYG{n+na}{size}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{j}\PYG{+w}{ }\PYG{o}{\PYGZgt{}=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{j}\PYG{o}{\PYGZhy{}\PYGZhy{}}\PYG{p}{)}
+\PYG{+w}{                }\PYG{n}{pushTermToStack}\PYG{p}{(}\PYG{n}{cargs}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{j}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{bindings}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{right}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (7)}
+\PYG{+w}{            }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{addFirst}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{AngOpen}\PYG{p}{(}\PYG{n}{c}\PYG{p}{.}\PYG{n+na}{fn}\PYG{p}{()));}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{default}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{addFirst}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{Passive}\PYG{p}{(}\PYG{n}{t}\PYG{p}{));}\PYG{+w}{ }\PYG{c+c1}{// (8)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

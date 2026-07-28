@@ -1,0 +1,7 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{c+c1}{// Шаг 3: формируем множество допустимых вызовов}
+\PYG{+w}{    }\PYG{n}{Set}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{callable}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{HashSet}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}\PYG{+w}{            }\PYG{c+c1}{// (5)}
+\PYG{+w}{    }\PYG{n}{callable}\PYG{p}{.}\PYG{n+na}{addAll}\PYG{p}{(}\PYG{n}{funcEnv}\PYG{p}{.}\PYG{n+na}{keySet}\PYG{p}{());}\PYG{+w}{    }\PYG{c+c1}{// user functions}
+\PYG{+w}{    }\PYG{n}{callable}\PYG{p}{.}\PYG{n+na}{addAll}\PYG{p}{(}\PYG{n}{prog}\PYG{p}{.}\PYG{n+na}{externs}\PYG{p}{());}\PYG{+w}{      }\PYG{c+c1}{// \PYGZdl{}EXTERN declared}
+\PYG{+w}{    }\PYG{n}{callable}\PYG{p}{.}\PYG{n+na}{addAll}\PYG{p}{(}\PYG{n}{bins}\PYG{p}{);}\PYG{+w}{               }\PYG{c+c1}{// built\PYGZhy{}ins}
+\end{MintedVerbatim}

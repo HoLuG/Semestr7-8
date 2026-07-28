@@ -1,0 +1,45 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{+w}{ }\PYG{n+nf}{matchSingleAll}\PYG{p}{(}
+\PYG{+w}{        }\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{p}\PYG{p}{,}\PYG{+w}{           }\PYG{c+c1}{// элемент паттерна}
+\PYG{+w}{        }\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{,}\PYG{+w}{           }\PYG{c+c1}{// элемент выражения}
+\PYG{+w}{        }\PYG{n}{Bindings}\PYG{+w}{ }\PYG{n}{env}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n}{Function}\PYG{o}{\PYGZlt{}}\PYG{n}{Bindings}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{p}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{Var}\PYG{+w}{ }\PYG{n}{v}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{String}\PYG{+w}{ }\PYG{n}{key}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{v}\PYG{p}{.}\PYG{n+na}{key}\PYG{p}{();}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{v}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{SVar}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{x}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{Br}\PYG{p}{)}\PYG{+w}{                     }\PYG{c+c1}{// (1)}
+\PYG{+w}{                }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{());}
+\PYG{+w}{            }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{env}\PYG{p}{.}\PYG{n+na}{contains}\PYG{p}{(}\PYG{n}{key}\PYG{p}{))}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                 }\PYG{c+c1}{// (2)}
+\PYG{+w}{                }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{bound}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{env}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{key}\PYG{p}{);}
+\PYG{+w}{                }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{bound}\PYG{p}{.}\PYG{n+na}{size}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{o}{||}\PYG{+w}{ }\PYG{o}{!}\PYG{n}{singleEquals}\PYG{p}{(}\PYG{n}{bound}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{))}
+\PYG{+w}{                    }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{());}
+\PYG{+w}{                }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{.}\PYG{n+na}{apply}\PYG{p}{(}\PYG{n}{env}\PYG{p}{);}
+\PYG{+w}{            }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{.}\PYG{n+na}{apply}\PYG{p}{(}\PYG{n}{env}\PYG{p}{.}\PYG{n+na}{with}\PYG{p}{(}\PYG{n}{key}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{singleton}\PYG{p}{(}\PYG{n}{x}\PYG{p}{)));}\PYG{+w}{ }\PYG{c+c1}{// (3)}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{v}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{TVar}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{env}\PYG{p}{.}\PYG{n+na}{contains}\PYG{p}{(}\PYG{n}{key}\PYG{p}{))}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                 }\PYG{c+c1}{// (4)}
+\PYG{+w}{                }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{bound}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{env}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{key}\PYG{p}{);}
+\PYG{+w}{                }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{bound}\PYG{p}{.}\PYG{n+na}{size}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{o}{||}\PYG{+w}{ }\PYG{o}{!}\PYG{n}{singleEquals}\PYG{p}{(}\PYG{n}{bound}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{))}
+\PYG{+w}{                    }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{());}
+\PYG{+w}{                }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{.}\PYG{n+na}{apply}\PYG{p}{(}\PYG{n}{env}\PYG{p}{);}
+\PYG{+w}{            }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{.}\PYG{n+na}{apply}\PYG{p}{(}\PYG{n}{env}\PYG{p}{.}\PYG{n+na}{with}\PYG{p}{(}\PYG{n}{key}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{singleton}\PYG{p}{(}\PYG{n}{x}\PYG{p}{)));}\PYG{+w}{ }\PYG{c+c1}{// (5)}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{c+c1}{// EVar никогда не попадает сюда (обрабатывается в rec)}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{());}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{p}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{Br}\PYG{+w}{ }\PYG{n}{pBr}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{p}{(}\PYG{n}{x}\PYG{+w}{ }\PYG{k}{instanceof}\PYG{+w}{ }\PYG{n}{Br}\PYG{+w}{ }\PYG{n}{xBr}\PYG{p}{))}\PYG{+w}{                 }\PYG{c+c1}{// (6)}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{());}
+\PYG{+w}{        }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{innerPat}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{pBr}\PYG{p}{.}\PYG{n+na}{items}\PYG{p}{().}\PYG{n+na}{toList}\PYG{p}{();}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{More}\PYG{p}{(}\PYG{+w}{                       }\PYG{c+c1}{// (7)}
+\PYG{+w}{            }\PYG{p}{()}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{rec}\PYG{p}{(}\PYG{n}{innerPat}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{innerPat}\PYG{p}{.}\PYG{n+na}{size}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{xBr}\PYG{p}{.}\PYG{n+na}{items}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{env}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{));}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{c+c1}{// Литерал (Sym, Num, Str): простое равенство}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{p}\PYG{p}{.}\PYG{n+na}{equals}\PYG{p}{(}\PYG{n}{x}\PYG{p}{)}\PYG{+w}{                              }\PYG{c+c1}{// (8)}
+\PYG{+w}{        }\PYG{o}{?}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{.}\PYG{n+na}{apply}\PYG{p}{(}\PYG{n}{env}\PYG{p}{)}
+\PYG{+w}{        }\PYG{p}{:}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{p}{.}\PYG{n+na}{Done}\PYG{p}{(}\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{());}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

@@ -1,0 +1,11 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{n}{Optional}\PYG{o}{\PYGZlt{}}\PYG{n}{String}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{overrideEntry}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{parsed}\PYG{p}{.}\PYG{n+na}{entry}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{k+kc}{null}
+\PYG{+w}{        }\PYG{o}{?}\PYG{+w}{ }\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{()}
+\PYG{+w}{        }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{Optional}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{n}{parsed}\PYG{p}{.}\PYG{n+na}{entry}\PYG{p}{);}
+\PYG{+w}{    }\PYG{k}{try}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{SemanticChecker}\PYG{p}{.}\PYG{n+na}{check}\PYG{p}{(}\PYG{n}{program}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{overrideEntry}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{rt}\PYG{p}{.}\PYG{n+na}{builtinNames}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// (13)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{catch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{SemanticException}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{err}\PYG{p}{.}\PYG{n+na}{println}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}[ERROR] \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{parsed}\PYG{p}{.}\PYG{n+na}{file}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}: \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{.}\PYG{n+na}{getMessage}\PYG{p}{());}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

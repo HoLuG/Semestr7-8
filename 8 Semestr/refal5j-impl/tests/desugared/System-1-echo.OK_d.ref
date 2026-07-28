@@ -1,0 +1,4 @@
+$ENTRY Go {
+   = <System 'echo Hello'> <System 'echo World'>;
+}
+

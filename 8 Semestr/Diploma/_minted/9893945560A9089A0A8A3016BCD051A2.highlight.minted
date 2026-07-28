@@ -1,0 +1,12 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYGZdl{}ENTRY Go \PYGZob{}
+  = \PYGZlt{}Prout \PYGZlt{}Rev \PYGZsq{}Hello\PYGZsq{}\PYGZgt{}\PYGZgt{};
+\PYGZcb{}
+Rev \PYGZob{}
+  e.X = \PYGZlt{}Rev\PYGZhy{}Aux e.X ()\PYGZgt{};
+\PYGZcb{}
+Rev\PYGZhy{}Aux \PYGZob{}
+  s.H e.T (e.Acc) = \PYGZlt{}Rev\PYGZhy{}Aux e.T (s.H e.Acc)\PYGZgt{};
+  (e.Acc) = e.Acc;
+\PYGZcb{}
+\end{MintedVerbatim}

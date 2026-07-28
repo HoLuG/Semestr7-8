@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Runtime.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.runtime</a> &gt; <span class="el_source">Runtime.java</span></div><h1>Runtime.java</h1><pre class="source lang-java linenums">package refal.runtime;
+
+import refal.ast.Br;
+import refal.ast.Call;
+import refal.ast.Func;
+import refal.ast.Program;
+import refal.ast.Rule;
+import refal.ast.Term;
+import refal.deque.Expr;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+// Интерпретатор базисного подмножества Рефала-5.
+// Аргументы функций передаются как деки термов (Expr&lt;Term&gt;).
+public final class Runtime {
+
+    public static final int DEFAULT_STEP_LIMIT = 100_000;
+
+    private final Program program;
+    private final Map&lt;String, BuiltinFn&gt; builtins;
+    private final int stepLimit;
+<span class="fc" id="L36">    private final StringBuilder stdout = new StringBuilder();</span>
+<span class="fc" id="L37">    private final StringBuilder stderr = new StringBuilder();</span>
+    private int steps;
+<span class="fc" id="L39">    private String[] programArgs = new String[0];</span>
+<span class="fc" id="L40">    private final Map&lt;Long, BufferedReader&gt; openReaders = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L41">    private final Map&lt;Long, BufferedWriter&gt; openWriters = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L42">    private long startNanos = System.nanoTime();</span>
+    private BufferedReader stdinReader;
+
+    public Runtime(Program program) {
+<span class="fc" id="L46">        this(program, Builtins.defaultBuiltins(), DEFAULT_STEP_LIMIT);</span>
+<span class="fc" id="L47">    }</span>
+
+<span class="fc" id="L49">    public Runtime(Program program, Map&lt;String, BuiltinFn&gt; builtins, int stepLimit) {</span>
+<span class="fc" id="L50">        this.program = program;</span>
+<span class="fc" id="L51">        this.builtins = new LinkedHashMap&lt;&gt;(builtins);</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (stepLimit &lt;= 0) {</span>
+<span class="nc" id="L53">            throw new IllegalArgumentException(&quot;stepLimit must be &gt; 0&quot;);</span>
+        }
+<span class="fc" id="L55">        this.stepLimit = stepLimit;</span>
+<span class="fc" id="L56">    }</span>
+
+    public String stdout() {
+<span class="fc" id="L59">        return stdout.toString();</span>
+    }
+
+    public String stderr() {
+<span class="fc" id="L63">        return stderr.toString();</span>
+    }
+
+    void appendStdout(String s) {
+<span class="fc" id="L67">        stdout.append(s);</span>
+<span class="fc" id="L68">    }</span>
+
+    void appendStderr(String s) {
+<span class="fc" id="L71">        stderr.append(s);</span>
+<span class="fc" id="L72">    }</span>
+
+    public Set&lt;String&gt; builtinNames() {
+<span class="fc" id="L75">        return builtins.keySet();</span>
+    }
+
+    public void setProgramArgs(String[] args) {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        this.programArgs = args == null ? new String[0] : args.clone();</span>
+<span class="fc" id="L80">    }</span>
+
+    String[] programArgs() {
+<span class="fc" id="L83">        return programArgs;</span>
+    }
+
+    /** Текущее число выполненных шагов нормализации. */
+    int currentStep() {
+<span class="fc" id="L88">        return steps;</span>
+    }
+
+    /** Время от запуска интерпретатора, в секундах. */
+    double timeElapsedSeconds() {
+<span class="fc" id="L93">        return (System.nanoTime() - startNanos) / 1_000_000_000.0;</span>
+    }
+
+    /** Сброс таймера (для &lt;TimeElapsed 0&gt;). */
+    void resetStartNanos() {
+<span class="nc" id="L98">        startNanos = System.nanoTime();</span>
+<span class="nc" id="L99">    }</span>
+
+    void openFile(long channel, String mode, String filename) {
+        try {
+<span class="fc" id="L103">            closeChannel(channel);</span>
+<span class="pc bpc" id="L104" title="1 of 4 branches missed.">            switch (mode.toLowerCase(java.util.Locale.ROOT)) {</span>
+                case &quot;r&quot; -&gt; {
+<span class="pc" id="L106">                    BufferedReader r = Files.newBufferedReader(</span>
+<span class="fc" id="L107">                            Paths.get(filename), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L108">                    openReaders.put(channel, r);</span>
+<span class="nc" id="L109">                }</span>
+                case &quot;w&quot; -&gt; {
+<span class="fc" id="L111">                    BufferedWriter w = Files.newBufferedWriter(</span>
+<span class="fc" id="L112">                            Paths.get(filename), StandardCharsets.UTF_8);</span>
+<span class="fc" id="L113">                    openWriters.put(channel, w);</span>
+<span class="fc" id="L114">                }</span>
+                case &quot;a&quot; -&gt; {
+<span class="fc" id="L116">                    BufferedWriter w = Files.newBufferedWriter(</span>
+<span class="fc" id="L117">                            Paths.get(filename), StandardCharsets.UTF_8,</span>
+                            StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+<span class="fc" id="L119">                    openWriters.put(channel, w);</span>
+<span class="fc" id="L120">                }</span>
+<span class="nc" id="L121">                default -&gt; throw new RefalException(</span>
+                        &quot;Open: unknown mode '&quot; + mode + &quot;' (expected r/w/a)&quot;);
+            }
+<span class="fc" id="L124">        } catch (IOException e) {</span>
+<span class="fc" id="L125">            throw new RefalException(&quot;Open: I/O error: &quot; + e.getMessage());</span>
+<span class="fc" id="L126">        }</span>
+<span class="fc" id="L127">    }</span>
+
+    void closeFile(long channel) {
+        try {
+<span class="fc" id="L131">            closeChannel(channel);</span>
+<span class="nc" id="L132">        } catch (IOException e) {</span>
+<span class="nc" id="L133">            throw new RefalException(&quot;Close: I/O error: &quot; + e.getMessage());</span>
+<span class="fc" id="L134">        }</span>
+<span class="fc" id="L135">    }</span>
+
+    private void closeChannel(long channel) throws IOException {
+<span class="fc" id="L138">        Closeable r = openReaders.remove(channel);</span>
+<span class="fc" id="L139">        Closeable w = openWriters.remove(channel);</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if (r != null) {</span>
+<span class="nc" id="L141">            r.close();</span>
+        }
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        if (w != null) {</span>
+<span class="fc" id="L144">            w.close();</span>
+        }
+<span class="fc" id="L146">    }</span>
+
+    String readFileLine(long channel) {
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        if (!openReaders.containsKey(channel)) {</span>
+            // Традиционный Рефал-5: автооткрытие REFALNN.DAT для чтения.
+<span class="nc" id="L151">            openFile(channel, &quot;r&quot;, defaultChannelFile(channel));</span>
+        }
+<span class="nc" id="L153">        BufferedReader r = openReaders.get(channel);</span>
+        try {
+<span class="nc" id="L155">            return r.readLine();</span>
+<span class="nc" id="L156">        } catch (IOException e) {</span>
+<span class="nc" id="L157">            throw new RefalException(&quot;Get: I/O error: &quot; + e.getMessage());</span>
+        }
+    }
+
+    String readStdinLine() {
+        // Блокируемся в ожидании строки — иначе тесты с piped-stdin падают
+        // на Windows: System.in.available() для канала из pipe возвращает 0
+        // даже когда данные уже доступны.
+        try {
+<span class="nc bnc" id="L166" title="All 2 branches missed.">            if (stdinReader == null) {</span>
+<span class="nc" id="L167">                stdinReader = new BufferedReader(</span>
+                        new InputStreamReader(System.in, StandardCharsets.UTF_8));
+            }
+<span class="nc" id="L170">            return stdinReader.readLine();</span>
+<span class="nc" id="L171">        } catch (IOException e) {</span>
+<span class="nc" id="L172">            return null;</span>
+        }
+    }
+
+    private static String defaultChannelFile(long ch) {
+<span class="fc" id="L177">        return String.format(&quot;REFAL%02d.DAT&quot;, ch);</span>
+    }
+
+    void writeFile(long channel, String text) {
+        // Канал 0 — поток ошибок (stderr).
+<span class="fc bfc" id="L182" title="All 2 branches covered.">        if (channel == 0) {</span>
+<span class="fc" id="L183">            appendStderr(text);</span>
+<span class="fc" id="L184">            return;</span>
+        }
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        if (!openWriters.containsKey(channel)) {</span>
+            // Автооткрытие REFALNN.DAT в режиме добавления.
+<span class="fc" id="L188">            openFile(channel, &quot;a&quot;, defaultChannelFile(channel));</span>
+        }
+<span class="fc" id="L190">        BufferedWriter w = openWriters.get(channel);</span>
+        try {
+<span class="fc" id="L192">            w.write(text);</span>
+<span class="fc" id="L193">            w.flush();</span>
+<span class="nc" id="L194">        } catch (IOException e) {</span>
+<span class="nc" id="L195">            throw new RefalException(&quot;Put: I/O error: &quot; + e.getMessage());</span>
+<span class="fc" id="L196">        }</span>
+<span class="fc" id="L197">    }</span>
+
+    private void closeAllFiles() {
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">        for (var r : openReaders.values()) {</span>
+            try {
+<span class="nc" id="L202">                r.close();</span>
+<span class="nc" id="L203">            } catch (IOException ignored) {</span>
+                // закрываем по возможности, ошибки игнорируем
+<span class="nc" id="L205">            }</span>
+<span class="nc" id="L206">        }</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">        for (var w : openWriters.values()) {</span>
+            try {
+<span class="fc" id="L209">                w.close();</span>
+<span class="nc" id="L210">            } catch (IOException ignored) {</span>
+                // закрываем по возможности, ошибки игнорируем
+<span class="fc" id="L212">            }</span>
+<span class="fc" id="L213">        }</span>
+<span class="fc" id="L214">        openReaders.clear();</span>
+<span class="fc" id="L215">        openWriters.clear();</span>
+<span class="fc" id="L216">    }</span>
+
+    public Expr&lt;Term&gt; evalCall(String fn, List&lt;Term&gt; args) {
+<span class="fc" id="L219">        return evalCall(fn, Expr.fromList(args));</span>
+    }
+
+    // Применить функцию к аргументам (одно применение, без нормализации).
+    public Expr&lt;Term&gt; evalCall(String fn, Expr&lt;Term&gt; args) {
+<span class="fc" id="L224">        BuiltinFn b = builtins.get(fn);</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        if (b != null) {</span>
+<span class="fc" id="L226">            return b.apply(this, args);</span>
+        }
+<span class="fc" id="L228">        Optional&lt;Func&gt; f = program.getFunc(fn);</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        if (f.isEmpty()) {</span>
+<span class="fc" id="L230">            throw new RefalException(&quot;Unknown function: &quot; + fn);</span>
+        }
+<span class="pc bpc" id="L232" title="1 of 2 branches missed.">        for (Rule rule : f.get().rules()) {</span>
+<span class="fc" id="L233">            var bindings = Matcher.match(rule.pattern(), args);</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">            if (bindings.isPresent()) {</span>
+<span class="fc" id="L235">                return Substitutor.substitute(rule.result(), bindings.get());</span>
+            }
+<span class="fc" id="L237">        }</span>
+<span class="nc" id="L238">        throw new RefalException(</span>
+<span class="nc" id="L239">                &quot;No matching rule for &quot; + fn + &quot; on args=&quot; + args.toList());</span>
+    }
+
+    // Полная нормализация выражения через два стека (поле зрения).
+    // Правый стек — необработанное выражение, левый — уже пассивные термы.
+    public Expr&lt;Term&gt; normalize(Expr&lt;Term&gt; expr) {
+<span class="fc" id="L245">        java.util.ArrayDeque&lt;ViewTerm&gt; left = new java.util.ArrayDeque&lt;&gt;();</span>
+<span class="fc" id="L246">        java.util.ArrayDeque&lt;ViewTerm&gt; right = new java.util.ArrayDeque&lt;&gt;();</span>
+
+        // Заполняем правый стек слева-направо.
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        for (Term t : expr) {</span>
+<span class="fc" id="L250">            flattenInto(t, right);</span>
+<span class="fc" id="L251">        }</span>
+
+<span class="fc bfc" id="L253" title="All 2 branches covered.">        while (!right.isEmpty()) {</span>
+<span class="fc" id="L254">            ViewTerm v = right.pollFirst();</span>
+<span class="fc bfc" id="L255" title="All 6 branches covered.">            switch (v) {</span>
+<span class="fc" id="L256">                case ViewTerm.Passive p -&gt; left.addLast(p);</span>
+<span class="fc" id="L257">                case ViewTerm.BulkPassive bp -&gt; left.addLast(bp);</span>
+<span class="fc" id="L258">                case ViewTerm.AngOpen open -&gt; left.addLast(open);</span>
+<span class="fc" id="L259">                case ViewTerm.ParenOpen open -&gt; left.addLast(open);</span>
+
+<span class="fc" id="L261">                case ViewTerm.ParenClose ignored -&gt; {</span>
+                    // Свернуть верх left до ParenOpen в скобочный терм.
+                    // Элементы собираются справа-налево (pollLast), поэтому
+                    // одиночный Passive добавляется pushFront, а BulkPassive — concat слева.
+<span class="fc" id="L265">                    Expr&lt;Term&gt; brItems = Expr.empty();</span>
+                    while (true) {
+<span class="fc" id="L267">                        ViewTerm top = left.pollLast();</span>
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">                        if (top == null) {</span>
+<span class="nc" id="L269">                            throw new RefalException(&quot;Unmatched ')' in view field&quot;);</span>
+                        }
+<span class="fc bfc" id="L271" title="All 2 branches covered.">                        if (top instanceof ViewTerm.ParenOpen) {</span>
+<span class="fc" id="L272">                            break;</span>
+                        }
+<span class="fc bfc" id="L274" title="All 2 branches covered.">                        if (top instanceof ViewTerm.Passive pt) {</span>
+<span class="fc" id="L275">                            brItems = brItems.pushFront(pt.term());</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">                        } else if (top instanceof ViewTerm.BulkPassive bp) {</span>
+<span class="fc" id="L277">                            brItems = Expr.concat(bp.items(), brItems);</span>
+                        } else {
+<span class="nc" id="L279">                            throw new RefalException(</span>
+                                    &quot;Unexpected &quot; + top + &quot; inside brackets&quot;);
+                        }
+<span class="fc" id="L282">                    }</span>
+<span class="fc" id="L283">                    left.addLast(new ViewTerm.Passive(new Br(brItems)));</span>
+<span class="fc" id="L284">                }</span>
+
+<span class="fc" id="L286">                case ViewTerm.AngClose ignored -&gt; {</span>
+<span class="fc" id="L287">                    bumpStep();</span>
+                    // Собрать аргументы со стека до AngOpen(fn).
+                    // Элементы собираются справа-налево (pollLast): Passive → pushFront,
+                    // BulkPassive → concat(items, acc) — всё O(1) амортизированно.
+<span class="fc" id="L291">                    Expr&lt;Term&gt; argsExpr = Expr.empty();</span>
+<span class="fc" id="L292">                    String fn = null;</span>
+                    while (true) {
+<span class="fc" id="L294">                        ViewTerm top = left.pollLast();</span>
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">                        if (top == null) {</span>
+<span class="nc" id="L296">                            throw new RefalException(&quot;Unmatched '&gt;' in view field&quot;);</span>
+                        }
+<span class="fc bfc" id="L298" title="All 2 branches covered.">                        if (top instanceof ViewTerm.AngOpen ao) {</span>
+<span class="fc" id="L299">                            fn = ao.fn();</span>
+<span class="fc" id="L300">                            break;</span>
+                        }
+<span class="fc bfc" id="L302" title="All 2 branches covered.">                        if (top instanceof ViewTerm.Passive pt) {</span>
+<span class="fc" id="L303">                            argsExpr = argsExpr.pushFront(pt.term());</span>
+<span class="pc bpc" id="L304" title="1 of 2 branches missed.">                        } else if (top instanceof ViewTerm.BulkPassive bp) {</span>
+<span class="fc" id="L305">                            argsExpr = Expr.concat(bp.items(), argsExpr);</span>
+                        } else {
+<span class="nc" id="L307">                            throw new RefalException(</span>
+                                    &quot;Unexpected &quot; + top + &quot; inside &lt;&quot; + &quot;...&gt;&quot;);
+                        }
+<span class="fc" id="L310">                    }</span>
+
+<span class="fc" id="L312">                    BuiltinFn b = builtins.get(fn);</span>
+<span class="fc bfc" id="L313" title="All 2 branches covered.">                    if (b != null) {</span>
+                        // Встроенная функция: возвращает пассивный Expr&lt;Term&gt;
+                        // (без вызовов внутри) — сплющиваем в ViewTerm через flattenInto.
+<span class="fc" id="L316">                        Expr&lt;Term&gt; result = b.apply(this, argsExpr);</span>
+<span class="fc" id="L317">                        java.util.ArrayDeque&lt;ViewTerm&gt; tmp = new java.util.ArrayDeque&lt;&gt;();</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">                        for (Term t : result) {</span>
+<span class="fc" id="L319">                            flattenInto(t, tmp);</span>
+<span class="fc" id="L320">                        }</span>
+<span class="fc" id="L321">                        java.util.Iterator&lt;ViewTerm&gt; it = tmp.descendingIterator();</span>
+<span class="fc bfc" id="L322" title="All 2 branches covered.">                        while (it.hasNext()) {</span>
+<span class="fc" id="L323">                            right.addFirst(it.next());</span>
+                        }
+<span class="fc" id="L325">                    } else {</span>
+                        // Пользовательская функция: кладём правую часть правила
+                        // напрямую на правый стек (никаких конкатенаций и Expr с Call).
+<span class="fc" id="L328">                        Optional&lt;Func&gt; f = program.getFunc(fn);</span>
+<span class="pc bpc" id="L329" title="1 of 2 branches missed.">                        if (f.isEmpty()) {</span>
+<span class="nc" id="L330">                            throw new RefalException(&quot;Unknown function: &quot; + fn);</span>
+                        }
+<span class="fc" id="L332">                        boolean matched = false;</span>
+<span class="fc bfc" id="L333" title="All 2 branches covered.">                        for (Rule rule : f.get().rules()) {</span>
+<span class="fc" id="L334">                            var bindings = Matcher.match(rule.pattern(), argsExpr);</span>
+<span class="fc bfc" id="L335" title="All 2 branches covered.">                            if (bindings.isPresent()) {</span>
+<span class="fc" id="L336">                                pushResultToStack(rule.result(), bindings.get(), right);</span>
+<span class="fc" id="L337">                                matched = true;</span>
+<span class="fc" id="L338">                                break;</span>
+                            }
+<span class="fc" id="L340">                        }</span>
+<span class="fc bfc" id="L341" title="All 2 branches covered.">                        if (!matched) {</span>
+<span class="fc" id="L342">                            throw new RefalException(</span>
+                                    &quot;No matching rule for &quot; + fn
+<span class="fc" id="L344">                                    + &quot; on args=&quot; + argsExpr.toList());</span>
+                        }
+                    }
+                }
+            }
+<span class="fc" id="L349">        }</span>
+
+        // Собрать пассивные термы из левого стека.
+<span class="fc" id="L352">        Expr&lt;Term&gt; out = Expr.empty();</span>
+<span class="fc bfc" id="L353" title="All 2 branches covered.">        for (ViewTerm v : left) {</span>
+<span class="pc bpc" id="L354" title="1 of 3 branches missed.">            switch (v) {</span>
+<span class="fc" id="L355">                case ViewTerm.Passive p -&gt; out = out.pushBack(p.term());</span>
+<span class="fc" id="L356">                case ViewTerm.BulkPassive bp -&gt; out = Expr.concat(out, bp.items());</span>
+<span class="nc" id="L357">                default -&gt; throw new RefalException(</span>
+                        &quot;Unbalanced view field: leftover &quot; + v);
+            }
+<span class="fc" id="L360">        }</span>
+<span class="fc" id="L361">        return out;</span>
+    }
+
+    /**
+     * Кладёт правую часть правила (после подстановки связываний) на правый стек
+     * справа-налево: первый терм окажется на вершине стека и будет обработан первым.
+     * Никаких промежуточных Expr&lt;Term&gt; с Call-нодами не создаётся.
+     */
+    private static void pushResultToStack(
+            List&lt;Term&gt; result,
+            Bindings bindings,
+            java.util.ArrayDeque&lt;ViewTerm&gt; right) {
+<span class="fc bfc" id="L373" title="All 2 branches covered.">        for (int i = result.size() - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L374">            pushTermToStack(result.get(i), bindings, right);</span>
+        }
+<span class="fc" id="L376">    }</span>
+
+    /**
+     * Кладёт один терм правой части (с раскрытием переменных) на правый стек.
+     * Порядок обхода: справа-налево внутри составных термов.
+     */
+    private static void pushTermToStack(
+            Term t,
+            Bindings bindings,
+            java.util.ArrayDeque&lt;ViewTerm&gt; right) {
+<span class="fc bfc" id="L386" title="All 4 branches covered.">        switch (t) {</span>
+<span class="fc" id="L387">            case refal.ast.Var v -&gt; {</span>
+                // Значение переменной — всегда пассивное выражение.
+                // Кладём на стек одним BulkPassive (O(1)) вместо O(n) Passive-объектов.
+<span class="fc" id="L390">                Expr&lt;Term&gt; val = bindings.get(v.key());</span>
+<span class="fc bfc" id="L391" title="All 2 branches covered.">                if (!val.isEmpty()) {</span>
+<span class="fc" id="L392">                    right.addFirst(new ViewTerm.BulkPassive(val));</span>
+                }
+<span class="fc" id="L394">            }</span>
+<span class="fc" id="L395">            case refal.ast.Br br -&gt; {</span>
+<span class="fc" id="L396">                right.addFirst(ViewTerm.ParenClose.INSTANCE);</span>
+<span class="fc" id="L397">                List&lt;Term&gt; items = br.items().toList();</span>
+<span class="fc bfc" id="L398" title="All 2 branches covered.">                for (int j = items.size() - 1; j &gt;= 0; j--) {</span>
+<span class="fc" id="L399">                    pushTermToStack(items.get(j), bindings, right);</span>
+                }
+<span class="fc" id="L401">                right.addFirst(ViewTerm.ParenOpen.INSTANCE);</span>
+<span class="fc" id="L402">            }</span>
+<span class="fc" id="L403">            case refal.ast.Call c -&gt; {</span>
+<span class="fc" id="L404">                right.addFirst(ViewTerm.AngClose.INSTANCE);</span>
+<span class="fc" id="L405">                List&lt;Term&gt; cargs = c.args().toList();</span>
+<span class="fc bfc" id="L406" title="All 2 branches covered.">                for (int j = cargs.size() - 1; j &gt;= 0; j--) {</span>
+<span class="fc" id="L407">                    pushTermToStack(cargs.get(j), bindings, right);</span>
+                }
+<span class="fc" id="L409">                right.addFirst(new ViewTerm.AngOpen(c.fn()));</span>
+<span class="fc" id="L410">            }</span>
+<span class="fc" id="L411">            default -&gt; right.addFirst(new ViewTerm.Passive(t));</span>
+        }
+<span class="fc" id="L413">    }</span>
+
+    /** Сплющивание AST-терма в линейную последовательность ViewTerm. */
+    private static void flattenInto(Term t, java.util.ArrayDeque&lt;ViewTerm&gt; out) {
+<span class="fc bfc" id="L417" title="All 3 branches covered.">        switch (t) {</span>
+<span class="fc" id="L418">            case Call c -&gt; {</span>
+<span class="fc" id="L419">                out.addLast(new ViewTerm.AngOpen(c.fn()));</span>
+<span class="fc bfc" id="L420" title="All 2 branches covered.">                for (Term a : c.args()) {</span>
+<span class="fc" id="L421">                    flattenInto(a, out);</span>
+<span class="fc" id="L422">                }</span>
+<span class="fc" id="L423">                out.addLast(ViewTerm.AngClose.INSTANCE);</span>
+<span class="fc" id="L424">            }</span>
+<span class="fc" id="L425">            case Br br -&gt; {</span>
+<span class="fc" id="L426">                out.addLast(ViewTerm.ParenOpen.INSTANCE);</span>
+<span class="fc bfc" id="L427" title="All 2 branches covered.">                for (Term a : br.items()) {</span>
+<span class="fc" id="L428">                    flattenInto(a, out);</span>
+<span class="fc" id="L429">                }</span>
+<span class="fc" id="L430">                out.addLast(ViewTerm.ParenClose.INSTANCE);</span>
+<span class="fc" id="L431">            }</span>
+<span class="fc" id="L432">            default -&gt; out.addLast(new ViewTerm.Passive(t));</span>
+        }
+<span class="fc" id="L434">    }</span>
+
+    private void bumpStep() {
+<span class="fc" id="L437">        steps++;</span>
+<span class="fc bfc" id="L438" title="All 2 branches covered.">        if (steps &gt; stepLimit) {</span>
+<span class="fc" id="L439">            throw new RefalException(&quot;Step limit exceeded (&quot; + stepLimit + &quot;)&quot;);</span>
+        }
+<span class="fc" id="L441">    }</span>
+
+    public List&lt;Term&gt; run(String entry, List&lt;Term&gt; initial) {
+        // Entry-вызов (Go) не должен учитываться как шаг нормализации.
+        // bumpStep() инкрементит steps перед первой редукцией, поэтому
+        // начинаем с -1: после входа в Go steps = 0, первый внутренний
+        // вызов делает &lt;Step&gt; = 1.
+<span class="fc" id="L448">        steps = -1;</span>
+        try {
+<span class="fc" id="L450">            Expr&lt;Term&gt; initialCall = Expr.singleton(new Call(entry, Expr.fromList(initial)));</span>
+<span class="fc" id="L451">            return normalize(initialCall).toList();</span>
+        } finally {
+<span class="fc" id="L453">            closeAllFiles();</span>
+        }
+    }
+
+    public List&lt;Term&gt; runEntry(List&lt;Term&gt; initial) {
+<span class="nc" id="L458">        String entry = program.entry().orElseThrow(() -&gt;</span>
+<span class="nc" id="L459">                new RefalException(&quot;Program has no $ENTRY and no entry was specified&quot;));</span>
+<span class="nc" id="L460">        return run(entry, initial);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

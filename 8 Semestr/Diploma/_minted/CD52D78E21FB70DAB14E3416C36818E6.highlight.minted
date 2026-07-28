@@ -1,0 +1,16 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@Override}
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n+nf}{pushFront}\PYG{p}{(}\PYG{n}{T}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{front}\PYG{p}{.}\PYG{n+na}{isFull}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                       }\PYG{c+c1}{// (1)}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{DeepDeque}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}
+\PYG{+w}{            }\PYG{n}{front}\PYG{p}{.}\PYG{n+na}{pushFrontTight}\PYG{p}{(}\PYG{n}{x}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{mid}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{back}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{sz}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{c+c1}{// front полон \PYGZhy{}\PYGZhy{}\PYGZhy{} надо освободить место}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{split}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{splitForPushFront}\PYG{p}{(}\PYG{n}{front}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{);}\PYG{+w}{     }\PYG{c+c1}{// (2)}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{mkDeep}\PYG{p}{(}
+\PYG{+w}{        }\PYG{n}{split}\PYG{p}{.}\PYG{n+na}{head}\PYG{p}{(),}\PYG{+w}{            }\PYG{c+c1}{// новый front (первые MIN\PYGZus{}FILL эл.)}
+\PYG{+w}{        }\PYG{n}{mid}\PYG{p}{.}\PYG{n+na}{pushFront}\PYG{p}{(}\PYG{n}{split}\PYG{p}{.}\PYG{n+na}{tail}\PYG{p}{()),}\PYG{+w}{ }\PYG{c+c1}{// старый front уходит в начало mid}
+\PYG{+w}{        }\PYG{n}{back}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n}{sz}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{);}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

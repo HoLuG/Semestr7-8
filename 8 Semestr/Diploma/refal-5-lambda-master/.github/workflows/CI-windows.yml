@@ -1,0 +1,38 @@
+name: CI-windows
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  bootstrap-bat:
+    strategy:
+      matrix:
+        ccomp: [ msvc32, msvc64, gcc ]
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Bootstrapping with ${{ matrix.ccomp }}
+        run: |
+          copy .github\workflows\conf-template-${{ matrix.ccomp }}.bat c-plus-plus.conf.bat
+          bootstrap.bat
+        shell: cmd
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: log-info-windows-${{ matrix.ccomp }}
+          path: |
+            autotests\__error.txt
+            autotests\__dump.txt
+            autotests\__log.txt
+            bin
+            src
+          retention-days: 5

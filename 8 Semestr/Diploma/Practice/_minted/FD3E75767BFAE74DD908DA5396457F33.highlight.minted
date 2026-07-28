@@ -1,0 +1,14 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public}\PYG{+w}{ }\PYG{k+kd}{sealed}\PYG{+w}{ }\PYG{k+kd}{interface} \PYG{n+nc}{ViewTerm}
+\PYG{+w}{        }\PYG{n}{permits}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{Passive}\PYG{p}{,}\PYG{+w}{  }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{BulkPassive}\PYG{p}{,}
+\PYG{+w}{                }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{AngOpen}\PYG{p}{,}\PYG{+w}{  }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{AngClose}\PYG{p}{,}
+\PYG{+w}{                }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{ParenOpen}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{ParenClose}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+
+\PYG{+w}{    }\PYG{k+kd}{record} \PYG{n+nc}{Passive}\PYG{p}{(}\PYG{n}{Term}\PYG{+w}{ }\PYG{n}{term}\PYG{p}{)}\PYG{+w}{          }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{+w}{    }\PYG{k+kd}{record} \PYG{n+nc}{BulkPassive}\PYG{p}{(}\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{items}\PYG{p}{)}\PYG{+w}{ }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{+w}{    }\PYG{k+kd}{record} \PYG{n+nc}{AngOpen}\PYG{p}{(}\PYG{n}{String}\PYG{+w}{ }\PYG{n}{fn}\PYG{p}{)}\PYG{+w}{          }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{+w}{    }\PYG{k+kd}{record} \PYG{n+nc}{AngClose}\PYG{p}{()}\PYG{+w}{                  }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{+w}{    }\PYG{k+kd}{record} \PYG{n+nc}{ParenOpen}\PYG{p}{()}\PYG{+w}{                 }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{+w}{    }\PYG{k+kd}{record} \PYG{n+nc}{ParenClose}\PYG{p}{()}\PYG{+w}{                }\PYG{k+kd}{implements}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

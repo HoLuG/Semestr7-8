@@ -1,0 +1,10 @@
+$ENTRY Main;
+
+* Nested brackets, t-variable matches a single (possibly bracketed) term
+Main {
+  = <Wrap (A B (C))>;
+}
+
+Wrap {
+  t.X = (t.X t.X);
+}

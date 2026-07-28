@@ -1,0 +1,14 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+Program   ::= EntryDecl? FuncDef* EOF
+EntryDecl ::= \PYGZdq{}\PYGZdl{}ENTRY\PYGZdq{} Ident \PYGZdq{};\PYGZdq{}
+
+FuncDef   ::= Ident \PYGZdq{}\PYGZob{}\PYGZdq{} Rule* \PYGZdq{}\PYGZcb{}\PYGZdq{}
+Rule      ::= Pattern \PYGZdq{}=\PYGZdq{} Result \PYGZdq{};\PYGZdq{}
+
+Pattern   ::= Term*
+Result    ::= Term*
+
+Term      ::= Int | String | Var | Symbol | BracketTerm
+Var       ::= (\PYGZdq{}s\PYGZdq{} | \PYGZdq{}t\PYGZdq{} | \PYGZdq{}e\PYGZdq{}) \PYGZdq{}.\PYGZdq{} Ident
+BracketTerm ::= \PYGZdq{}(\PYGZdq{} Term* \PYGZdq{})\PYGZdq{}
+\end{MintedVerbatim}

@@ -1,0 +1,30 @@
+$ENTRY Go {
+  /* пусто */
+    = <Eq 111 <F 'AAA'>>
+      <Eq 112 <F 'AAB'>>
+      <Eq 12 <F 'AB'>>
+      <Eq 2 <F 'B'>>
+}
+
+Eq { s.X s.X = }
+
+F {
+  s.First1 e.Rest1
+    , s.First1
+    : {
+        'A', e.Rest1 : s.First2 e.Rest2
+          , s.First2
+          : {
+              'A', e.Rest2 : s.First3
+                , s.First3
+                : {
+                    'A' = 111;
+                    'B' = 112;
+                  };
+          
+              'B' = 12;
+            };
+
+        'B' = 2;
+      };
+}

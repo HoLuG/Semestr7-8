@@ -1,0 +1,437 @@
+\clearpage
+
+\anonsection{ПРИЛОЖЕНИЕ А}
+\label{app:grammar}
+
+\subsection*{Формальная грамматика базисного подмножества Рефала-5}
+
+Грамматика приведена в нотации EBNF. Синтаксис базисного подмножества является
+точным подмножеством синтаксиса Рефала-5. В реализуемом базисном подмножестве дополнительно
+поддерживается директива \prog{\$EXTERN}, нужная для согласованности с выходом
+рассахаривателя \prog{r5fw-desugar}~\cite{refal5_framework_github}.
+
+\subsection*{Лексика}
+
+\begin{itemize}
+  \item Пробелы и переводы строк разделяют токены и игнорируются.
+  \item Комментарий: строка, начинающаяся с \prog{*}, до конца строки.
+  \item Целое число: \prog{-?[0-9]+}.
+  \item Строка: \prog{'\ldots'} либо \prog{\textquotedbl\ldots\textquotedbl} (без экранирования; допускаются любые
+        символы до следующей кавычки того же вида).
+  \item Идентификатор: \prog{[A-Za-z.\_\$][A-Za-z0-9.\_\$\-]*}.
+  \item Зарезервированные директивы: \prog{\$ENTRY}, \prog{\$EXTERN}.
+  \item Скобки и разделители: \prog{\{ \} ( ) < > = ; ,}.
+\end{itemize}
+
+\subsection*{Синтаксис (EBNF)}
+
+\begin{lstlisting}[language={},caption={EBNF-грамматика базисного подмножества Refal-5},label={lst:ebnf}]
+Program     ::= TopLevel* EOF ;
+
+TopLevel    ::= EntryDecl | ExternDecl | FuncDef ;
+
+EntryDecl   ::= "$ENTRY" Ident ";"
+              | "$ENTRY" FuncDef ;
+
+ExternDecl  ::= "$EXTERN" Ident ("," Ident)* ";" ;
+
+FuncDef     ::= Ident "{" Rule+ "}" ;
+
+Rule        ::= Pattern "=" Result ";"? ;
+
+Pattern     ::= PatternTerm* ;
+PatternTerm ::= Int | Str | QuotedSym | Var | "(" PatternTerm* ")" ;
+
+Result      ::= ResultTerm* ;
+ResultTerm  ::= Int | Str | QuotedSym | Var | Symbol
+              | "(" ResultTerm* ")"
+              | "<" Ident ResultTerm* ">" ;
+
+Var         ::= ("s" | "t" | "e") "." VarName ;
+VarName     ::= (Letter | Digit | "_" | "." | "$")+ ;
+
+Symbol      ::= Ident ;
+Ident       ::= Letter (Letter | Digit | "_" | "-" | "+" | ".")* ;
+Int         ::= Digit+ ;
+Str         ::= '"' Char* '"' ;
+QuotedSym   ::= "'" Char* "'" ;
+\end{lstlisting}
+
+\subsection*{Семантика сопоставления}
+
+\begin{itemize}
+  \item \prog{s.X}~--- связывается с ровно одним \emph{атомарным} термом (символ, число или
+        строка); скобочный терм не подходит.
+  \item \prog{t.X}~--- связывается с ровно одним термом (включая скобочный).
+  \item \prog{e.X}~--- связывается с последовательностью термов (возможно пустой).
+  \item Если переменная встречается в правиле несколько раз~--- все вхождения должны быть
+        связаны с одинаковыми значениями.
+  \item В теле функции выбирается \emph{первое} правило, чей образец сопоставим с
+        аргументами; затем результат подставляется и редуцируется.
+\end{itemize}
+
+\subsection*{Что \emph{не} поддерживается}
+
+\begin{itemize}
+  \item Условия \prog{,~e.Cond} после паттерна, блоки \prog{\{ : \}}~--- для них применяется
+        внешний рассахариватель \prog{r5fw-desugar}, выход которого уже укладывается в эту
+        грамматику.
+  \item Экранирование в строках (\prog{\textbackslash n}, \prog{\textbackslash x42}).
+  \item Макроцифры \prog{@BIG-MACRODIGIT@}.
+  \item Псевдокомментарии \prog{*\$CLASSIC} / \prog{*\$EXTENDED}.
+  \item Декларации \prog{*\$FROM} (директива модульной системы Рефала-5); несколько файлов
+        загружаются через синтаксис \prog{+}: \prog{java -jar target/refal5q.jar a.ref+b.ref+c.ref}.
+\end{itemize}
+
+\clearpage
+\anonsection{ПРИЛОЖЕНИЕ Б}
+\label{app:listings}
+
+\subsection*{Листинги ключевых функций}
+
+В приложении приведены ключевые фрагменты исходного кода Java-реализации
+с пояснительными комментариями. Каждый листинг сопровождён ссылкой на
+соответствующий файл в каталоге \prog{refal5q-impl/src/main/java/refal/}.
+
+\subsection*{Конкатенация контейнеров ExprOps.concat}
+
+Файл \prog{refal5q-impl/src/main/java/refal/deque/ExprOps.java}.
+
+\begin{lstlisting}[language=Java,caption={Конкатенация двух Expr с разбором всех четырёх случаев},label={lst:app-concat}]
+static <T> Expr<T> concat(Expr<T> a, Expr<T> b) {
+    if (a.isEmpty()) return b;
+    if (b.isEmpty()) return a;
+    if (a instanceof ShallowDeque<T> sa && b instanceof ShallowDeque<T> sb) return concatSS(sa, sb);
+    if (a instanceof ShallowDeque<T> sa && b instanceof DeepDeque<T> db)    return concatSD(sa, db);
+    if (a instanceof DeepDeque<T> da && b instanceof ShallowDeque<T> sb)    return concatDS(da, sb);
+    DeepDeque<T> da = (DeepDeque<T>) a;
+    DeepDeque<T> db = (DeepDeque<T>) b;
+    return concatDD(da, db);
+}
+
+private static <T> Expr<T> concatDD(DeepDeque<T> a, DeepDeque<T> b) {
+    int total = a.size() + b.size();
+    ShallowDeque<T> ab = a.back();
+    ShallowDeque<T> bf = b.front();
+    int boundary = ab.size() + bf.size();
+
+    Expr<ShallowDeque<T>> aMidPlus = a.mid();
+    if (boundary == 0) {
+        (*@{\color{black}\ttfamily // оба граничных буфера пусты -- ничего добавлять не нужно.}@*)
+    } else if (boundary <= CAPACITY) {
+        ShallowDeque<T> merged = ShallowDeque.empty();
+        for (T x : iter(ab)) merged = merged.pushBackTight(x);
+        for (T x : iter(bf)) merged = merged.pushBackTight(x);
+        aMidPlus = aMidPlus.pushBack(merged);
+    } else {
+        Object[] tmp = new Object[boundary];
+        int i = 0;
+        for (T x : iter(ab)) tmp[i++] = x;
+        for (T x : iter(bf)) tmp[i++] = x;
+        int rightLen = boundary - CAPACITY;
+        if (rightLen < ShallowDeque.MIN_FILL) rightLen = ShallowDeque.MIN_FILL;
+        int leftLen = boundary - rightLen;
+        ShallowDeque<T> m1 = ShallowDeque.ofArray(tmp, 0, leftLen);
+        ShallowDeque<T> m2 = ShallowDeque.ofArray(tmp, leftLen, rightLen);
+        aMidPlus = aMidPlus.pushBack(m1).pushBack(m2);
+    }
+
+    Expr<ShallowDeque<T>> newMid = concat(aMidPlus, b.mid());
+    return DeepDeque.mkDeep(a.front(), newMid, b.back(), total);
+}
+\end{lstlisting}
+
+Случай Deep+Deep явно показан полностью --- в нём проявляется рекурсивный
+вызов \prog{concat} на средних очередях буферов, обеспечивающий
+амортизированно \(O(1)\) сложность по Окасаки~\cite{okasaki_pfds}. Случаи
+Shallow+Shallow, Shallow+Deep и Deep+Shallow (методы \prog{concatSS},
+\prog{concatSD}, \prog{concatDS}) реализованы аналогично с расщеплением
+объединённого буфера ровно пополам, если он превышает \prog{CAPACITY}.
+
+\subsection*{Сопоставление образца с выражением Matcher.match}
+
+Файл \prog{refal5q-impl/src/main/java/refal/runtime/Matcher.java}.
+
+\begin{lstlisting}[language=Java,caption={Сопоставление образца с выражением (с backtracking по e-переменным)},label={lst:app-match}]
+public static Optional<Bindings> match(List<Term> pattern, List<Term> expr) {
+    return rec(pattern, 0, expr, 0, expr.size(), Bindings.empty());
+}
+
+private static Optional<Bindings> rec(
+        List<Term> pat, int pi,
+        List<Term> exp, int ei, int eEnd,
+        Bindings env) {
+    if (pi == pat.size()) {
+        return ei == eEnd ? Optional.of(env) : Optional.empty();
+    }
+    Term p = pat.get(pi);
+
+    if (p instanceof Var v && v.kind() == 'e') {
+        String key = v.key();
+        if (env.contains(key)) {
+            (*@{\color{black}\ttfamily // Повторное вхождение: проверяем совпадение.}@*)
+            List<Term> bound = env.get(key);
+            int len = bound.size();
+            if (ei + len > eEnd) return Optional.empty();
+            for (int k = 0; k < len; k++) {
+                if (!exp.get(ei + k).equals(bound.get(k))) return Optional.empty();
+            }
+            return rec(pat, pi + 1, exp, ei + len, eEnd, env);
+        }
+        (*@{\color{black}\ttfamily // Свежая e.X -- перебираем длину захвата 0, 1, ...}@*)
+        for (int len = 0; ei + len <= eEnd; len++) {
+            List<Term> chunk = exp.subList(ei, ei + len);
+            Bindings env1 = env.with(key, List.copyOf(chunk));
+            Optional<Bindings> r = rec(pat, pi + 1, exp, ei + len, eEnd, env1);
+            if (r.isPresent()) return r;
+        }
+        return Optional.empty();
+    }
+
+    if (ei >= eEnd) return Optional.empty();
+    Term x = exp.get(ei);
+
+    if (p instanceof Var v) {
+        String key = v.key();
+        if (v.kind() == 's') {
+            if (x instanceof Br) return Optional.empty();
+            if (env.contains(key)) {
+                List<Term> bound = env.get(key);
+                if (bound.size() != 1 || !bound.get(0).equals(x)) return Optional.empty();
+                return rec(pat, pi + 1, exp, ei + 1, eEnd, env);
+            }
+            return rec(pat, pi + 1, exp, ei + 1, eEnd, env.with(key, List.of(x)));
+        }
+        if (v.kind() == 't') {
+            if (env.contains(key)) {
+                List<Term> bound = env.get(key);
+                if (bound.size() != 1 || !bound.get(0).equals(x)) return Optional.empty();
+                return rec(pat, pi + 1, exp, ei + 1, eEnd, env);
+            }
+            return rec(pat, pi + 1, exp, ei + 1, eEnd, env.with(key, List.of(x)));
+        }
+    }
+
+    if (p instanceof Br pBr) {
+        if (!(x instanceof Br xBr)) return Optional.empty();
+        Optional<Bindings> inner = rec(pBr.items(), 0, xBr.items(), 0, xBr.items().size(), env);
+        if (inner.isEmpty()) return Optional.empty();
+        return rec(pat, pi + 1, exp, ei + 1, eEnd, inner.get());
+    }
+
+    if (p.equals(x)) return rec(pat, pi + 1, exp, ei + 1, eEnd, env);
+    return Optional.empty();
+}
+\end{lstlisting}
+
+\subsection*{Подстановка результата правила Substitutor.substitute}
+
+Файл \prog{refal5q-impl/src/main/java/refal/runtime/Substitutor.java}.
+
+\begin{lstlisting}[language=Java,caption={Сборка результата правила через Expr.concat},label={lst:app-subst}]
+public static Expr<Term> substitute(List<Term> result, Bindings env) {
+    Expr<Term> out = Expr.empty();
+    for (Term t : result) {
+        switch (t) {
+            case Var v -> {
+                String key = v.key();
+                if (!env.contains(key)) {
+                    throw new IllegalStateException(
+                            "Unbound variable in result: " + key);
+                }
+                out = Expr.concat(out, Expr.fromList(env.get(key)));
+            }
+            case Br br -> {
+                Expr<Term> inner = substitute(br.items(), env);
+                out = out.pushBack(new Br(inner.toList()));
+            }
+            case Call c -> {
+                Expr<Term> argDq = substitute(c.args(), env);
+                out = out.pushBack(new Call(c.fn(), argDq.toList()));
+            }
+            default -> out = out.pushBack(t);
+        }
+    }
+    return out;
+}
+\end{lstlisting}
+
+Использование switch-выражения с шаблонами над запечатанным
+интерфейсом \prog{Term} обеспечивает компилируемую полноту разбора:
+если в иерархию AST добавляется новый вид терма, компилятор Java потребует
+обработать его явно.
+
+\subsection*{Цикл нормализации Runtime.normalize и Runtime.evalCall}
+
+Файл \prog{refal5q-impl/src/main/java/refal/runtime/Runtime.java}.
+
+\begin{lstlisting}[language=Java,caption={Цикл нормализации (прикладной порядок, сначала крайний слева)},label={lst:app-normalize}]
+public Expr<Term> normalize(Expr<Term> expr) {
+    Expr<Term> out = Expr.empty();
+    for (Term t : expr) {
+        out = Expr.concat(out, normalizeTerm(t));
+    }
+    return out;
+}
+
+private Expr<Term> normalizeTerm(Term t) {
+    return switch (t) {
+        case Call c -> {
+            bumpStep();
+            Expr<Term> normalizedArgs = normalize(Expr.fromList(c.args()));
+            Expr<Term> body = evalCall(c.fn(), normalizedArgs.toList());
+            yield normalize(body);
+        }
+        case Br br -> {
+            Expr<Term> inner = normalize(Expr.fromList(br.items()));
+            yield Expr.singleton(new Br(inner.toList()));
+        }
+        default -> Expr.singleton(t);
+    };
+}
+
+public Expr<Term> evalCall(String fn, List<Term> args) {
+    BuiltinFn b = builtins.get(fn);
+    if (b != null) {
+        List<Term> r = b.apply(this, args);
+        return Expr.fromList(r);
+    }
+    Optional<Func> f = program.getFunc(fn);
+    if (f.isEmpty()) {
+        throw new RefalException("Unknown function: " + fn);
+    }
+    for (Rule rule : f.get().rules()) {
+        var bindings = Matcher.match(rule.pattern(), args);
+        if (bindings.isPresent()) {
+            return Substitutor.substitute(rule.result(), bindings.get());
+        }
+    }
+    throw new RefalException("No matching rule for " + fn + " on args=" + args);
+}
+\end{lstlisting}
+
+\clearpage
+\anonsection{ПРИЛОЖЕНИЕ В}
+\label{app:reproduce}
+
+\subsection*{Команды воспроизведения тестов и сравнительного прогона}
+
+Все команды выполняются из каталога \prog{refal5q-impl/}. Предполагаются
+установленными Java~25~LTS~\cite{java_se25_spec} (с
+переменной \prog{JAVA\_HOME}, указывающей на JDK) и Apache Maven~3.9 или
+выше~\cite{maven_guide}.
+
+\subsection*{Установка инструментов}
+
+\begin{lstlisting}[language=bash,caption={Проверка инструментов перед сборкой}]
+$ java -version       (*@{\color{black}\ttfamily \# ожидается 25.x}@*)
+$ javac -version      (*@{\color{black}\ttfamily \# ожидается 25.x}@*)
+$ mvn -version        (*@{\color{black}\ttfamily \# ожидается 3.9.x или новее}@*)
+\end{lstlisting}
+
+Зависимости проекта (JUnit~5, AssertJ, JaCoCo, Checkstyle) подтягиваются
+Maven автоматически из локального репозитория \prog{\textasciitilde/.m2/}; явная
+установка не требуется.
+
+\subsection*{Полная сборка с тестами и проверками}
+
+\begin{lstlisting}[language=bash,caption={Полная сборка проекта}]
+$ mvn clean verify
+\end{lstlisting}
+
+Команда выполняет:
+\begin{itemize}
+  \item компиляцию (\prog{maven-compiler-plugin}, целевой релиз --- 25);
+  \item запуск всех \(143\) тестов JUnit~5 (\prog{maven-surefire-plugin});
+  \item построение самодостаточного JAR-файла \prog{target/refal5q.jar} (\prog{maven-shade-plugin});
+  \item проверку покрытия (\prog{jacoco-maven-plugin}; пороги
+        \(\geq 70\,\%\) по инструкциям и \(\geq 55\,\%\) по веткам для
+        пакетов \prog{refal.deque} и \prog{refal.runtime});
+  \item проверку стиля кода (\prog{maven-checkstyle-plugin}, конфигурация
+        \prog{checkstyle.xml}).
+\end{itemize}
+
+При успешном завершении в каталоге \prog{target/site/jacoco/} лежит HTML-отчёт о
+покрытии, в \prog{target/} --- jar-артефакт.
+
+\subsection*{Запуск программы}
+
+\begin{lstlisting}[language=bash,caption={Запуск программы из файла}]
+$ java -jar target/refal5q.jar bench/hello.ref --expr "'World'"
+\end{lstlisting}
+
+При наличии \prog{\$ENTRY} в файле опция \prog{--entry} необязательна.
+Опция \prog{--step-limit~N} устанавливает лимит шагов редукции
+(по умолчанию \(100\,000\)).
+
+\subsection*{Workflow с внешним рассахаривателем}
+
+Если исходный файл написан с использованием расширенного синтаксиса
+Рефала-5 (условия \prog{,~e.Cond}, блоки \prog{\{ : \}}), то перед запуском
+его пропускают через рассахариватель из проекта
+\prog{refal-5-framework}~\cite{refal5_framework_github}:
+
+\begin{lstlisting}[language=bash,caption={Полный workflow с рассахаривателем}]
+$ refgo r5fw-desugar program.ref program-desugared.ref
+$ java -jar target/refal5q.jar program-desugared.ref --entry Go
+\end{lstlisting}
+
+\subsection*{Сравнительные прогоны трёх реализаций Рефала-5}
+
+Сравнительные прогоны из подраздела~\ref{subsec:benchmarks} автоматизированы
+двумя PowerShell-скриптами. Оба ожидают установленный Refal-5~PZ~\cite{refal5_home}
+(дистрибутив Version~PZ с сайта ИПМ им.~А.~П.~Ершова; пути к
+\prog{refgo.exe} и \prog{refc.exe} задаются в начале скрипта) и опционально~---
+Refal-5J при включённой опции \prog{-WithR5J}.
+
+Скрипт \prog{bench/loop-select-bench.ps1} прогоняет синтетический тест
+Loop/Select при значениях $N$ от 100 до 20\,000:
+
+\begin{lstlisting}[language=bash,caption={Запуск бенчмарка Loop/Select}]
+$ powershell -File bench\loop-select-bench.ps1 -WithPZ -WithR5J
+\end{lstlisting}
+
+Скрипт \prog{bench/desugar-bench.ps1} измеряет время рассахаривания
+\prog{R5FW-Parser.ref}:
+
+\begin{lstlisting}[language=bash,caption={Запуск бенчмарка рассахаривателя}]
+$ powershell -File bench\desugar-bench.ps1 -WithPZ -WithR5J
+\end{lstlisting}
+
+По умолчанию выполняется \(1\) прогревочный запуск и \(3\) измеряемых, в
+отчёт идёт медиана; параметры регулируются опциями \prog{-WarmupRuns} и
+\prog{-MeasuredRuns}. Результаты Loop/Select сохраняются в
+\prog{bench/loop-select-results.csv}; график для основного текста строится
+отдельно командой \prog{python bench/plot-benchmark.py --out bench/loop-select-graph.pdf}.
+Время рассахаривания записывается в \prog{bench/desugar-results.csv}.
+
+\clearpage
+\anonsection{ПРИЛОЖЕНИЕ Г}
+\label{app:loopselect-src}
+
+\subsection*{Исходный код теста Loop/Select}
+
+Тестовая программа сравнительного прогона из подраздела~\ref{subsec:benchmarks}.
+Файл \prog{refal5q-impl/bench/loop-select.ref}. Аргумент \prog{<Arg 1>}~---
+число итераций $N$; на каждой итерации функция \prog{Loop} строит новый
+скобочный терм из растущего аккумулятора \prog{e.Acc}, а \prog{Select}
+выбирает одну из двух альтернатив в зависимости от направления.
+
+\begin{lstlisting}[language=Refal,caption={Тестовая программа Loop/Select},label={lst:app-loopselect}]
+$ENTRY Go {
+  = <TimeElapsed 0>
+    <Loop Left () <Numb <Arg 1>>>
+    <Prout <TimeElapsed>>;
+}
+
+Loop {
+  s.Side (e.Acc) 0 = /* done */;
+  s.Side (e.Acc) s.Rest
+    = <Loop <Select s.Side (e.Acc A) (e.Acc B)> <- s.Rest 1>>;
+}
+
+Select {
+  Left  t.Left t.Right = Right t.Left;
+  Right t.Left t.Right = Left  t.Right;
+}
+\end{lstlisting}

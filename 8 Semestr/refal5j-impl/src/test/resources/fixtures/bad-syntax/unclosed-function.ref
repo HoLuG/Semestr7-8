@@ -1,0 +1,5 @@
+$ENTRY Main;
+
+* '}' is missing for the function body.
+Main {
+  = ;

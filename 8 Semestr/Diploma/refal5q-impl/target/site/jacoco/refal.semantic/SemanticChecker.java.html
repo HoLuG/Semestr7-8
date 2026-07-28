@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SemanticChecker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.semantic</a> &gt; <span class="el_source">SemanticChecker.java</span></div><h1>SemanticChecker.java</h1><pre class="source lang-java linenums">package refal.semantic;
+
+import refal.ast.Br;
+import refal.ast.Call;
+import refal.ast.Func;
+import refal.ast.Program;
+import refal.ast.Rule;
+import refal.ast.Term;
+import refal.ast.Var;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+// Семантические проверки: уникальность функций, запрет вызовов в образцах,
+// типы переменных, несвязанные переменные в правой части, неизвестные вызовы.
+public final class SemanticChecker {
+
+    private SemanticChecker() {
+    }
+
+    public static SemanticInfo check(
+            Program prog,
+            Optional&lt;String&gt; overrideEntry,
+            Set&lt;String&gt; builtinNames) {
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        Set&lt;String&gt; bins = builtinNames == null ? Set.of() : builtinNames;</span>
+
+        // 1. дубли определений функций — Program.Builder уже собрал их.
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (!prog.duplicateFuncNames().isEmpty()) {</span>
+<span class="fc" id="L33">            String name = prog.duplicateFuncNames().iterator().next();</span>
+<span class="fc" id="L34">            throw new SemanticException(</span>
+                    SemanticException.Kind.DUPLICATE_FUNCTION,
+                    &quot;duplicate function definition: '&quot; + name + &quot;'&quot;,
+                    name, -1);
+        }
+
+<span class="fc" id="L40">        Map&lt;String, Func&gt; funcEnv = new HashMap&lt;&gt;(prog.funcs());</span>
+
+        // 1b. Конфликт имени пользовательской функции со встроенной.
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        for (String funcName : funcEnv.keySet()) {</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">            if (bins.contains(funcName)) {</span>
+<span class="fc" id="L45">                throw new SemanticException(</span>
+                        SemanticException.Kind.BUILTIN_SHADOW,
+                        &quot;function '&quot; + funcName + &quot;' shadows a built-in with the same name&quot;,
+                        funcName, -1);
+            }
+<span class="fc" id="L50">        }</span>
+
+        // 2. вызываемые имена: user funcs + externs + builtins
+<span class="fc" id="L53">        Set&lt;String&gt; callable = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L54">        callable.addAll(funcEnv.keySet());</span>
+<span class="fc" id="L55">        callable.addAll(prog.externs());</span>
+<span class="fc" id="L56">        callable.addAll(bins);</span>
+
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        for (Func f : funcEnv.values()) {</span>
+<span class="fc" id="L59">            int ruleIdx = 0;</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">            for (Rule r : f.rules()) {</span>
+<span class="fc" id="L61">                checkNoCallInPattern(f.name(), ruleIdx, r.pattern());</span>
+
+<span class="fc" id="L63">                Map&lt;String, Character&gt; patternVars = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L64">                collectPatternVarKinds(r.pattern(), patternVars, f.name(), ruleIdx);</span>
+
+<span class="fc" id="L66">                checkResultVars(r.result(), patternVars, f.name(), ruleIdx);</span>
+<span class="fc" id="L67">                checkCalls(r.result(), callable, f.name(), ruleIdx);</span>
+
+<span class="fc" id="L69">                ruleIdx++;</span>
+<span class="fc" id="L70">            }</span>
+<span class="fc" id="L71">        }</span>
+
+        // 3. entry resolution
+<span class="fc" id="L74">        Optional&lt;String&gt; effectiveEntry =</span>
+<span class="fc" id="L75">                overrideEntry.or(prog::entry);</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (effectiveEntry.isPresent()</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">                &amp;&amp; !funcEnv.containsKey(effectiveEntry.get())) {</span>
+<span class="fc" id="L78">            throw new SemanticException(</span>
+                    SemanticException.Kind.UNDEFINED_ENTRY,
+<span class="fc" id="L80">                    &quot;Entry function '&quot; + effectiveEntry.get()</span>
+                            + &quot;' is not defined in the program&quot;,
+<span class="fc" id="L82">                    effectiveEntry.get(), -1);</span>
+        }
+
+<span class="fc" id="L85">        Set&lt;String&gt; externsLinked = new LinkedHashSet&lt;&gt;(prog.externs());</span>
+<span class="fc" id="L86">        return new SemanticInfo(funcEnv, externsLinked, effectiveEntry, bins);</span>
+    }
+
+    private static void checkNoCallInPattern(
+            String fn, int ruleIdx, Iterable&lt;Term&gt; pattern) {
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        for (Term t : pattern) {</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">            if (t instanceof Call c) {</span>
+<span class="nc" id="L93">                throw new SemanticException(</span>
+                        SemanticException.Kind.CALL_IN_PATTERN,
+                        &quot;function '&quot; + fn + &quot;', rule #&quot; + (ruleIdx + 1)
+<span class="nc" id="L96">                                + &quot;: call '&lt;&quot; + c.fn() + &quot; ...&gt;' is not allowed in pattern&quot;,</span>
+                        fn, ruleIdx);
+            }
+<span class="fc bfc" id="L99" title="All 2 branches covered.">            if (t instanceof Br br) {</span>
+<span class="fc" id="L100">                checkNoCallInPattern(fn, ruleIdx, br.items());</span>
+            }
+<span class="fc" id="L102">        }</span>
+<span class="fc" id="L103">    }</span>
+
+    private static void collectPatternVarKinds(
+            Iterable&lt;Term&gt; pattern,
+            Map&lt;String, Character&gt; out,
+            String fn, int ruleIdx) {
+        // В классическом Рефале-5 переменные s.X, t.X, e.X — три разных
+        // переменных, даже с одинаковым именем. Поэтому ключ карты — это
+        // полная пара «префикс.имя», конфликтов по совпадающему имени нет.
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        for (Term t : pattern) {</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">            if (t instanceof Var v) {</span>
+<span class="fc" id="L114">                out.put(v.kind() + &quot;.&quot; + v.name(), v.kind());</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">            } else if (t instanceof Br br) {</span>
+<span class="fc" id="L116">                collectPatternVarKinds(br.items(), out, fn, ruleIdx);</span>
+            }
+<span class="fc" id="L118">        }</span>
+<span class="fc" id="L119">    }</span>
+
+    private static void checkResultVars(
+            Iterable&lt;Term&gt; result,
+            Map&lt;String, Character&gt; patternVars,
+            String fn, int ruleIdx) {
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        for (Term t : result) {</span>
+<span class="fc bfc" id="L126" title="All 4 branches covered.">            switch (t) {</span>
+<span class="fc" id="L127">                case Var v -&gt; {</span>
+<span class="fc" id="L128">                    String key = v.kind() + &quot;.&quot; + v.name();</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">                    if (!patternVars.containsKey(key)) {</span>
+<span class="fc" id="L130">                        throw new SemanticException(</span>
+                                SemanticException.Kind.UNBOUND_VARIABLE,
+                                &quot;function '&quot; + fn + &quot;', rule #&quot; + (ruleIdx + 1)
+<span class="fc" id="L133">                                        + &quot;: variable &quot; + v.kind() + &quot;.&quot; + v.name()</span>
+                                        + &quot; in result is not bound in pattern&quot;,
+                                fn, ruleIdx);
+                    }
+<span class="fc" id="L137">                }</span>
+<span class="fc" id="L138">                case Br br -&gt; checkResultVars(br.items(), patternVars, fn, ruleIdx);</span>
+<span class="fc" id="L139">                case Call c -&gt; checkResultVars(c.args(), patternVars, fn, ruleIdx);</span>
+                default -&gt; { /* атомарный — пропускаем */ }
+            }
+<span class="fc" id="L142">        }</span>
+<span class="fc" id="L143">    }</span>
+
+    private static void checkCalls(
+            Iterable&lt;Term&gt; result,
+            Set&lt;String&gt; known,
+            String fn, int ruleIdx) {
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        for (Term t : result) {</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">            if (t instanceof Call c) {</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">                if (!known.contains(c.fn())) {</span>
+<span class="fc" id="L152">                    throw new SemanticException(</span>
+                            SemanticException.Kind.UNDEFINED_FUNCTION,
+                            &quot;function '&quot; + fn + &quot;', rule #&quot; + (ruleIdx + 1)
+<span class="fc" id="L155">                                    + &quot;: call to undefined function '&quot; + c.fn() + &quot;'&quot;,</span>
+                            fn, ruleIdx);
+                }
+<span class="fc" id="L158">                checkCalls(c.args(), known, fn, ruleIdx);</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">            } else if (t instanceof Br br) {</span>
+<span class="fc" id="L160">                checkCalls(br.items(), known, fn, ruleIdx);</span>
+            }
+<span class="fc" id="L162">        }</span>
+<span class="fc" id="L163">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

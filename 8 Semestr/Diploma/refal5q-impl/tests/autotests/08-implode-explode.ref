@@ -1,0 +1,30 @@
+$ENTRY Go {
+  /* пусто */
+    = <Eq (Hello '!@#$%^&*()') <Implode 'Hello!@#$%^&*()'>>
+      <Eq (Hi123_45-67 '<>?')  <Implode 'Hi123_45-67<>?'>>
+      <Eq (Hi123_45-67abcd)    <Implode 'Hi123_45-67abcd'>>
+      <Eq ("Money$100500")     <Implode 'Money$100500'>>
+      <Eq (Hello 1 2 3)        <Implode 'Hello' 1 2 3>>
+      <Eq (Hello Bye)          <Implode 'Hello' Bye>>
+      <Eq (Hello () () ())     <Implode 'Hello' () () ()>>
+      <Eq (0 '!@#$%^&*()')     <Implode '!@#$%^&*()'>>
+      <Eq (0 1 2 3)            <Implode 1 2 3>>
+      <Eq (0 Hello Bye)        <Implode Hello Bye>>
+      <Eq (0 () () ())         <Implode () () ()>>
+      <Eq (0)                  <Implode /* пусто */>>
+
+      <Eq (Hello-World)        <Implode_Ext 'Hello-World'>>
+      <Eq ("Hello World!")     <Implode_Ext 'Hello World!'>>
+      <Eq ("!@#$%^&*()")       <Implode_Ext '!@#$%^&*()'>>
+      <Eq ("")                 <Implode_Ext /* пусто */>>
+
+      <Eq ('Hello')            <Explode Hello>>
+      <Eq ('Hello World!')     <Explode "Hello World!">>
+      <Eq (/* пусто */)        <Explode "">>
+
+      <Eq ('Hello')            <Explode_Ext Hello>>
+      <Eq ('Hello World!')     <Explode_Ext "Hello World!">>
+      <Eq (/* пусто */)        <Explode_Ext "">>
+}
+
+Eq { (e.X) e.X = }

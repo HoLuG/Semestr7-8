@@ -1,0 +1,6 @@
+$ENTRY Main;
+
+* 's.Y' appears in result but not in pattern.
+Main {
+  s.X = s.X s.Y;
+}

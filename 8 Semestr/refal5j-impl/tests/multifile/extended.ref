@@ -1,0 +1,11 @@
+$ENTRY Go {
+  = <Prout <Classify 1>>
+    <Prout <Classify 2>>
+    <Prout <Classify 3>>;
+}
+
+Classify {
+  s.N, <Compare s.N 2>: '-' = Less;
+  s.N, <Compare s.N 2>: '0' = Equal;
+  s.N                       = Greater;
+}

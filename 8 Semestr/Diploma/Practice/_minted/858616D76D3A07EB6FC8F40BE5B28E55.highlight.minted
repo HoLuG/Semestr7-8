@@ -1,0 +1,4 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+pip\PYG{+w}{ }install\PYG{+w}{ }matplotlib\PYG{+w}{ }numpy
+python\PYG{+w}{ }bench\PYG{l+s+se}{\PYGZbs{}p}lot\PYGZhy{}benchmark.py\PYG{+w}{ }\PYGZhy{}\PYGZhy{}out\PYG{+w}{ }bench\PYG{l+s+se}{\PYGZbs{}l}oop\PYGZhy{}select\PYGZhy{}graph.pdf
+\end{MintedVerbatim}

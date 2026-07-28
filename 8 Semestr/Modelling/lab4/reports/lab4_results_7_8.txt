@@ -1,0 +1,41 @@
+ЛР4 — пункты 7 и 8 (конкретные результаты)
+
+Постановка: Y=Glucose, исключены Outcome и Insulin.
+
+Всего факторов после исключений: 6: Pregnancies, BloodPressure, SkinThickness, BMI, DiabetesPedigreeFunction, Age
+
+
+7) Сокращение числа факторов (Spearman):
+Корреляция Спирмена ρ_S(Y, Xj):
+  Age                       rho_S =  0.285045
+  BloodPressure             rho_S =  0.235191
+  BMI                       rho_S =  0.231141
+  Pregnancies               rho_S =  0.130734
+  DiabetesPedigreeFunction  rho_S =  0.091293
+  SkinThickness             rho_S =  0.060022
+
+Выбрано k=4 признаков (сильные по |rho_S(Y,X)| + ограничение избыточности max |rho_S(Xi,Xj)| <= 0.6):
+  selected = Age, BloodPressure, BMI, DiabetesPedigreeFunction
+  removed  = Pregnancies, SkinThickness
+
+8) Линейная регрессия (MoM / нормальные уравнения) на стандартизованных X:
+Разбиение: train=614, test=154 (seed=42)
+Коэффициенты модели (на стандартизованных признаках):
+  β0 (intercept) =  120.410423
+  β[Age                     ] =  8.643396
+  β[BloodPressure           ] =  0.826623
+  β[BMI                     ] =  6.124587
+  β[DiabetesPedigreeFunction] =  3.292635
+
+Метрики:
+  train: MSE=918.904473, MAE=23.085090, R^2=0.137446
+  test : MSE=792.968494, MAE=22.285050, R^2=0.055071
+
+Анализ остатков (test):
+  mean(residual) = 0.254704
+  std(residual)  = 28.158544
+
+KS-проверки (α=0.05):
+  KS(y_test vs yhat_test): D=0.298701, p=1.82766e-06  => reject
+  KS(resid_test vs N(0, s^2) ref): D=0.103896, p=0.377785  => OK (не отвергаем)
+

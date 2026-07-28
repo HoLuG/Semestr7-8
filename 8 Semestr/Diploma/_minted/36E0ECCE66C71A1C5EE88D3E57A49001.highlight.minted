@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@Test}\PYG{+w}{ }\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{sVariableRejectsBracketTerm}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{pattern}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{List}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{SVar}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}X\PYGZdq{}}\PYG{p}{));}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{expr}\PYG{+w}{    }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{singleton}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Br}\PYG{p}{(}\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{empty}\PYG{p}{()));}
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{result}\PYG{+w}{  }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Matcher}\PYG{p}{.}\PYG{n+na}{match}\PYG{p}{(}\PYG{n}{pattern}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{);}
+\PYG{+w}{    }\PYG{n}{assertThat}\PYG{p}{(}\PYG{n}{result}\PYG{p}{).}\PYG{n+na}{isEmpty}\PYG{p}{();}\PYG{+w}{             }\PYG{c+c1}{// (3)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

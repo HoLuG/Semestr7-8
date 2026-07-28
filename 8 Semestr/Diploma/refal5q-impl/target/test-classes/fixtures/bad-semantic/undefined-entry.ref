@@ -1,0 +1,6 @@
+$ENTRY NoSuchEntry;
+
+* $ENTRY references a function that is not defined.
+SomethingElse {
+  = ;
+}

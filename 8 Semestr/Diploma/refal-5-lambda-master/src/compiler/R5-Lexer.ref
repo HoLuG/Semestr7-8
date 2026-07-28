@@ -1,0 +1,569 @@
+$INCLUDE "LibraryEx";
+
+
+/**
+  <Scan e.SourceFile> == t.Token*
+
+  t.Token ::= (s.TokType t.SrcPos e.TokValue)
+  t.SrcPos ::= (RowCol s.Line s.Col)
+
+  s.TokType ~ e.TokValue ::=
+    TkName ~ char*
+    TkCompound ~ char*
+    TkMacroDigit ~ macrodigit
+    TkChar ~ char
+    TkVariable ~ s.VarType e.VarName
+    TkOpenBracket, TkCloseBracket, TkCloseCall, TkCloseADT,
+    TkOpenBlock, TkCloseBlock ~ пусто
+    TkOpenCall, TkOpenADT ~ char* -- имя функции
+    TkComma, TkColon, TkAssign, TkSemicolon ~ пусто
+    TkExtern, TkEntry, TkEnum, TkEEnum, TkSwap,
+    TkESwap, TkInclude, TkInline, TkDrive,
+    TkSpec, TkMeta, TkIntrinsic ~ пусто
+    TkScopeId ~ пусто
+    TkLabel ~ пусто
+    TkEOF ~ пусто
+    TkError ~ char* -- сообщение об ошибке в лексике
+    TkRefal5Mode ~ Classic | Extended
+    TkAmpersand ~ empty
+    TkRedefinition ~ empty
+    TkNativeCode ~ (s.Char*)*
+    TkPseudoComment ~ t.Token+
+  s.VarType ::= 's' | 't' | 'e'
+*/
+$ENTRY R5-Scan {
+  s.Mode e.FileName =
+    <CheckClassicTokens
+      s.Mode <DoScan (RowCol 1 1) <Skip-UTF-8-Bom <LoadFile e.FileName>>>
+    >;
+}
+
+Skip-UTF-8-Bom {
+  ('\xEF\xBB\xBF' e.Line) e.Lines = (e.Line) e.Lines;
+
+  e.Lines = e.Lines;
+}
+
+CheckClassicTokens {
+  s.Mode (TkRefal5Mode t.Pos s.NewMode) e.Tokens
+    = (TkRefal5Mode t.Pos s.NewMode) <CheckClassicTokens s.NewMode e.Tokens>;
+
+  Extended (TkPseudoComment t.Pos e.CommentTokens) e.Tokens
+    = <MapAccum
+        {
+          (e.Messages) (TkError e.Error) = (e.Messages (TkError e.Error));
+          (e.Messages) (TkWarning e.Warn) = (e.Messages (TkWarning e.Warn));
+
+          (e.Messages) t.Token = (e.Messages) t.Token;
+        }
+        (/* messages */)
+        e.CommentTokens
+      >
+    : (e.Messages) e.CommentTokens^
+    = (TkPseudoComment t.Pos e.CommentTokens)
+      e.Messages
+      <CheckClassicTokens Extended e.Tokens>;
+
+  Extended t.NextToken e.Tokens
+    = t.NextToken <CheckClassicTokens Extended e.Tokens>;
+
+  Classic (TkName t.Pos '_' e.Name) e.Tokens
+    = (TkError t.Pos 'Invalid identifier "_' e.Name '"')
+      (TkName t.Pos '_' e.Name)
+      <CheckClassicTokens Classic e.Tokens>;
+
+  Classic (TkVariable t.Pos s.Mode e.Index) e.Tokens
+    , <Type e.Index>
+    : {
+        /* идентификатор */
+        'L' s.Case e.Index^ = /* пусто */;
+
+        /* последовательность десятичных цифр */
+        'D0' e.Index^, <AllDigits e.Index> : True = /* пусто */;
+
+        s.Type s.SubType e.Index^
+          = (TkError t.Pos 'Bad variable index "' s.Mode '.' e.Index '"');
+      }
+    : e.MaybeError
+    = e.MaybeError (TkVariable t.Pos s.Mode e.Index)
+      <CheckClassicTokens Classic e.Tokens>;
+
+  Classic (TkPseudoComment t.Pos e.CommentTokens) e.Tokens
+    = (TkWarning
+        t.Pos ignored-pseudocomments
+        'Pseudocomments are ignored in classic mode'
+      )
+      <CheckClassicTokens Classic e.Tokens>;
+
+  Classic t.NextToken e.Tokens
+    = t.NextToken <CheckClassicTokens Classic e.Tokens>;
+
+  s.Mode /* пусто */ = /* пусто */;
+}
+
+AllDigits {
+  e.String, <Type e.String> : 'D0' s.Digit e.Tail = <AllDigits e.Tail>;
+  /* пусто */ = True;
+  e.BadString = False;
+}
+
+IncLine {
+  (RowCol s.Line s.Col) = (RowCol <Inc s.Line> 1);
+}
+
+IncCol {
+  (RowCol s.Line s.Col) = (RowCol s.Line <Inc s.Col>);
+
+  (RowCol s.Line s.Col) Len e.String
+    = <Lenw e.String> : s.Len e._
+    = (RowCol s.Line <+ s.Col s.Len>);
+}
+
+DoScan {
+  t.Pos = (TkEOF t.Pos);
+
+  t.Pos (' ' e.Line) e.Lines = <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+  t.Pos ('\t' e.Line) e.Lines = <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+  t.Pos ('\r' e.Line) e.Lines = <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos () e.Lines = <DoScan <IncLine t.Pos> e.Lines>;
+
+  t.Pos (s.Var '.' e.Line) e.Lines
+    , <IsVarType s.Var> : True
+    = <DoScan-Var t.Pos (s.Var '.') (e.Line) e.Lines>;
+
+  t.Pos (s.StartIdent e.Line) e.Lines
+    , <IsStartIdent s.StartIdent> : True
+    = <DoScan-Ident t.Pos (s.StartIdent) (e.Line) e.Lines>;
+
+  t.Pos (s.Punctuation e.Line) e.Lines
+    , <IsPunctuation s.Punctuation> : s.TokType
+    = (s.TokType t.Pos)
+      <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  (RowCol s.Line 1) ('*$CLASSIC') e.Lines
+    = (TkRefal5Mode (RowCol s.Line 1) Classic)
+      <DoScan (RowCol <Inc s.Line> 1) e.Lines>;
+
+  (RowCol s.Line 1) ('*$EXTENDED') e.Lines
+    = (TkRefal5Mode (RowCol s.Line 1) Extended)
+      <DoScan (RowCol <Inc s.Line> 1) e.Lines>;
+
+  (RowCol s.Line 1) ('*$CLASSIC;') e.Lines
+    = (TkRefal5Mode (RowCol s.Line 1) Classic)
+      <DoScan (RowCol <Inc s.Line> 1) e.Lines>;
+
+  (RowCol s.Line 1) ('*$EXTENDED;') e.Lines
+    = (TkRefal5Mode (RowCol s.Line 1) Extended)
+      <DoScan (RowCol <Inc s.Line> 1) e.Lines>;
+
+  (RowCol s.Line 1) ('*$' e.Comment) e.Lines
+    , <ValidPseudocomment e.Comment>
+    : {
+        True
+          = <CollectPseudocommentLines e.Lines> : (e.CommentLines) e.Lines^
+          = (' $' e.Comment) e.CommentLines : e.CommentLines^
+          = <Lenw e.CommentLines> : s.Count e.CommentLines^
+          = <DoScan (RowCol s.Line 1) e.CommentLines> : e.CommentTokens
+          = (TkPseudoComment (RowCol s.Line 1) e.CommentTokens)
+            <DoScan (RowCol <+ s.Line s.Count> 1) e.Lines>;
+
+        False = <DoScan (RowCol <Inc s.Line> 1) e.Lines>;
+      };
+
+  (RowCol s.Line 1) ('*' e.Comment) e.Lines
+    = <DoScan (RowCol <Inc s.Line> 1) e.Lines>;
+
+  /*
+    Предложение не избыточно, поскольку иначе в вызове <s.F …> «s» будет
+    восприниматься как идентификатор, а точка за ним вызовет ошибку.
+  */
+  t.Pos ('<' s.Var '.' e.Line) e.Lines
+    , <IsVarType s.Var> : True
+    = (TkOpenCall t.Pos /* empty */)
+      <DoScan <IncCol t.Pos> (s.Var '.' e.Line) e.Lines>;
+
+  t.Pos ('<' s.StartIdent e.Line) e.Lines
+    , <IsStartIdent s.StartIdent> : True
+    = <DoScan-Ident t.Pos ('<' s.StartIdent) (e.Line) e.Lines>;
+
+  t.Pos ('$' e.Line) e.Lines = <DoScan-Keyword t.Pos (e.Line) e.Lines>;
+
+  t.Pos ('\'' e.Line) e.Lines
+    = <DoScan-Chars <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos ('/*' e.Line) e.Lines = <DoScan-CComment t.Pos ('/*') (e.Line) e.Lines>;
+
+  t.Pos ('\"' e.Line) e.Lines
+    = <DoScan-Compound t.Pos <IncCol t.Pos> () (e.Line) e.Lines>;
+
+  t.Pos ('[' s.StartIdent e.Line) e.Lines
+    , <Type s.StartIdent> : 'L' s.Case s.StartIdent
+    = <DoScan-Ident t.Pos ('[' s.StartIdent) (e.Line) e.Lines>;
+
+  t.Pos ('[' e.Line) e.Lines
+    = (TkOpenADT t.Pos UnnamedADT)
+      (TkError t.Pos 'Expected function name after \'[\'')
+      <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos (s.Digit e.Line) e.Lines
+    , <Type s.Digit> : 'D0' s.Digit
+    = <DoScan-Number t.Pos (s.Digit) (e.Line) e.Lines>;
+
+  (RowCol s.Line 1) ('%%') e.Lines
+    = <DoScan-NativeCode (RowCol <Inc s.Line> 1) e.Lines>;
+
+  t.Pos ('<' s.SugarName e.Line) e.Lines
+    , ('+Add') ('-Sub') ('*Mul') ('/Div') ('%Mod') ('?Residue')
+    : e.SugarNames-B (s.SugarName e.RealName) e.SugarNames-E
+    = (TkOpenCall t.Pos e.RealName)
+      <DoScan <IncCol t.Pos Len '<' s.SugarName> (e.Line) e.Lines>;
+
+  t.Pos ('<' e.Line) e.Lines
+    = (TkOpenCall t.Pos /* empty */)
+      <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos ('\\' e.LineWithEscapes) e.Lines
+    , <ScanEscape t.Pos e.LineWithEscapes>
+    : t.ScannedToken t.Pos1 e.RestOfLine
+    = t.ScannedToken <DoScan t.Pos1 (e.RestOfLine) e.Lines>;
+
+  t.Pos (s.Other e.Line) e.Lines
+    = (TkError t.Pos 'Bad character \'' s.Other '\'')
+      <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+}
+
+IsStartIdent {
+  '_' = True;
+  s.StartIdent, <Type s.StartIdent> : 'L' s.Case s.StartIdent = True;
+  s.Other = False;
+}
+
+IsVarType {
+  's' = True; 't' = True; 'e' = True; s.Other = False;
+}
+
+IsPunctuation {
+  s.Punct
+    , ('(' TkOpenBracket) (')' TkCloseBracket)
+      (';' TkSemicolon) ('=' TkAssign) ('>' TkCloseCall)
+      ('{' TkOpenBlock) ('}' TkCloseBlock)
+      (',' TkComma) (':' TkColon) ('^' TkRedefinition)
+      (']' TkCloseADT) ('&' TkAmpersand)
+    : e.Types-B (s.Punct s.TokType) e.Types-E
+    = s.TokType;
+
+  s.Other = /* пусто */;
+}
+
+DoScan-Keyword {
+  t.Pos (e.Line) e.Lines = <DoScan-BuildKeyword t.Pos ('$') (e.Line) e.Lines>;
+}
+
+DoScan-BuildKeyword {
+  t.Pos (e.KeywordChars) (s.Next e.Line) e.Lines
+    , <Type s.Next>: 'L' s.SubType s.Next
+    = <DoScan-BuildKeyword
+        t.Pos (e.KeywordChars s.Next) (e.Line) e.Lines
+      >;
+
+  t.Pos (e.KeywordChars) (e.Line) e.Lines
+    , (TkExtern '$EXTERN') (TkExtern '$EXTRN') (TkExtern '$EXTERNAL')
+      (TkEntry '$ENTRY') (TkEnum '$ENUM') (TkEEnum '$EENUM')
+      (TkSwap '$SWAP') (TkESwap '$ESWAP') (TkInclude '$INCLUDE')
+      (TkLabel '$LABEL')
+      (TkInline '$INLINE') (TkDrive '$DRIVE')
+      (TkSpec '$SPEC') (TkMeta '$META')
+      (TkIntrinsic '$INTRINSIC')
+    : e.Keywords-B (s.Tag e.KeywordChars) e.Keywords-E
+    = (s.Tag t.Pos)
+      <DoScan <IncCol t.Pos Len e.KeywordChars> (e.Line) e.Lines>;
+
+  t.Pos ('$SCOPEID') (e.Line) e.Lines
+    = (TkScopeId t.Pos)
+      (TkWarning t.Pos deprecated '$SCOPEID is deprecated')
+      <DoScan <IncCol t.Pos Len '$SCOPEID'> (e.Line) e.Lines>;
+
+  t.Pos ('$EASTEREGG') (e.Line) e.Lines
+    = <EasterEgg t.Pos $EASTEREGG>
+      <DoScan <IncCol t.Pos Len '$EASTEREGG'> (e.Line) e.Lines>;
+
+  t.Pos (e.KeywordChars) (e.Line) e.Lines =
+    (TkError t.Pos 'Bad keyword \'' e.KeywordChars '\'')
+    <DoScan <IncCol t.Pos Len e.KeywordChars> (e.Line) e.Lines>;
+}
+
+EasterEgg {
+  t.Pos s.Char e.Text = (TkChar t.Pos s.Char) <EasterEgg t.Pos e.Text>;
+
+  t.Pos /* empty */ = /* empty */;
+}
+
+DoScan-Number {
+  t.Pos (e.Number) (s.Next e.Line) e.Lines
+    , <Type s.Next> : 'D0' s.Next
+    , <Numb e.Number s.Next>
+    : {
+        s.Macrodigit
+          = <DoScan-Number t.Pos (e.Number s.Next) (e.Line) e.Lines>;
+
+        e.MacrodigitChain
+          = (TkError t.Pos 'Very large numeric literal: ' e.Number s.Next)
+            <DoScan
+              <IncCol t.Pos Len e.Number s.Next> (e.Line) e.Lines
+            >;
+      };
+
+  t.Pos (e.Number) (e.Line) e.Lines
+    = (TkMacroDigit t.Pos <Numb e.Number>)
+      <DoScan
+        <IncCol t.Pos Len e.Number> (e.Line) e.Lines
+      >;
+}
+
+DoScan-Var {
+  t.Pos (e.Variable) (s.Next e.Line) e.Lines
+    , <IsIdentTail s.Next> : True
+    = <DoScan-Var t.Pos (e.Variable s.Next) (e.Line) e.Lines>;
+
+  t.Pos (s.Type '.' e.Index) (e.Line) e.Lines
+    = (TkVariable t.Pos s.Type e.Index)
+      <Fetch
+        e.Index
+        {
+          '-' e._ = (TkError t.Pos 'A variable index can\'t start with \'-\'');
+          /* пусто */ = (TkError t.Pos 'An empty variable index');
+          e._ = /* пусто */;
+        }
+      >
+      <DoScan
+        <IncCol t.Pos Len s.Type '.' e.Index> (e.Line) e.Lines
+      >;
+}
+
+IsIdentTail {
+  '-' = True;
+  '_' = True;
+
+  s.Other
+    , <Type s.Other>
+    : {
+        'D0' s.Other^ = True;
+        'L' s.Case s.Other^ = True;
+
+        e.OtherType = False;
+      }
+}
+
+DoScan-CComment {
+  t.Pos (e.Comment) ('*/' e.Line) e.Lines
+    = <DoScan <IncCol t.Pos Len e.Comment '*/'> (e.Line) e.Lines>;
+
+  t.Pos (e.Comment) (s.Char e.Line) e.Lines
+    = <DoScan-CComment t.Pos (e.Comment s.Char) (e.Line) e.Lines>;
+
+  t.Pos (e.Comment) () e.Lines
+    = <DoScan-CComment <IncLine t.Pos> () e.Lines>;
+
+  t.Pos (e.Comment) /* пусто */
+    = (TkError t.Pos 'Unexpected EOF, unclosed comment')
+      (TkEOF <IncCol t.Pos Len e.Comment>);
+}
+
+DoScan-NativeCode {
+  t.Pos e.Lines = <DoScan-DoNativeCode t.Pos t.Pos () e.Lines>;
+}
+
+DoScan-DoNativeCode {
+  t.StartPos t.Pos (e.Collected) ('%%') e.Lines
+    = (TkNativeCode t.StartPos e.Collected)
+      <DoScan <IncLine t.Pos> e.Lines>;
+
+  t.StartPos t.Pos (e.Collected) /* empty */
+    = (TkNativeCode t.StartPos e.Collected)
+      (TkError t.Pos 'Unexpected EOF, unclosed native code insertion')
+      (TkEOF t.Pos);
+
+  t.StartPos t.Pos (e.Collected) (e.NextLine) e.Lines
+    = <DoScan-DoNativeCode
+        t.StartPos <IncLine t.Pos> (e.Collected (e.NextLine)) e.Lines
+      >;
+}
+
+DoScan-Ident {
+  t.Pos (e.Ident) (s.Next e.Line) e.Lines
+    , <IsIdentTail s.Next> : True
+    = <DoScan-Ident t.Pos (e.Ident s.Next) (e.Line) e.Lines>;
+
+  t.Pos ('<' e.Ident) (e.Line) e.Lines
+    = (TkOpenCall t.Pos e.Ident)
+      <DoScan <IncCol t.Pos Len '<' e.Ident> (e.Line) e.Lines>;
+
+  t.Pos ('[' e.Ident) (e.Line) e.Lines
+    = (TkOpenADT t.Pos e.Ident)
+      <DoScan <IncCol t.Pos Len '[' e.Ident> (e.Line) e.Lines>;
+
+  t.Pos (e.Ident) (e.Line) e.Lines
+    = (TkName t.Pos e.Ident)
+      <DoScan <IncCol t.Pos Len e.Ident> (e.Line) e.Lines>;
+}
+
+DoScan-Chars {
+  t.Pos ('\\' e.Line) e.Lines = <DoScan-Chars-Escape t.Pos (e.Line) e.Lines>;
+
+  t.Pos ('\'' e.Line) e.Lines = <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos (s.Char e.Line) e.Lines
+    = (TkChar t.Pos s.Char)
+      <DoScan-Chars <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.Pos () e.Lines
+    = (TkError t.Pos 'Unclosed \' - single quotes')
+      <DoScan <IncLine t.Pos> e.Lines>;
+}
+
+SimpleEscapedChar {
+  s.Escaped
+    , ('\'\'') ('\"\"') ('\\\\') ('n\n') ('r\r') ('t\t')
+      ('((') ('))') ('<<') ('>>')
+    : {
+        e.Escapes-B (s.Escaped s.Char) e.Escapes-E = s.Char;
+
+        e.Escapes = /* пусто */;
+      }
+}
+
+ScanEscape {
+  t.Pos s.Escaped e.Line
+    , <SimpleEscapedChar s.Escaped> : s.Char
+    = (TkChar t.Pos s.Char)
+      <IncCol t.Pos Len '\\' s.Escaped> e.Line;
+
+  t.Pos 'x' s.Hex1 s.Hex2 e.Line
+    , <HexDigit s.Hex1> : s.Num1
+    , <HexDigit s.Hex2> : s.Num2
+    = (TkChar t.Pos <Chr <+ <* s.Num1 16> s.Num2>>)
+      <IncCol t.Pos Len '\\x' s.Hex1 s.Hex2> e.Line;
+
+  t.Pos 'x' e.Line
+    = (TkError t.Pos 'After \\x should be two hex digits')
+      <IncCol t.Pos Len '\\x'> e.Line;
+
+
+  t.Pos s.Other e.Line
+    = (TkError t.Pos 'Bad escape sequence \\' s.Other)
+      <IncCol t.Pos Len '\\' s.Other> e.Line;
+
+  t.Pos /* пусто */
+    = (TkError t.Pos 'Unexpected \\ at the end of the line')
+      t.Pos /* пусто */;
+}
+
+DoScan-Chars-Escape {
+  t.Pos (e.LineWithEscapes) e.Lines
+    , <ScanEscape t.Pos e.LineWithEscapes>
+    : t.ScannedToken t.Pos1 e.RestOfLine
+    = t.ScannedToken <DoScan-Chars t.Pos1 (e.RestOfLine) e.Lines>;
+}
+
+HexDigit {
+  s.Digit
+    , <Type s.Digit>
+    : {
+        'D0' s.Digit^ = <Numb s.Digit>;
+        'Lu' s.Digit^ = <DoHexDigit 'ABCDEF' 10 s.Digit>;
+        'Ll' s.Digit^ = <DoHexDigit 'abcdef' 10 s.Digit>;
+
+        s.Other = /* пусто */;
+      };
+}
+
+DoHexDigit {
+  s.Digit e.Samples s.Val s.Digit = s.Val;
+
+  s.OtherDigit e.Samples s.Val s.Digit
+    = <DoHexDigit e.Samples <Inc s.Val> s.Digit>;
+
+  /* нет образцов */ s.BadVal s.Digit = /* пусто */;
+}
+
+MakeCompound {
+  t.Pos e.Compound-B '\x00' e.Compound-E
+    = (TkWarning t.Pos nul-in-compound 'Zero byte in the compound symbol')
+      (TkCompound t.Pos e.Compound-B);
+
+  t.Pos e.Compound = (TkCompound t.Pos e.Compound);
+}
+
+DoScan-Compound {
+  t.StartPos t.Pos (e.Compound) ('\"' e.Line) e.Lines
+    = <MakeCompound t.StartPos e.Compound>
+      <DoScan <IncCol t.Pos> (e.Line) e.Lines>;
+
+  t.StartPos t.Pos (e.Compound) ('\\' e.Line) e.Lines
+    = <DoScan-Compound-HandleEscape
+        t.StartPos <IncCol t.Pos> (e.Compound) (e.Line) e.Lines
+      >;
+
+  t.StartPos t.Pos (e.Compound) (s.Char e.Line) e.Lines
+    = <DoScan-Compound
+        t.StartPos <IncCol t.Pos> (e.Compound s.Char) (e.Line) e.Lines
+      >;
+
+  t.StartPos t.Pos (e.Compound) () e.Lines
+    = (TkError t.Pos 'Unclosed \" - double quotes')
+      <DoScan <IncLine t.Pos> e.Lines>;
+}
+
+DoScan-Compound-HandleEscape {
+  t.StartPos t.Pos (e.Compound) (s.Escaped e.Line) e.Lines
+    , <SimpleEscapedChar s.Escaped> : s.Char
+    = <DoScan-Compound
+        t.StartPos <IncCol t.Pos> (e.Compound s.Char) (e.Line) e.Lines
+      >;
+
+  t.StartPos t.Pos (e.Compound) ('x' s.Hex1 s.Hex2 e.Line) e.Lines
+    , <HexDigit s.Hex1> : s.Num1
+    , <HexDigit s.Hex2> : s.Num2
+    = <DoScan-Compound
+        t.StartPos <IncCol t.Pos Len 'x' s.Hex1 s.Hex2>
+        (e.Compound <Chr <+ <* s.Num1 16> s.Num2>>) (e.Line) e.Lines
+      >;
+
+  t.StartPos t.Pos (e.Compound) ('x' e.Line) e.Lines
+    = (TkError t.Pos 'After \\x should be two hex digits')
+      <DoScan-Compound t.StartPos <IncCol t.Pos> (e.Compound) (e.Line) e.Lines>;
+
+  t.StartPos t.Pos (e.Compound) (s.Other e.Line) e.Lines
+    = (TkError t.Pos 'Bad escape sequence \\' s.Other)
+      <DoScan-Compound t.StartPos <IncCol t.Pos> (e.Compound) (e.Line) e.Lines>;
+
+  t.StartPos t.Pos (e.Compound) () e.Lines
+    = (TkError t.Pos 'Unexpected \\ at the end of compound literal')
+      <MakeCompound t.StartPos e.Compound>
+      <DoScan <IncLine t.Pos> e.Lines>;
+}
+
+ValidPseudocomment {
+  e.Keyword s.Space e._
+    , <OneOf s.Space ' \t'> : True
+    = <ValidPseudocomment-Keyword e.Keyword>;
+
+  e.Keyword = <ValidPseudocomment-Keyword e.Keyword>;
+}
+
+ValidPseudocomment-Keyword {
+  e.Keyword = <OneOf (e.Keyword) ('DRIVE') ('INLINE') ('SPEC')>;
+}
+
+CollectPseudocommentLines {
+  e.Lines = <DoCollectPseudocommentLines () e.Lines>;
+}
+
+DoCollectPseudocommentLines {
+  (e.Scanned) ('*$' s.Space e.Line) e.Lines
+    , <OneOf s.Space ' \t'> : True
+    = <DoCollectPseudocommentLines (e.Scanned ('  ' s.Space e.Line)) e.Lines>;
+
+  (e.Scanned) e.Lines = (e.Scanned) e.Lines;
+}

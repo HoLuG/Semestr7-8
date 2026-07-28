@@ -1,0 +1,336 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{numpy}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{np}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{matplotlib.pyplot}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{plt}
+
+
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{RungeKuttaSolver}\PYG{p}{:}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf+fm}{\PYGZus{}\PYGZus{}init\PYGZus{}\PYGZus{}}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{dt}\PYG{o}{=}\PYG{l+m+mf}{0.01}\PYG{p}{):}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{dt} \PYG{o}{=} \PYG{n}{dt}
+
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{rk4\PYGZus{}step}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{f}\PYG{p}{,} \PYG{n}{t}\PYG{p}{,} \PYG{n}{y}\PYG{p}{):}
+        \PYG{n}{k1} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{dt} \PYG{o}{*} \PYG{n}{f}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,} \PYG{n}{y}\PYG{p}{)}
+        \PYG{n}{k2} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{dt} \PYG{o}{*} \PYG{n}{f}\PYG{p}{(}\PYG{n}{t} \PYG{o}{+} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{dt}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{y} \PYG{o}{+} \PYG{n}{k1}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{)}
+        \PYG{n}{k3} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{dt} \PYG{o}{*} \PYG{n}{f}\PYG{p}{(}\PYG{n}{t} \PYG{o}{+} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{dt}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{y} \PYG{o}{+} \PYG{n}{k2}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{)}
+        \PYG{n}{k4} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{dt} \PYG{o}{*} \PYG{n}{f}\PYG{p}{(}\PYG{n}{t} \PYG{o}{+} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{dt}\PYG{p}{,} \PYG{n}{y} \PYG{o}{+} \PYG{n}{k3}\PYG{p}{)}
+
+        \PYG{k}{return} \PYG{n}{y} \PYG{o}{+} \PYG{p}{(}\PYG{n}{k1} \PYG{o}{+} \PYG{l+m+mi}{2}\PYG{o}{*}\PYG{n}{k2} \PYG{o}{+} \PYG{l+m+mi}{2}\PYG{o}{*}\PYG{n}{k3} \PYG{o}{+} \PYG{n}{k4}\PYG{p}{)} \PYG{o}{/} \PYG{l+m+mi}{6}
+
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{solve}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{f}\PYG{p}{,} \PYG{n}{y0}\PYG{p}{,} \PYG{n}{t\PYGZus{}span}\PYG{p}{):}
+        \PYG{n}{y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{zeros}\PYG{p}{((}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{t\PYGZus{}span}\PYG{p}{),} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{y0}\PYG{p}{)))}
+        \PYG{n}{y}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{n}{y0}
+
+        \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{t\PYGZus{}span}\PYG{p}{)):}
+            \PYG{n}{y}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{rk4\PYGZus{}step}\PYG{p}{(}\PYG{n}{f}\PYG{p}{,} \PYG{n}{t\PYGZus{}span}\PYG{p}{[}\PYG{n}{i}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{],} \PYG{n}{y}\PYG{p}{[}\PYG{n}{i}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{])}
+
+        \PYG{k}{return} \PYG{n}{y}
+
+
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{GalileiModel}\PYG{p}{:}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf+fm}{\PYGZus{}\PYGZus{}init\PYGZus{}\PYGZus{}}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{g}\PYG{o}{=}\PYG{l+m+mf}{9.81}\PYG{p}{,} \PYG{n}{v0}\PYG{o}{=}\PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{45.0}\PYG{p}{):}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{g} \PYG{o}{=} \PYG{n}{g}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{v0} \PYG{o}{=} \PYG{n}{v0}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{alpha} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{alpha}\PYG{p}{)}
+
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{solve\PYGZus{}numerically}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{t\PYGZus{}span}\PYG{p}{,} \PYG{n}{dt}\PYG{o}{=}\PYG{l+m+mf}{0.01}\PYG{p}{):}
+        \PYG{n}{t\PYGZus{}flight} \PYG{o}{=} \PYG{l+m+mf}{2.0} \PYG{o}{*} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{v0} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sin}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{alpha}\PYG{p}{)} \PYG{o}{/} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{g}
+
+
+        \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{t\PYGZus{}span}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{o+ow}{and} \PYG{n}{t\PYGZus{}span}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{\PYGZlt{}} \PYG{n}{t\PYGZus{}flight} \PYG{o}{*} \PYG{l+m+mf}{1.5}\PYG{p}{:}
+            \PYG{n}{t\PYGZus{}max} \PYG{o}{=} \PYG{n}{t\PYGZus{}flight} \PYG{o}{*} \PYG{l+m+mf}{1.5}
+            \PYG{n}{t\PYGZus{}span} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{t\PYGZus{}max}\PYG{p}{,} \PYG{n}{dt}\PYG{p}{)}
+        \PYG{n}{x0} \PYG{o}{=} \PYG{l+m+mf}{0.0}
+        \PYG{n}{y0} \PYG{o}{=} \PYG{l+m+mf}{0.0}
+        \PYG{n}{u0} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{v0} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{cos}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{alpha}\PYG{p}{)}
+        \PYG{n}{w0} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{v0} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sin}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{alpha}\PYG{p}{)}
+
+        \PYG{n}{y\PYGZus{}init} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{([}\PYG{n}{x0}\PYG{p}{,} \PYG{n}{y0}\PYG{p}{,} \PYG{n}{u0}\PYG{p}{,} \PYG{n}{w0}\PYG{p}{])}
+
+        \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{f\PYGZus{}galilei}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,} \PYG{n}{y}\PYG{p}{):}
+            \PYG{n}{x}\PYG{p}{,} \PYG{n}{y\PYGZus{}pos}\PYG{p}{,} \PYG{n}{u}\PYG{p}{,} \PYG{n}{w} \PYG{o}{=} \PYG{n}{y}
+            \PYG{k}{return} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{([}\PYG{n}{u}\PYG{p}{,} \PYG{n}{w}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{g}\PYG{p}{])}
+
+        \PYG{n}{solver} \PYG{o}{=} \PYG{n}{RungeKuttaSolver}\PYG{p}{(}\PYG{n}{dt}\PYG{o}{=}\PYG{n}{dt}\PYG{p}{)}
+        \PYG{n}{solution} \PYG{o}{=} \PYG{n}{solver}\PYG{o}{.}\PYG{n}{solve}\PYG{p}{(}\PYG{n}{f\PYGZus{}galilei}\PYG{p}{,} \PYG{n}{y\PYGZus{}init}\PYG{p}{,} \PYG{n}{t\PYGZus{}span}\PYG{p}{)}
+
+        \PYG{n}{x} \PYG{o}{=} \PYG{n}{solution}\PYG{p}{[:,} \PYG{l+m+mi}{0}\PYG{p}{]}
+        \PYG{n}{y} \PYG{o}{=} \PYG{n}{solution}\PYG{p}{[:,} \PYG{l+m+mi}{1}\PYG{p}{]}
+
+        \PYG{n}{mask} \PYG{o}{=} \PYG{n}{y} \PYG{o}{\PYGZgt{}=} \PYG{l+m+mi}{0}
+        \PYG{k}{if} \PYG{o+ow}{not} \PYG{n}{np}\PYG{o}{.}\PYG{n}{all}\PYG{p}{(}\PYG{n}{mask}\PYG{p}{):}
+            \PYG{n}{first\PYGZus{}negative} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{where}\PYG{p}{(}\PYG{o}{\PYGZti{}}\PYG{n}{mask}\PYG{p}{)[}\PYG{l+m+mi}{0}\PYG{p}{]}
+            \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{first\PYGZus{}negative}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0}\PYG{p}{:}
+                \PYG{n}{mask} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{y}\PYG{p}{))} \PYG{o}{\PYGZlt{}} \PYG{n}{first\PYGZus{}negative}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}
+        \PYG{k}{else}\PYG{p}{:}
+            \PYG{n}{last\PYGZus{}positive} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{where}\PYG{p}{(}\PYG{n}{y} \PYG{o}{\PYGZgt{}=} \PYG{l+m+mi}{0}\PYG{p}{)[}\PYG{l+m+mi}{0}\PYG{p}{]}
+            \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{last\PYGZus{}positive}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0}\PYG{p}{:}
+                \PYG{n}{mask} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{y}\PYG{p}{))} \PYG{o}{\PYGZlt{}=} \PYG{n}{last\PYGZus{}positive}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{]}
+
+        \PYG{k}{return} \PYG{n}{x}\PYG{p}{[}\PYG{n}{mask}\PYG{p}{],} \PYG{n}{y}\PYG{p}{[}\PYG{n}{mask}\PYG{p}{]}
+
+
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{NewtonModel}\PYG{p}{:}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf+fm}{\PYGZus{}\PYGZus{}init\PYGZus{}\PYGZus{}}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{g}\PYG{o}{=}\PYG{l+m+mf}{9.81}\PYG{p}{,} \PYG{n}{v0}\PYG{o}{=}\PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{45.0}\PYG{p}{,} \PYG{n}{m}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{r\PYGZus{}core}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{rho\PYGZus{}core}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,}
+                 \PYG{n}{beta}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{C}\PYG{o}{=}\PYG{l+m+mf}{0.15}\PYG{p}{,} \PYG{n}{rho\PYGZus{}air}\PYG{o}{=}\PYG{l+m+mf}{1.225}\PYG{p}{,} \PYG{n}{S}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{):}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{g} \PYG{o}{=} \PYG{n}{g}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{v0} \PYG{o}{=} \PYG{n}{v0}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{alpha} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{alpha}\PYG{p}{)}
+
+        \PYG{k}{if} \PYG{n}{m} \PYG{o+ow}{is} \PYG{k+kc}{None}\PYG{p}{:}
+            \PYG{n}{V\PYGZus{}core} \PYG{o}{=} \PYG{p}{(}\PYG{l+m+mf}{4.0} \PYG{o}{/} \PYG{l+m+mf}{3.0}\PYG{p}{)} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{pi} \PYG{o}{*} \PYG{n}{r\PYGZus{}core}\PYG{o}{**}\PYG{l+m+mi}{3}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{m} \PYG{o}{=} \PYG{n}{rho\PYGZus{}core} \PYG{o}{*} \PYG{n}{V\PYGZus{}core}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{r\PYGZus{}core} \PYG{o}{=} \PYG{n}{r\PYGZus{}core}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{rho\PYGZus{}core} \PYG{o}{=} \PYG{n}{rho\PYGZus{}core}
+        \PYG{k}{else}\PYG{p}{:}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{m} \PYG{o}{=} \PYG{n}{m}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{r\PYGZus{}core} \PYG{o}{=} \PYG{n}{r\PYGZus{}core}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{rho\PYGZus{}core} \PYG{o}{=} \PYG{n}{rho\PYGZus{}core}
+
+        \PYG{k}{if} \PYG{n}{S} \PYG{o+ow}{is} \PYG{k+kc}{None}\PYG{p}{:}
+            \PYG{k}{if} \PYG{n}{r\PYGZus{}core} \PYG{o+ow}{is} \PYG{o+ow}{not} \PYG{k+kc}{None}\PYG{p}{:}
+                \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{S} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{pi} \PYG{o}{*} \PYG{n}{r\PYGZus{}core}\PYG{o}{**}\PYG{l+m+mi}{2}
+        \PYG{k}{else}\PYG{p}{:}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{S} \PYG{o}{=} \PYG{n}{S}
+
+        \PYG{k}{if} \PYG{n}{beta} \PYG{o+ow}{is} \PYG{k+kc}{None}\PYG{p}{:}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{beta} \PYG{o}{=} \PYG{n}{C} \PYG{o}{*} \PYG{n}{rho\PYGZus{}air} \PYG{o}{*} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{S} \PYG{o}{/} \PYG{l+m+mf}{2.0}
+        \PYG{k}{else}\PYG{p}{:}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{beta} \PYG{o}{=} \PYG{n}{beta}
+
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{solve}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{t\PYGZus{}span}\PYG{p}{,} \PYG{n}{dt}\PYG{o}{=}\PYG{l+m+mf}{0.01}\PYG{p}{):}
+        \PYG{n}{x0} \PYG{o}{=} \PYG{l+m+mf}{0.0}
+        \PYG{n}{y0} \PYG{o}{=} \PYG{l+m+mf}{0.0}
+        \PYG{n}{u0} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{v0} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{cos}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{alpha}\PYG{p}{)}
+        \PYG{n}{w0} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{v0} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sin}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{alpha}\PYG{p}{)}
+
+        \PYG{n}{y\PYGZus{}init} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{([}\PYG{n}{x0}\PYG{p}{,} \PYG{n}{y0}\PYG{p}{,} \PYG{n}{u0}\PYG{p}{,} \PYG{n}{w0}\PYG{p}{])}
+
+        \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{f\PYGZus{}newton}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,} \PYG{n}{y}\PYG{p}{):}
+            \PYG{n}{x}\PYG{p}{,} \PYG{n}{y\PYGZus{}pos}\PYG{p}{,} \PYG{n}{u}\PYG{p}{,} \PYG{n}{w} \PYG{o}{=} \PYG{n}{y}
+            \PYG{n}{V} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{u}\PYG{o}{**}\PYG{l+m+mi}{2} \PYG{o}{+} \PYG{n}{w}\PYG{o}{**}\PYG{l+m+mi}{2}\PYG{p}{)}
+
+            \PYG{k}{if} \PYG{n}{V} \PYG{o}{\PYGZlt{}} \PYG{l+m+mf}{1e\PYGZhy{}10}\PYG{p}{:}
+                \PYG{n}{du\PYGZus{}dt} \PYG{o}{=} \PYG{l+m+mi}{0}
+                \PYG{n}{dw\PYGZus{}dt} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{g}
+            \PYG{k}{else}\PYG{p}{:}
+                \PYG{n}{du\PYGZus{}dt} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{beta} \PYG{o}{*} \PYG{n}{u} \PYG{o}{*} \PYG{n}{V} \PYG{o}{/} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{m}
+                \PYG{n}{dw\PYGZus{}dt} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{g} \PYG{o}{\PYGZhy{}} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{beta} \PYG{o}{*} \PYG{n}{w} \PYG{o}{*} \PYG{n}{V} \PYG{o}{/} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{m}
+
+            \PYG{k}{return} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{([}\PYG{n}{u}\PYG{p}{,} \PYG{n}{w}\PYG{p}{,} \PYG{n}{du\PYGZus{}dt}\PYG{p}{,} \PYG{n}{dw\PYGZus{}dt}\PYG{p}{])}
+
+        \PYG{n}{solver} \PYG{o}{=} \PYG{n}{RungeKuttaSolver}\PYG{p}{(}\PYG{n}{dt}\PYG{o}{=}\PYG{n}{dt}\PYG{p}{)}
+        \PYG{n}{solution} \PYG{o}{=} \PYG{n}{solver}\PYG{o}{.}\PYG{n}{solve}\PYG{p}{(}\PYG{n}{f\PYGZus{}newton}\PYG{p}{,} \PYG{n}{y\PYGZus{}init}\PYG{p}{,} \PYG{n}{t\PYGZus{}span}\PYG{p}{)}
+
+        \PYG{n}{x} \PYG{o}{=} \PYG{n}{solution}\PYG{p}{[:,} \PYG{l+m+mi}{0}\PYG{p}{]}
+        \PYG{n}{y} \PYG{o}{=} \PYG{n}{solution}\PYG{p}{[:,} \PYG{l+m+mi}{1}\PYG{p}{]}
+        \PYG{n}{u} \PYG{o}{=} \PYG{n}{solution}\PYG{p}{[:,} \PYG{l+m+mi}{2}\PYG{p}{]}
+        \PYG{n}{w} \PYG{o}{=} \PYG{n}{solution}\PYG{p}{[:,} \PYG{l+m+mi}{3}\PYG{p}{]}
+
+        \PYG{n}{mask} \PYG{o}{=} \PYG{n}{y} \PYG{o}{\PYGZgt{}=} \PYG{l+m+mi}{0}
+        \PYG{k}{return} \PYG{n}{x}\PYG{p}{[}\PYG{n}{mask}\PYG{p}{],} \PYG{n}{y}\PYG{p}{[}\PYG{n}{mask}\PYG{p}{],} \PYG{n}{u}\PYG{p}{[}\PYG{n}{mask}\PYG{p}{],} \PYG{n}{w}\PYG{p}{[}\PYG{n}{mask}\PYG{p}{]}
+
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{plot\PYGZus{}trajectories}\PYG{p}{(}\PYG{n}{g}\PYG{o}{=}\PYG{l+m+mf}{9.81}\PYG{p}{,} \PYG{n}{v0}\PYG{o}{=}\PYG{l+m+mf}{30.0}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{45.0}\PYG{p}{,} \PYG{n}{C}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{rho\PYGZus{}air}\PYG{o}{=}\PYG{l+m+mf}{1.225}\PYG{p}{,}
+                      \PYG{n}{S}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{r\PYGZus{}core}\PYG{o}{=}\PYG{l+m+mf}{0.04}\PYG{p}{,} \PYG{n}{rho\PYGZus{}core}\PYG{o}{=}\PYG{l+m+mf}{200.0}\PYG{p}{,} \PYG{n}{diff\PYGZus{}range}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{dt}\PYG{o}{=}\PYG{l+m+mf}{0.001}\PYG{p}{,}
+                      \PYG{n}{filename}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}trajectory\PYGZus{}comparison.png\PYGZsq{}}\PYG{p}{):}
+    \PYG{k}{if} \PYG{n}{S} \PYG{o+ow}{is} \PYG{k+kc}{None}\PYG{p}{:}
+        \PYG{n}{S} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{pi} \PYG{o}{*} \PYG{n}{r\PYGZus{}core}\PYG{o}{**}\PYG{l+m+mi}{2}
+
+    \PYG{n}{t\PYGZus{}flight\PYGZus{}galilei} \PYG{o}{=} \PYG{l+m+mf}{2.0} \PYG{o}{*} \PYG{n}{v0} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sin}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{alpha}\PYG{p}{))} \PYG{o}{/} \PYG{n}{g}
+    \PYG{n}{t\PYGZus{}max} \PYG{o}{=} \PYG{n+nb}{max}\PYG{p}{(}\PYG{l+m+mf}{5.0}\PYG{p}{,} \PYG{n}{t\PYGZus{}flight\PYGZus{}galilei} \PYG{o}{*} \PYG{l+m+mf}{1.5}\PYG{p}{)}
+    \PYG{n}{t\PYGZus{}span} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{t\PYGZus{}max}\PYG{p}{,} \PYG{n}{dt}\PYG{p}{)}
+
+    \PYG{n}{galilei} \PYG{o}{=} \PYG{n}{GalileiModel}\PYG{p}{(}\PYG{n}{g}\PYG{o}{=}\PYG{n}{g}\PYG{p}{,} \PYG{n}{v0}\PYG{o}{=}\PYG{n}{v0}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{n}{alpha}\PYG{p}{)}
+    \PYG{n}{x\PYGZus{}gal}\PYG{p}{,} \PYG{n}{y\PYGZus{}gal} \PYG{o}{=} \PYG{n}{galilei}\PYG{o}{.}\PYG{n}{solve\PYGZus{}numerically}\PYG{p}{(}\PYG{n}{t\PYGZus{}span}\PYG{p}{,} \PYG{n}{dt}\PYG{o}{=}\PYG{n}{dt}\PYG{p}{)}
+
+    \PYG{n}{newton} \PYG{o}{=} \PYG{n}{NewtonModel}\PYG{p}{(}\PYG{n}{g}\PYG{o}{=}\PYG{n}{g}\PYG{p}{,} \PYG{n}{v0}\PYG{o}{=}\PYG{n}{v0}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{n}{alpha}\PYG{p}{,} \PYG{n}{r\PYGZus{}core}\PYG{o}{=}\PYG{n}{r\PYGZus{}core}\PYG{p}{,} \PYG{n}{rho\PYGZus{}core}\PYG{o}{=}\PYG{n}{rho\PYGZus{}core}\PYG{p}{,}
+                         \PYG{n}{C}\PYG{o}{=}\PYG{n}{C}\PYG{p}{,} \PYG{n}{rho\PYGZus{}air}\PYG{o}{=}\PYG{n}{rho\PYGZus{}air}\PYG{p}{)}
+    \PYG{n}{x\PYGZus{}newt}\PYG{p}{,} \PYG{n}{y\PYGZus{}newt}\PYG{p}{,} \PYG{n}{u\PYGZus{}newt}\PYG{p}{,} \PYG{n}{w\PYGZus{}newt} \PYG{o}{=} \PYG{n}{newton}\PYG{o}{.}\PYG{n}{solve}\PYG{p}{(}\PYG{n}{t\PYGZus{}span}\PYG{p}{,} \PYG{n}{dt}\PYG{o}{=}\PYG{n}{dt}\PYG{p}{)}
+
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(}\PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{8}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{))}
+    \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{o+ow}{and} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{y\PYGZus{}gal}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0}\PYG{p}{:}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{,} \PYG{n}{y\PYGZus{}gal}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZsh{}0066CC\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mf}{2.5}\PYG{p}{,}
+                \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}Галилей\PYGZsq{}}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{2}\PYG{p}{)}
+        \PYG{n}{x\PYGZus{}max\PYGZus{}gal} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{)}
+        \PYG{n}{y\PYGZus{}max\PYGZus{}gal} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{y\PYGZus{}gal}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.005}\PYG{p}{,} \PYG{n}{x\PYGZus{}max\PYGZus{}gal} \PYG{o}{*} \PYG{l+m+mf}{1.05}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.005}\PYG{p}{,} \PYG{n}{y\PYGZus{}max\PYGZus{}gal} \PYG{o}{*} \PYG{l+m+mf}{1.1}\PYG{p}{)}
+
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{axhline}\PYG{p}{(}\PYG{n}{y}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}gray\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{axvline}\PYG{p}{(}\PYG{n}{x}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}gray\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}x (м)\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{11}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}y (м)\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{11}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Траектория Галилея}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s1}{(упрощенный Ньютон без сопротивления воздуха)\PYGZsq{}}\PYG{p}{,}
+              \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{12}\PYG{p}{,} \PYG{n}{fontweight}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}bold\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{9}\PYG{p}{,} \PYG{n}{loc}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}upper right\PYGZsq{}}\PYG{p}{,} \PYG{n}{framealpha}\PYG{o}{=}\PYG{l+m+mf}{0.9}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}:\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{axis}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}equal\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{()}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}trajectory\PYGZus{}galilei.png\PYGZsq{}}\PYG{p}{,} \PYG{n}{dpi}\PYG{o}{=}\PYG{l+m+mi}{300}\PYG{p}{,} \PYG{n}{bbox\PYGZus{}inches}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}tight\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{close}\PYG{p}{()}
+
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(}\PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{8}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{))}
+    \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{o+ow}{and} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{y\PYGZus{}newt}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0}\PYG{p}{:}
+        \PYG{n}{x\PYGZus{}parabola} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{),} \PYG{l+m+mi}{1000}\PYG{p}{)}
+        \PYG{n}{y\PYGZus{}parabola} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{n}{g} \PYG{o}{/} \PYG{p}{(}\PYG{l+m+mi}{2} \PYG{o}{*} \PYG{n}{v0}\PYG{o}{**}\PYG{l+m+mi}{2} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{cos}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{alpha}\PYG{p}{))}\PYG{o}{**}\PYG{l+m+mi}{2}\PYG{p}{)} \PYG{o}{*} \PYG{n}{x\PYGZus{}parabola}\PYG{o}{**}\PYG{l+m+mi}{2} \PYG{o}{+} \PYG{n}{np}\PYG{o}{.}\PYG{n}{tan}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{alpha}\PYG{p}{))} \PYG{o}{*} \PYG{n}{x\PYGZus{}parabola}
+        \PYG{n}{y\PYGZus{}parabola} \PYG{o}{=} \PYG{n}{y\PYGZus{}parabola}\PYG{p}{[}\PYG{n}{y\PYGZus{}parabola} \PYG{o}{\PYGZgt{}=} \PYG{l+m+mi}{0}\PYG{p}{]}
+        \PYG{n}{x\PYGZus{}parabola} \PYG{o}{=} \PYG{n}{x\PYGZus{}parabola}\PYG{p}{[:}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{y\PYGZus{}parabola}\PYG{p}{)]}
+
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{x\PYGZus{}parabola}\PYG{p}{,} \PYG{n}{y\PYGZus{}parabola}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZsh{}00CCFF\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mf}{1.5}\PYG{p}{,}
+                \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}Парабола (для сравнения)\PYGZsq{}}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.6}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{,} \PYG{n}{y\PYGZus{}newt}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZsh{}CC0000\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mf}{2.5}\PYG{p}{,}
+                \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}Ньютон (непараболическая)\PYGZsq{}}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{2}\PYG{p}{)}
+        \PYG{n}{x\PYGZus{}max\PYGZus{}newt} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{)}
+        \PYG{n}{y\PYGZus{}max\PYGZus{}newt} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{y\PYGZus{}newt}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.005}\PYG{p}{,} \PYG{n}{x\PYGZus{}max\PYGZus{}newt} \PYG{o}{*} \PYG{l+m+mf}{1.05}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.005}\PYG{p}{,} \PYG{n}{y\PYGZus{}max\PYGZus{}newt} \PYG{o}{*} \PYG{l+m+mf}{1.1}\PYG{p}{)}
+
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{axhline}\PYG{p}{(}\PYG{n}{y}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}gray\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{axvline}\PYG{p}{(}\PYG{n}{x}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}gray\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}x (м)\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{11}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}y (м)\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{11}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Траектория Ньютона}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s1}{(с учетом сопротивления воздуха)\PYGZsq{}}\PYG{p}{,}
+              \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{12}\PYG{p}{,} \PYG{n}{fontweight}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}bold\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{9}\PYG{p}{,} \PYG{n}{loc}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}upper right\PYGZsq{}}\PYG{p}{,} \PYG{n}{framealpha}\PYG{o}{=}\PYG{l+m+mf}{0.9}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}:\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{axis}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}equal\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{()}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}trajectory\PYGZus{}newton.png\PYGZsq{}}\PYG{p}{,} \PYG{n}{dpi}\PYG{o}{=}\PYG{l+m+mi}{300}\PYG{p}{,} \PYG{n}{bbox\PYGZus{}inches}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}tight\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{close}\PYG{p}{()}
+
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(}\PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{8}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{))}
+    \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{o+ow}{and} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0}\PYG{p}{:}
+        \PYG{k}{if} \PYG{n}{diff\PYGZus{}range} \PYG{o+ow}{is} \PYG{k+kc}{None}\PYG{p}{:}
+            \PYG{n}{range\PYGZus{}gal} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{)}
+            \PYG{n}{range\PYGZus{}newt} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{)}
+            \PYG{n}{diff\PYGZus{}range} \PYG{o}{=} \PYG{n}{range\PYGZus{}gal} \PYG{o}{\PYGZhy{}} \PYG{n}{range\PYGZus{}newt}
+        \PYG{k}{else}\PYG{p}{:}
+            \PYG{n}{range\PYGZus{}gal} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{)}
+            \PYG{n}{range\PYGZus{}newt} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{)}
+
+        \PYG{n}{t\PYGZus{}gal} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{))} \PYG{o}{*} \PYG{n}{dt}
+        \PYG{n}{t\PYGZus{}newt} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{))} \PYG{o}{*} \PYG{n}{dt}
+
+        \PYG{n}{t\PYGZus{}min} \PYG{o}{=} \PYG{l+m+mi}{0}
+        \PYG{n}{t\PYGZus{}max\PYGZus{}common} \PYG{o}{=} \PYG{n+nb}{min}\PYG{p}{(}\PYG{n}{t\PYGZus{}gal}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{t\PYGZus{}gal}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{k}{else} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{t\PYGZus{}newt}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{t\PYGZus{}newt}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{k}{else} \PYG{l+m+mi}{0}\PYG{p}{)}
+        \PYG{n}{t\PYGZus{}common} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{linspace}\PYG{p}{(}\PYG{n}{t\PYGZus{}min}\PYG{p}{,} \PYG{n}{t\PYGZus{}max\PYGZus{}common}\PYG{p}{,} \PYG{l+m+mi}{1000}\PYG{p}{)}
+
+        \PYG{n}{x\PYGZus{}gal\PYGZus{}interp} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{interp}\PYG{p}{(}\PYG{n}{t\PYGZus{}common}\PYG{p}{,} \PYG{n}{t\PYGZus{}gal}\PYG{p}{,} \PYG{n}{x\PYGZus{}gal}\PYG{p}{)}
+        \PYG{n}{x\PYGZus{}newt\PYGZus{}interp} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{interp}\PYG{p}{(}\PYG{n}{t\PYGZus{}common}\PYG{p}{,} \PYG{n}{t\PYGZus{}newt}\PYG{p}{,} \PYG{n}{x\PYGZus{}newt}\PYG{p}{)}
+
+        \PYG{n}{diff\PYGZus{}x} \PYG{o}{=} \PYG{n}{x\PYGZus{}gal\PYGZus{}interp} \PYG{o}{\PYGZhy{}} \PYG{n}{x\PYGZus{}newt\PYGZus{}interp}
+
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal\PYGZus{}interp}\PYG{p}{,} \PYG{n}{diff\PYGZus{}x}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}purple\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mf}{2.5}\PYG{p}{,}
+                \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}Разница по x (Галилей \PYGZhy{} Ньютон)\PYGZsq{}}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{2}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{axhline}\PYG{p}{(}\PYG{n}{y}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}black\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{)}
+
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}x (м)\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{11}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Разница x (м)\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{11}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Погрешность по дальности (x)\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{12}\PYG{p}{,} \PYG{n}{fontweight}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}bold\PYGZsq{}}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{9}\PYG{p}{,} \PYG{n}{loc}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}best\PYGZsq{}}\PYG{p}{,} \PYG{n}{framealpha}\PYG{o}{=}\PYG{l+m+mf}{0.9}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}:\PYGZsq{}}\PYG{p}{)}
+
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{()}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}trajectory\PYGZus{}error.png\PYGZsq{}}\PYG{p}{,} \PYG{n}{dpi}\PYG{o}{=}\PYG{l+m+mi}{300}\PYG{p}{,} \PYG{n}{bbox\PYGZus{}inches}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}tight\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{close}\PYG{p}{()}
+
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(}\PYG{n}{figsize}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{8}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{))}
+    \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0} \PYG{o+ow}{and} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{0}\PYG{p}{:}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{,} \PYG{n}{y\PYGZus{}gal}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZsh{}0066CC\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mf}{2.5}\PYG{p}{,}
+                \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}Галилей\PYGZsq{}}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{2}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{,} \PYG{n}{y\PYGZus{}newt}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZsh{}CC0000\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mf}{2.5}\PYG{p}{,}
+                \PYG{n}{label}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}Ньютон\PYGZsq{}}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{3}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{axhline}\PYG{p}{(}\PYG{n}{y}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}gray\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{axvline}\PYG{p}{(}\PYG{n}{x}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}gray\PYGZsq{}}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}\PYGZhy{}\PYGZhy{}\PYGZsq{}}\PYG{p}{,} \PYG{n}{linewidth}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{n}{zorder}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+
+        \PYG{n}{x\PYGZus{}max} \PYG{o}{=} \PYG{n+nb}{max}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{),} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{))}
+        \PYG{n}{y\PYGZus{}max} \PYG{o}{=} \PYG{n+nb}{max}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{y\PYGZus{}gal}\PYG{p}{),} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{y\PYGZus{}newt}\PYG{p}{))}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.005}\PYG{p}{,} \PYG{n}{x\PYGZus{}max} \PYG{o}{*} \PYG{l+m+mf}{1.05}\PYG{p}{)}
+        \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylim}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.005}\PYG{p}{,} \PYG{n}{y\PYGZus{}max} \PYG{o}{*} \PYG{l+m+mf}{1.1}\PYG{p}{)}
+
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{xlabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}x (м)\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{11}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{ylabel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}y (м)\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{11}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{title}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Сравнение траекторий\PYGZsq{}}\PYG{p}{,} \PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{12}\PYG{p}{,} \PYG{n}{fontweight}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}bold\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{legend}\PYG{p}{(}\PYG{n}{fontsize}\PYG{o}{=}\PYG{l+m+mi}{9}\PYG{p}{,} \PYG{n}{loc}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}upper right\PYGZsq{}}\PYG{p}{,} \PYG{n}{framealpha}\PYG{o}{=}\PYG{l+m+mf}{0.9}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{l+m+mf}{0.3}\PYG{p}{,} \PYG{n}{linestyle}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}:\PYGZsq{}}\PYG{p}{)}
+
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{tight\PYGZus{}layout}\PYG{p}{()}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{savefig}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}trajectory\PYGZus{}comparison.png\PYGZsq{}}\PYG{p}{,} \PYG{n}{dpi}\PYG{o}{=}\PYG{l+m+mi}{300}\PYG{p}{,} \PYG{n}{bbox\PYGZus{}inches}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}tight\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{plt}\PYG{o}{.}\PYG{n}{close}\PYG{p}{()}
+
+
+\PYG{k}{if} \PYG{n+nv+vm}{\PYGZus{}\PYGZus{}name\PYGZus{}\PYGZus{}} \PYG{o}{==} \PYG{l+s+s2}{\PYGZdq{}\PYGZus{}\PYGZus{}main\PYGZus{}\PYGZus{}\PYGZdq{}}\PYG{p}{:}
+    \PYG{n}{g} \PYG{o}{=} \PYG{l+m+mf}{9.81}
+    \PYG{n}{v0} \PYG{o}{=} \PYG{l+m+mf}{60.0}
+    \PYG{n}{alpha} \PYG{o}{=} \PYG{l+m+mf}{43.0}
+    \PYG{n}{C} \PYG{o}{=} \PYG{l+m+mf}{0.15}
+    \PYG{n}{rho\PYGZus{}air} \PYG{o}{=} \PYG{l+m+mf}{1.225}
+    \PYG{n}{r\PYGZus{}core} \PYG{o}{=} \PYG{l+m+mf}{0.04}
+    \PYG{n}{rho\PYGZus{}core} \PYG{o}{=} \PYG{l+m+mf}{7300.0}
+
+    \PYG{n}{S} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{pi} \PYG{o}{*} \PYG{n}{r\PYGZus{}core}\PYG{o}{**}\PYG{l+m+mi}{2}
+    \PYG{n}{V\PYGZus{}core} \PYG{o}{=} \PYG{p}{(}\PYG{l+m+mf}{4.0} \PYG{o}{/} \PYG{l+m+mf}{3.0}\PYG{p}{)} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{pi} \PYG{o}{*} \PYG{n}{r\PYGZus{}core}\PYG{o}{**}\PYG{l+m+mi}{3}
+    \PYG{n}{m} \PYG{o}{=} \PYG{n}{rho\PYGZus{}core} \PYG{o}{*} \PYG{n}{V\PYGZus{}core}
+    \PYG{n}{beta} \PYG{o}{=} \PYG{n}{C} \PYG{o}{*} \PYG{n}{rho\PYGZus{}air} \PYG{o}{*} \PYG{n}{S} \PYG{o}{/} \PYG{l+m+mf}{2.0}
+
+    \PYG{n}{t\PYGZus{}flight\PYGZus{}galilei} \PYG{o}{=} \PYG{l+m+mf}{2.0} \PYG{o}{*} \PYG{n}{v0} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sin}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{deg2rad}\PYG{p}{(}\PYG{n}{alpha}\PYG{p}{))} \PYG{o}{/} \PYG{n}{g}
+    \PYG{n}{t\PYGZus{}max} \PYG{o}{=} \PYG{n+nb}{max}\PYG{p}{(}\PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{n}{t\PYGZus{}flight\PYGZus{}galilei} \PYG{o}{*} \PYG{l+m+mf}{1.5}\PYG{p}{)}
+    \PYG{n}{dt} \PYG{o}{=} \PYG{l+m+mf}{0.001}
+    \PYG{n}{t\PYGZus{}span} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{t\PYGZus{}max}\PYG{p}{,} \PYG{n}{dt}\PYG{p}{)}
+
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}=\PYGZdq{}} \PYG{o}{*} \PYG{l+m+mi}{60}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}ВХОДНЫЕ ПАРАМЕТРЫ\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}=\PYGZdq{}} \PYG{o}{*} \PYG{l+m+mi}{60}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  g = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{g}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ m/s\PYGZca{}2\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  v0 = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{v0}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ m/s\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  alpha = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{alpha}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ grad\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  C = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{C}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  rho\PYGZus{}air = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{rho\PYGZus{}air}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ kg/m\PYGZca{}3\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  S = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{S}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ m\PYGZca{}2 (}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{S}\PYG{o}{*}\PYG{l+m+mi}{100}\PYG{l+s+si}{:}\PYG{l+s+s2}{.1f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ dm\PYGZca{}2 = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{S}\PYG{o}{*}\PYG{l+m+mi}{10000}\PYG{l+s+si}{:}\PYG{l+s+s2}{.0f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ cm\PYGZca{}2)\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  rho\PYGZus{}core = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{rho\PYGZus{}core}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ kg/m\PYGZca{}3\PYGZdq{}}\PYG{p}{)}
+
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{+} \PYG{l+s+s2}{\PYGZdq{}=\PYGZdq{}} \PYG{o}{*} \PYG{l+m+mi}{60}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}ВЫЧИСЛЯЕМЫЕ ПАРАМЕТРЫ\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}=\PYGZdq{}} \PYG{o}{*} \PYG{l+m+mi}{60}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  r\PYGZus{}core = sqrt(S/pi) = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{r\PYGZus{}core}\PYG{l+s+si}{:}\PYG{l+s+s2}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ m\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  V\PYGZus{}core = (4/3)*pi*r\PYGZca{}3 = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{V\PYGZus{}core}\PYG{l+s+si}{:}\PYG{l+s+s2}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ m\PYGZca{}3\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  m = rho\PYGZus{}core * V\PYGZus{}core = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{m}\PYG{l+s+si}{:}\PYG{l+s+s2}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ kg\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  beta = C*rho\PYGZus{}air*S/2 = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{beta}\PYG{l+s+si}{:}\PYG{l+s+s2}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  t\PYGZus{}flight (Galilei) = 2*v0*sin(alpha)/g = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{t\PYGZus{}flight\PYGZus{}galilei}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ s\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  t\PYGZus{}max = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{t\PYGZus{}max}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ s\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}  dt = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{dt}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ s\PYGZdq{}}\PYG{p}{)}
+
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{+} \PYG{l+s+s2}{\PYGZdq{}=\PYGZdq{}} \PYG{o}{*} \PYG{l+m+mi}{60}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Модель Галилея (упрощенный Ньютон без сопротивления воздуха)\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}=\PYGZdq{}} \PYG{o}{*} \PYG{l+m+mi}{60}\PYG{p}{)}
+    \PYG{n}{galilei} \PYG{o}{=} \PYG{n}{GalileiModel}\PYG{p}{(}\PYG{n}{g}\PYG{o}{=}\PYG{n}{g}\PYG{p}{,} \PYG{n}{v0}\PYG{o}{=}\PYG{n}{v0}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{n}{alpha}\PYG{p}{)}
+    \PYG{n}{x\PYGZus{}gal}\PYG{p}{,} \PYG{n}{y\PYGZus{}gal} \PYG{o}{=} \PYG{n}{galilei}\PYG{o}{.}\PYG{n}{solve\PYGZus{}numerically}\PYG{p}{(}\PYG{n}{t\PYGZus{}span}\PYG{p}{,} \PYG{n}{dt}\PYG{o}{=}\PYG{n}{dt}\PYG{p}{)}
+    \PYG{n}{range\PYGZus{}gal} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}gal}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Дальность полёта: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{range\PYGZus{}gal}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ m\PYGZdq{}}\PYG{p}{)}
+
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{+} \PYG{l+s+s2}{\PYGZdq{}=\PYGZdq{}} \PYG{o}{*} \PYG{l+m+mi}{60}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Модель Ньютона (с учетом сопротивления воздуха)\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}=\PYGZdq{}} \PYG{o}{*} \PYG{l+m+mi}{60}\PYG{p}{)}
+    \PYG{n}{newton} \PYG{o}{=} \PYG{n}{NewtonModel}\PYG{p}{(}\PYG{n}{g}\PYG{o}{=}\PYG{n}{g}\PYG{p}{,} \PYG{n}{v0}\PYG{o}{=}\PYG{n}{v0}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{n}{alpha}\PYG{p}{,} \PYG{n}{r\PYGZus{}core}\PYG{o}{=}\PYG{n}{r\PYGZus{}core}\PYG{p}{,} \PYG{n}{rho\PYGZus{}core}\PYG{o}{=}\PYG{n}{rho\PYGZus{}core}\PYG{p}{,}
+                         \PYG{n}{C}\PYG{o}{=}\PYG{n}{C}\PYG{p}{,} \PYG{n}{rho\PYGZus{}air}\PYG{o}{=}\PYG{n}{rho\PYGZus{}air}\PYG{p}{)}
+    \PYG{n}{x\PYGZus{}newt}\PYG{p}{,} \PYG{n}{y\PYGZus{}newt}\PYG{p}{,} \PYG{n}{u\PYGZus{}newt}\PYG{p}{,} \PYG{n}{w\PYGZus{}newt} \PYG{o}{=} \PYG{n}{newton}\PYG{o}{.}\PYG{n}{solve}\PYG{p}{(}\PYG{n}{t\PYGZus{}span}\PYG{p}{,} \PYG{n}{dt}\PYG{o}{=}\PYG{n}{dt}\PYG{p}{)}
+    \PYG{n}{range\PYGZus{}newt} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{x\PYGZus{}newt}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Дальность полёта: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{range\PYGZus{}newt}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ m\PYGZdq{}}\PYG{p}{)}
+
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{+} \PYG{l+s+s2}{\PYGZdq{}=\PYGZdq{}} \PYG{o}{*} \PYG{l+m+mi}{60}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}СРАВНЕНИЕ ДАЛЬНОСТИ ПОЛЁТА\PYGZdq{}}\PYG{p}{)}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}=\PYGZdq{}} \PYG{o}{*} \PYG{l+m+mi}{60}\PYG{p}{)}
+    \PYG{n}{diff\PYGZus{}range} \PYG{o}{=} \PYG{n}{range\PYGZus{}gal} \PYG{o}{\PYGZhy{}} \PYG{n}{range\PYGZus{}newt}
+
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Разница в дальности: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{diff\PYGZus{}range}\PYG{l+s+si}{:}\PYG{l+s+s2}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ m (}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{diff\PYGZus{}range}\PYG{o}{*}\PYG{l+m+mi}{1000}\PYG{l+s+si}{:}\PYG{l+s+s2}{.3f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ mm)\PYGZdq{}}\PYG{p}{)}
+
+    \PYG{n}{relative\PYGZus{}error} \PYG{o}{=} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{diff\PYGZus{}range} \PYG{o}{/} \PYG{n}{range\PYGZus{}gal}\PYG{p}{)} \PYG{o}{*} \PYG{l+m+mi}{100}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Относительная погрешность: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{relative\PYGZus{}error}\PYG{l+s+si}{:}\PYG{l+s+s2}{.6f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ \PYGZpc{}\PYGZdq{}}\PYG{p}{)}
+
+
+    \PYG{n}{plot\PYGZus{}trajectories}\PYG{p}{(}\PYG{n}{g}\PYG{o}{=}\PYG{n}{g}\PYG{p}{,} \PYG{n}{v0}\PYG{o}{=}\PYG{n}{v0}\PYG{p}{,} \PYG{n}{alpha}\PYG{o}{=}\PYG{n}{alpha}\PYG{p}{,} \PYG{n}{C}\PYG{o}{=}\PYG{n}{C}\PYG{p}{,} \PYG{n}{rho\PYGZus{}air}\PYG{o}{=}\PYG{n}{rho\PYGZus{}air}\PYG{p}{,}
+                     \PYG{n}{S}\PYG{o}{=}\PYG{n}{S}\PYG{p}{,} \PYG{n}{r\PYGZus{}core}\PYG{o}{=}\PYG{n}{r\PYGZus{}core}\PYG{p}{,} \PYG{n}{rho\PYGZus{}core}\PYG{o}{=}\PYG{n}{rho\PYGZus{}core}\PYG{p}{,}
+                     \PYG{n}{diff\PYGZus{}range}\PYG{o}{=}\PYG{n}{diff\PYGZus{}range}\PYG{p}{,} \PYG{n}{dt}\PYG{o}{=}\PYG{n}{dt}\PYG{p}{)}
+
+\end{MintedVerbatim}

@@ -1,0 +1,6 @@
+$ENTRY Main;
+
+* Variable index is empty.
+Main {
+  e. = ;
+}

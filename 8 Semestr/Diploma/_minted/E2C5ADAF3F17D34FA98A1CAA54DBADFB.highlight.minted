@@ -1,0 +1,4 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+java\PYG{+w}{ }\PYGZhy{}jar\PYG{+w}{ }target/refal5q.jar\PYG{+w}{ }tests/multifile/main.ref+tests/multifile/lib.ref
+\PYG{c+c1}{\PYGZsh{} Вывод: Hello from lib}
+\end{MintedVerbatim}

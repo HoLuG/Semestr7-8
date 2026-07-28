@@ -1,0 +1,6 @@
+﻿term,transform,beta
+Intercept,-,105.8126952734922
+Age,x,0.686005548858621
+BloodPressure,sqrt(x),1.9791450504336403
+BMI,1/x,-832.2754802240879
+DiabetesPedigreeFunction,x^2,1.7457600776909183

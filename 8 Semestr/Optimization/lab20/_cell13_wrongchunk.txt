@@ -1,0 +1,64 @@
+inits_r = Vector{Vector{Int}}(undef, N_LINEAGES)
+for c in 1:N_LINEAGES
+    g = copy(line0)
+    rng_w = Random.Xoshiro(10_000 + c)
+    for _ in 1:WARMUP_MUTATIONS
+        g = mutate_one(g, rng_w)
+    end
+    inits_r[c] = g
+end
+
+RACE_MAX_GEN = 45
+RACE_STAG = 18
+
+runs_r = map(1:N_LINEAGES) do c
+    evolve_biomorph(
+        target_r;
+        N = Npop_r,
+        max_stagnation = RACE_STAG,
+        max_generations = RACE_MAX_GEN,
+        mode = Ft_r,
+        init = inits_r[c],
+        rng = Random.Xoshiro(20_000 + c),
+        line_half_width = lw_r,
+        early_stop_offspring = false,
+        fitness_goal = nothing,
+    )
+end
+
+function _biomorph_heatmap_color(img; px::Int = 120, cmap = :viridis)
+    heatmap(
+        img;
+        c = cmap,
+        aspect_ratio = 1,
+        colorbar = false,
+        ticks = false,
+        showaxis = false,
+        grid = false,
+        legend = false,
+        framestyle = :none,
+        widen = false,
+        size = (px, px),
+    )
+end
+
+HM_TARGET = 400
+showplot(_biomorph_heatmap_color(target_r; px = HM_TARGET))
+
+function _state_at_row(r, row::Int)
+    h = r.history_genes
+    h[min(row, length(h))]
+end
+
+Lmax = maximum(length.(getproperty.(runs_r, :history_genes)))
+HM_CELL = 240
+ROWS_PER_PAGE = 10
+pages = cld(Lmax, ROWS_PER_PAGE)
+
+for p in 1:pages
+    row_start = (p - 1) * ROWS_PER_PAGE + 1
+    row_end = min(Lmax, p * ROWS_PER_PAGE)
+    nrows = row_end - row_start + 1
+    tab_cells = []
+    for row in row_start:row_end
+        

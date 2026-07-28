@@ -1,0 +1,19 @@
+//FROM Library
+$EXTERN Add, Sub, Mul, Div, Mod;
+
+Eq {
+  s.X s.X = s.X;
+  (e.X) e.X = (e.X);
+}
+
+$ENTRY Go {
+  =
+    <Eq <Add 100 200> 300>
+    <Eq <Sub 666 24> 642>
+    <Eq <Mul 3 3> 9>
+    <Eq <Div 1024 10> 102>
+    <Eq <Mod 1024 30> 4>
+    <Eq (<Add 3000000000 3000000000>) 1 1705032704>
+    <Eq (<Sub 0 1>) '-' 1>
+    <Eq (<Mul 65536 65536>) 1 0>;
+}

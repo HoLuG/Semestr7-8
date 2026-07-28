@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{+w}{ }\PYG{n+nf}{rec}\PYG{p}{(}
+\PYG{+w}{        }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{pat}\PYG{p}{,}\PYG{+w}{  }\PYG{c+c1}{// паттерн (весь)}
+\PYG{+w}{        }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{pi}\PYG{p}{,}\PYG{+w}{          }\PYG{c+c1}{// левый указатель (индекс в паттерне)}
+\PYG{+w}{        }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{pe}\PYG{p}{,}\PYG{+w}{          }\PYG{c+c1}{// правый указатель (исключающий)}
+\PYG{+w}{        }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{expr}\PYG{p}{,}\PYG{+w}{ }\PYG{c+c1}{// оставшееся выражение}
+\PYG{+w}{        }\PYG{n}{Bindings}\PYG{+w}{ }\PYG{n}{env}\PYG{p}{,}\PYG{+w}{    }\PYG{c+c1}{// текущие привязки переменных}
+\PYG{+w}{        }\PYG{n}{Function}\PYG{o}{\PYGZlt{}}\PYG{n}{Bindings}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Thunk}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{cont}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{c+c1}{// продолжение (что делать при успехе)}
+\end{MintedVerbatim}

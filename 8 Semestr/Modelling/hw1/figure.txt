@@ -1,0 +1,41 @@
+Переходы между состояниями можно представить в виде марковской цепи (рис.~\ref{fig:markov_chain}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Stealth,
+  auto,
+  every state/.style={minimum size=1.35cm, inner sep=1pt},
+  accepting/.style={double distance=1.5pt},
+  every node/.style={font=\small}
+]
+  % Состояния
+  \node[state] (1) at (0,0) {1};
+  \node[state] (2) at (4,0) {2};
+  \node[state] (3) at (8,0) {3};
+  \node[state, accepting] (4) at (4,2.8) {4};
+  \node[state, accepting] (5) at (4,-2.8) {5};
+
+  % Подписи состояний: задаются абсолютными координатами,
+  % поэтому их положение точно меняется и не зависит от above/below of.
+  \node[font=\footnotesize, align=center] at (0,-1) {Первая попытка};
+  \node[font=\footnotesize, align=center] at (4,-1) {Вторая попытка};
+  \node[font=\footnotesize, align=center] at (8,-1) {Третья попытка};
+  \node[font=\footnotesize, align=center] at (4,5.05) {Успешная\\сдача};
+  \node[font=\footnotesize, align=center] at (4,-5) {Неуспешная\\сдача};
+
+  % Переходы
+  \path[->, thick] (1) edge[bend left=18] node[pos=0.40, above left] {$p_1 = 0.6$} (4);
+  \path[->, thick] (1) edge node[midway, above=2pt] {$1-p_1 = 0.4$} (2);
+  \path[->, thick] (2) edge[bend left=18] node[pos=0.50, left=2pt] {$p_2 = 0.25$} (4);
+  \path[->, thick] (2) edge node[midway, above=2pt] {$1-p_2 = 0.75$} (3);
+  \path[->, thick] (3) edge[bend right=18] node[pos=0.38, above right] {$p_3 = 0.1$} (4);
+  \path[->, thick] (3) edge[bend right=18] node[pos=0.8, right=1pt] {$1-p_3 = 0.9$} (5);
+
+  % Поглощающие состояния (петли)
+  \path[->, thick] (4) edge[loop above, looseness=5] node[above] {$1$} (4);
+  \path[->, thick] (5) edge[loop below, looseness=5] node[below] {$1$} (5);
+\end{tikzpicture}
+\caption{Марковская цепь переходов между состояниями студента при сдаче зачёта}
+\label{fig:markov_chain}
+\end{figure}

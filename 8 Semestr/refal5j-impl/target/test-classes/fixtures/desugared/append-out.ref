@@ -1,0 +1,11 @@
+* Concat two e-variable sequences, simulating what UnBlock might emit.
+
+$ENTRY Main;
+
+Main {
+  = <Append (1 2 3) (4 5 6)>;
+}
+
+Append {
+  (e.X) (e.Y) = e.X e.Y;
+}

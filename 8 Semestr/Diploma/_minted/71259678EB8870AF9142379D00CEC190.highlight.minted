@@ -1,0 +1,31 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{n}{Term}\PYG{+w}{ }\PYG{n+nf}{parsePatternTerm}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Token}\PYG{+w}{ }\PYG{n}{t}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{peek}\PYG{p}{();}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{k}{switch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{t}\PYG{p}{.}\PYG{n+na}{type}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{INT}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                        }\PYG{c+c1}{// (1)}
+\PYG{+w}{            }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k+kd}{yield}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n+nf}{Num}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{BigInteger}\PYG{p}{(}\PYG{n}{t}\PYG{p}{.}\PYG{n+na}{value}\PYG{p}{()));}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{STRING}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}\PYG{+w}{ }\PYG{k+kd}{yield}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n+nf}{Str}\PYG{p}{(}\PYG{n}{t}\PYG{p}{.}\PYG{n+na}{value}\PYG{p}{());}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{c+c1}{// (2)}
+\PYG{+w}{        }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{QSYM}\PYG{+w}{   }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                    }\PYG{c+c1}{// (3)}
+\PYG{+w}{            }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k+kd}{yield}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{.}\PYG{n+na}{value}\PYG{p}{().}\PYG{n+na}{isEmpty}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{?}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Str}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}\PYGZdq{}}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Sym}\PYG{p}{(}\PYG{n}{t}\PYG{p}{.}\PYG{n+na}{value}\PYG{p}{());}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{LPAREN}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{                    }\PYG{c+c1}{// (4)}
+\PYG{+w}{            }\PYG{n}{Token}\PYG{+w}{ }\PYG{n}{open}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{inner}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayList}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{();}
+\PYG{+w}{            }\PYG{k}{while}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{peek}\PYG{p}{().}\PYG{n+na}{type}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{n}{RPAREN}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{peek}\PYG{p}{().}\PYG{n+na}{type}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{n}{EOF}\PYG{p}{)}
+\PYG{+w}{                    }\PYG{k}{throw}\PYG{+w}{ }\PYG{n}{err}\PYG{p}{(}\PYG{n}{open}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Unclosed \PYGZsq{}(\PYGZsq{} in pattern\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{                }\PYG{n}{inner}\PYG{p}{.}\PYG{n+na}{add}\PYG{p}{(}\PYG{n}{parsePatternTerm}\PYG{p}{());}\PYG{+w}{ }\PYG{c+c1}{// рекурсия}
+\PYG{+w}{            }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{            }\PYG{n}{expect}\PYG{p}{(}\PYG{n}{RPAREN}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kd}{yield}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n+nf}{Br}\PYG{p}{(}\PYG{n}{Expr}\PYG{p}{.}\PYG{n+na}{fromList}\PYG{p}{(}\PYG{n}{inner}\PYG{p}{));}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{LANGLE}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{                       }\PYG{c+c1}{// (5)}
+\PYG{+w}{            }\PYG{k}{throw}\PYG{+w}{ }\PYG{n}{err}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Function call \PYGZsq{}\PYGZlt{}...\PYGZgt{}\PYGZsq{} not allowed in pattern\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }\PYG{k}{case}\PYG{+w}{ }\PYG{n}{IDENT}\PYG{+w}{  }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{;}\PYG{+w}{ }\PYG{k+kd}{yield}\PYG{+w}{ }\PYG{n+nf}{identToTerm}\PYG{p}{(}\PYG{n}{t}\PYG{p}{);}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{c+c1}{// (6)}
+\PYG{+w}{        }\PYG{k}{default}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{n}{err}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Unexpected token in pattern: \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{.}\PYG{n+na}{type}\PYG{p}{());}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{};}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

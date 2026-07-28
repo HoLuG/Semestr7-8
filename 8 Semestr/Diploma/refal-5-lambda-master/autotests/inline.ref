@@ -1,0 +1,7 @@
+* TREE
+
+$ENTRY Go { = ; }
+
+Bar { =; }
+
+$INLINE Bar;

@@ -1,0 +1,18 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{initial}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{try}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{initial}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{parsed}\PYG{p}{.}\PYG{n+na}{expr}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{()}
+\PYG{+w}{            }\PYG{o}{?}\PYG{+w}{ }\PYG{n}{List}\PYG{p}{.}\PYG{n+na}{of}\PYG{p}{()}
+\PYG{+w}{            }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{Parser}\PYG{p}{.}\PYG{n+na}{parseTerms}\PYG{p}{(}\PYG{n}{parsed}\PYG{p}{.}\PYG{n+na}{expr}\PYG{p}{);}\PYG{+w}{    }\PYG{c+c1}{// (9)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{catch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{LexException}\PYG{+w}{ }\PYG{o}{|}\PYG{+w}{ }\PYG{n}{ParseException}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{err}\PYG{p}{.}\PYG{n+na}{println}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}[ERROR] \PYGZhy{}\PYGZhy{}expr: \PYGZdq{}}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{e}\PYG{p}{.}\PYG{n+na}{getMessage}\PYG{p}{());}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{n}{Runtime}\PYG{+w}{ }\PYG{n}{rt}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Runtime}\PYG{p}{(}\PYG{n}{program}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n}{Builtins}\PYG{p}{.}\PYG{n+na}{defaultBuiltins}\PYG{p}{(),}\PYG{+w}{ }\PYG{n}{parsed}\PYG{p}{.}\PYG{n+na}{stepLimit}\PYG{p}{);}\PYG{+w}{ }\PYG{c+c1}{// (10)}
+\PYG{+w}{    }\PYG{n}{String}\PYG{o}{[]}\PYG{+w}{ }\PYG{n}{argv}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{String}\PYG{o}{[}\PYG{n}{parsed}\PYG{p}{.}\PYG{n+na}{programArgs}\PYG{p}{.}\PYG{n+na}{length}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{o}{]}\PYG{p}{;}
+\PYG{+w}{    }\PYG{n}{argv}\PYG{o}{[}\PYG{l+m+mi}{0}\PYG{o}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}refal5q\PYGZdq{}}\PYG{p}{;}\PYG{+w}{                         }\PYG{c+c1}{// (11)}
+\PYG{+w}{    }\PYG{n}{System}\PYG{p}{.}\PYG{n+na}{arraycopy}\PYG{p}{(}\PYG{n}{parsed}\PYG{p}{.}\PYG{n+na}{programArgs}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{argv}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{parsed}\PYG{p}{.}\PYG{n+na}{programArgs}\PYG{p}{.}\PYG{n+na}{length}\PYG{p}{);}
+\PYG{+w}{    }\PYG{n}{rt}\PYG{p}{.}\PYG{n+na}{setProgramArgs}\PYG{p}{(}\PYG{n}{argv}\PYG{p}{);}\PYG{+w}{                     }\PYG{c+c1}{// (12)}
+\end{MintedVerbatim}

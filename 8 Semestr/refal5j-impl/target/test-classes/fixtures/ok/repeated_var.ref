@@ -1,0 +1,12 @@
+$ENTRY Main;
+
+* Repeated e-variable: matches only when the two halves are equal.
+* Here input "ABAB" is split as e.X='AB' / e.X='AB'.
+Main {
+  = <Halve A B A B>;
+}
+
+Halve {
+  e.X e.X = (e.X);
+  e.X     = (Mismatch);
+}

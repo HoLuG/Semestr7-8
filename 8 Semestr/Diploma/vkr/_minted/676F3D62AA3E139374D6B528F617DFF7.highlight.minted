@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{case}\PYG{+w}{ }\PYG{n}{refal}\PYG{p}{.}\PYG{n+na}{ast}\PYG{p}{.}\PYG{n+na}{Var}\PYG{+w}{ }\PYG{n}{v}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Expr}\PYG{o}{\PYGZlt{}}\PYG{n}{Term}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{val}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{bindings}\PYG{p}{.}\PYG{n+na}{get}\PYG{p}{(}\PYG{n}{v}\PYG{p}{.}\PYG{n+na}{key}\PYG{p}{());}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{val}\PYG{p}{.}\PYG{n+na}{isEmpty}\PYG{p}{())}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{right}\PYG{p}{.}\PYG{n+na}{addFirst}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ViewTerm}\PYG{p}{.}\PYG{n+na}{BulkPassive}\PYG{p}{(}\PYG{n}{val}\PYG{p}{));}\PYG{+w}{ }\PYG{c+c1}{// O(1)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

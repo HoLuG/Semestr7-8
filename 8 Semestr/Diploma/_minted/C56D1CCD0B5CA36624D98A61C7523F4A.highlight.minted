@@ -1,0 +1,17 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{private}\PYG{+w}{ }\PYG{k+kd}{static}\PYG{+w}{ }\PYG{n}{Program}\PYG{+w}{ }\PYG{n+nf}{mergePrograms}\PYG{p}{(}\PYG{n}{Program}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Program}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{Program}\PYG{p}{.}\PYG{n+na}{Builder}\PYG{+w}{ }\PYG{n}{builder}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Program}\PYG{p}{.}\PYG{n+na}{builder}\PYG{p}{();}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{e}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{.}\PYG{n+na}{funcs}\PYG{p}{().}\PYG{n+na}{entrySet}\PYG{p}{())}\PYG{+w}{       }\PYG{c+c1}{// (1)}
+\PYG{+w}{        }\PYG{n}{builder}\PYG{p}{.}\PYG{n+na}{addFunc}\PYG{p}{(}\PYG{n}{e}\PYG{p}{.}\PYG{n+na}{getValue}\PYG{p}{());}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n}{e}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{funcs}\PYG{p}{().}\PYG{n+na}{entrySet}\PYG{p}{())}\PYG{+w}{       }\PYG{c+c1}{// (2)}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{builder}\PYG{p}{.}\PYG{n+na}{hasFunc}\PYG{p}{(}\PYG{n}{e}\PYG{p}{.}\PYG{n+na}{getKey}\PYG{p}{()))}
+\PYG{+w}{            }\PYG{n}{builder}\PYG{p}{.}\PYG{n+na}{addFunc}\PYG{p}{(}\PYG{n}{e}\PYG{p}{.}\PYG{n+na}{getValue}\PYG{p}{());}
+\PYG{+w}{    }\PYG{n}{builder}\PYG{p}{.}\PYG{n+na}{addExterns}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayList}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{a}\PYG{p}{.}\PYG{n+na}{externs}\PYG{p}{()));}\PYG{+w}{ }\PYG{c+c1}{// (3)}
+\PYG{+w}{    }\PYG{n}{builder}\PYG{p}{.}\PYG{n+na}{addExterns}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArrayList}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{externs}\PYG{p}{()));}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{a}\PYG{p}{.}\PYG{n+na}{entry}\PYG{p}{().}\PYG{n+na}{isPresent}\PYG{p}{())}\PYG{+w}{               }\PYG{c+c1}{// (4)}
+\PYG{+w}{        }\PYG{n}{builder}\PYG{p}{.}\PYG{n+na}{entry}\PYG{p}{(}\PYG{n}{a}\PYG{p}{.}\PYG{n+na}{entry}\PYG{p}{().}\PYG{n+na}{get}\PYG{p}{());}
+\PYG{+w}{    }\PYG{k}{else}\PYG{+w}{ }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{entry}\PYG{p}{().}\PYG{n+na}{isPresent}\PYG{p}{())}
+\PYG{+w}{        }\PYG{n}{builder}\PYG{p}{.}\PYG{n+na}{entry}\PYG{p}{(}\PYG{n}{b}\PYG{p}{.}\PYG{n+na}{entry}\PYG{p}{().}\PYG{n+na}{get}\PYG{p}{());}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{builder}\PYG{p}{.}\PYG{n+na}{build}\PYG{p}{();}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

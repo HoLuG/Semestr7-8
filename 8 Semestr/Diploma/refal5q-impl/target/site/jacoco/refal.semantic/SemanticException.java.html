@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SemanticException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">refal5j-impl</a> &gt; <a href="index.source.html" class="el_package">refal.semantic</a> &gt; <span class="el_source">SemanticException.java</span></div><h1>SemanticException.java</h1><pre class="source lang-java linenums">package refal.semantic;
+
+// Семантическая ошибка с указанием контекста (имя функции, индекс правила).
+public class SemanticException extends RuntimeException {
+
+    private static final long serialVersionUID = 1L;
+
+    private final String funcName;
+    private final int ruleIndex;
+    private final Kind kind;
+
+    // Вид ошибки — чтобы тесты могли различать их без разбора текста сообщения.
+<span class="fc" id="L13">    public enum Kind {</span>
+<span class="fc" id="L14">        DUPLICATE_FUNCTION,</span>
+<span class="fc" id="L15">        UNDEFINED_FUNCTION,</span>
+<span class="fc" id="L16">        UNDEFINED_ENTRY,</span>
+<span class="fc" id="L17">        UNBOUND_VARIABLE,</span>
+<span class="fc" id="L18">        VARIABLE_TYPE_MISMATCH,</span>
+<span class="fc" id="L19">        CALL_IN_PATTERN,</span>
+<span class="fc" id="L20">        BUILTIN_SHADOW</span>
+    }
+
+    public SemanticException(Kind kind, String message, String funcName, int ruleIndex) {
+<span class="fc" id="L24">        super(message);</span>
+<span class="fc" id="L25">        this.kind = kind;</span>
+<span class="fc" id="L26">        this.funcName = funcName;</span>
+<span class="fc" id="L27">        this.ruleIndex = ruleIndex;</span>
+<span class="fc" id="L28">    }</span>
+
+    public Kind kind() {
+<span class="fc" id="L31">        return kind;</span>
+    }
+
+    public String funcName() {
+<span class="nc" id="L35">        return funcName;</span>
+    }
+
+    public int ruleIndex() {
+<span class="nc" id="L39">        return ruleIndex;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
