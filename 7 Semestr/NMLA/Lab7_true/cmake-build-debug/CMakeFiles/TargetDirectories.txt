@@ -1,0 +1,3 @@
+D:/Programming/Projects/7 Semestr/NMLA/Lab7_true/cmake-build-debug/CMakeFiles/Lab10.dir
+D:/Programming/Projects/7 Semestr/NMLA/Lab7_true/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/Programming/Projects/7 Semestr/NMLA/Lab7_true/cmake-build-debug/CMakeFiles/rebuild_cache.dir
